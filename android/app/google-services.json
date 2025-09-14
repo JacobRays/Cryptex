@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "355167642913",
+    "project_id": "cryptex-malawi",
+    "storage_bucket": "cryptex-malawi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:355167642913:android:bfcd2b54fb7b8a7587ca60",
+        "android_client_info": {
+          "package_name": "com.cryptex_malawi.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMN-J6P_U-sM3QP4MhU68zPeRz4skenHU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,46 @@
+name: cryptex_malawi
+description: Cryptex Malawi - USDT <-> MWK P2P app
+publish_to: "none"
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI & Styling
+  cupertino_icons: ^1.0.6
+  google_fonts: ^6.2.1
+  flutter_animate: ^4.5.0
+  modal_bottom_sheet: ^3.0.0
+  flutter_svg: ^2.0.10+1
+  sizer: any
+  cached_network_image: any
+
+  # State & Storage
+  provider: ^6.1.2
+  shared_preferences: ^2.2.3
+
+  # Networking & Utilities
+  http: ^1.2.2
+  connectivity_plus: ^6.0.5
+  intl: ^0.19.0
+  universal_html: ^2.2.4
+  web: any
+
+  # 🔥 Firebase
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.4.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/logo.png
+    - assets/illustrations/
