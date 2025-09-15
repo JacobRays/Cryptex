@@ -16,7 +16,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   // Default merchant wallet (admin-as-merchant)
   double adminUsdt = 850.0;
-  double adminMwk = 1_250_000;
+  double adminMwk = 1250000;
 
   // Fee wallet
   double feesUsdt = 42.6;
