@@ -2,7 +2,7 @@ import 'package:cryptex_malawi/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class AdminDashboard extends StatefulWidget {
-  const AdminDashboard({super.key});
+  AdminDashboard({super.key}); // removed const
 
   @override
   State<AdminDashboard> createState() => _AdminDashboardState();
@@ -29,10 +29,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary), // removed const
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Admin Dashboard', style: TextStyle(color: AppColors.textPrimary)),
+        title: Text('Admin Dashboard', style: TextStyle(color: AppColors.textPrimary)), // removed const
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -57,10 +57,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
             color: AppColors.primary,
             title: 'Open Escrow Tools',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                backgroundColor: AppColors.surface,
-                content: Text('Navigate to Escrow Management', style: TextStyle(color: AppColors.textPrimary)),
-              ));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar( // removed const
+                  backgroundColor: AppColors.surface,
+                  content: Text('Navigate to Escrow Management', style: TextStyle(color: AppColors.textPrimary)),
+                ),
+              );
             },
           ),
           const SizedBox(height: 12),
@@ -80,7 +82,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
                   onPressed: () => _toast(context, 'Withdraw fees (USDT)'),
-                  child: const Text('Withdraw USDT', style: TextStyle(color: Colors.white)),
+                  child: Text('Withdraw USDT', style: TextStyle(color: Colors.white)), // removed const
                 ),
               ),
               const SizedBox(width: 12),
@@ -88,7 +90,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
                   onPressed: () => _toast(context, 'Withdraw fees (MWK)'),
-                  child: const Text('Withdraw MWK', style: TextStyle(color: Colors.white)),
+                  child: Text('Withdraw MWK', style: TextStyle(color: Colors.white)), // removed const
                 ),
               ),
             ],
@@ -108,9 +110,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   Widget _title(String t) => Padding(
-    padding: const EdgeInsets.only(bottom: 8),
-    child: Text(t, style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w600)),
-  );
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Text(t, style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w600)), // removed const
+      );
 
   Widget _balanceCard(String currency, String amount) {
     return Container(
@@ -123,9 +125,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(currency, style: const TextStyle(color: AppColors.textSecondary)),
+          Text(currency, style: TextStyle(color: AppColors.textSecondary)), // removed const
           const SizedBox(height: 6),
-          Text(amount, style: const TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(amount, style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.bold)), // removed const
         ],
       ),
     );
@@ -150,15 +152,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
             value: autoUpdate,
             onChanged: (v) => setState(() => autoUpdate = v),
             activeColor: AppColors.primary,
-            title: const Text('Auto update from market', style: TextStyle(color: AppColors.textPrimary)),
-            subtitle: const Text('If off, manual rates apply', style: TextStyle(color: AppColors.textSecondary)),
+            title: Text('Auto update from market', style: TextStyle(color: AppColors.textPrimary)), // removed const
+            subtitle: Text('If off, manual rates apply', style: TextStyle(color: AppColors.textSecondary)), // removed const
           ),
           Align(
             alignment: Alignment.centerRight,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
               onPressed: () => _toast(context, 'Global rates saved'),
-              child: const Text('Save', style: TextStyle(color: Colors.white)),
+              child: Text('Save', style: TextStyle(color: Colors.white)), // removed const
             ),
           ),
         ],
@@ -169,21 +171,21 @@ class _AdminDashboardState extends State<AdminDashboard> {
   Widget _rateRow(String label, TextEditingController controller) {
     return Row(
       children: [
-        Expanded(child: Text(label, style: const TextStyle(color: AppColors.textSecondary))),
+        Expanded(child: Text(label, style: TextStyle(color: AppColors.textSecondary))), // removed const
         const SizedBox(width: 10),
         SizedBox(
           width: 130,
           child: TextField(
             controller: controller,
             keyboardType: TextInputType.number,
-            style: const TextStyle(color: AppColors.textPrimary),
+            style: TextStyle(color: AppColors.textPrimary), // removed const
             decoration: InputDecoration(
               isDense: true,
               filled: true,
               fillColor: Colors.black.withOpacity(0.2),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
               hintText: '0',
-              hintStyle: const TextStyle(color: AppColors.textSecondary),
+              hintStyle: TextStyle(color: AppColors.textSecondary), // removed const
             ),
           ),
         ),
@@ -205,8 +207,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
           children: [
             Icon(icon, color: color),
             const SizedBox(width: 12),
-            Expanded(child: Text(title, style: const TextStyle(color: AppColors.textPrimary))),
-            const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+            Expanded(child: Text(title, style: TextStyle(color: AppColors.textPrimary))), // removed const
+            Icon(Icons.chevron_right, color: AppColors.textSecondary), // removed const
           ],
         ),
       ),
@@ -214,11 +216,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   void _toast(BuildContext context, String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: AppColors.surface,
-      content: Text(msg, style: const TextStyle(color: AppColors.textPrimary)),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar( // removed const
+        backgroundColor: AppColors.surface,
+        content: Text(msg, style: TextStyle(color: AppColors.textPrimary)), // removed const
+      ),
+    );
   }
 
-  String _fmtMoney(double v) => v.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
+  String _fmtMoney(double v) => v
+      .toStringAsFixed(0)
+      .replaceAllMapped(RegExp(r'(\\d{1,3})(?=(\\d{3})+(?!\\d))'), (m) => '${m[1]},');
 }
