@@ -42,5 +42,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/logo.png
-    - assets/illustrations/
+    - assets/images/img_app_logo.svg
+    - assets/images/no-image.jpg
+    - assets/images/sad_face.svg
