@@ -224,7 +224,7 @@ class _MerchantDashboardState extends State<MerchantDashboard> {
     );
   }
 
-  void _openMakeOffer(BuildContext context, _SaleOffer offer) {
+    void _openMakeOffer(BuildContext context, _SaleOffer offer) {
     final ctrl = TextEditingController();
     showDialog(
       context: context,
@@ -233,4 +233,63 @@ class _MerchantDashboardState extends State<MerchantDashboard> {
         title: Text('Propose MWK Amount', style: TextStyle(color: AppColors.textPrimary)),
         content: TextField(
           controller: ctrl,
-          keyboard
+          keyboardType: TextInputType.number,
+          style: TextStyle(color: AppColors.textPrimary),
+          decoration: InputDecoration(
+            hintText: 'Enter MWK',
+            hintStyle: TextStyle(color: AppColors.textSecondary),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            onPressed: () {
+              Navigator.pop(context);
+              _toast(context, 'Offer sent: MWK ${ctrl.text} for ${offer.amountUsdt.toStringAsFixed(2)} USDT');
+            },
+            child: Text('Send', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _toast(BuildContext context, String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: AppColors.surface,
+        content: Text(msg, style: TextStyle(color: AppColors.textPrimary)),
+      ),
+    );
+  }
+
+  String _ago(DateTime t) {
+    final d = DateTime.now().difference(t);
+    if (d.inMinutes < 1) return 'just now';
+    if (d.inMinutes < 60) return '${d.inMinutes}m ago';
+    if (d.inHours < 24) return '${d.inHours}h ago';
+    return '${d.inDays}d ago';
+  }
+
+  String _fmtMoney(double v) => v
+      .toStringAsFixed(0)
+      .replaceAllMapped(RegExp(r'(\\d{1,3})(?=(\\d{3})+(?!\\d))'), (m) => '${m[1]},');
+}
+
+class _SaleOffer {
+  final String userMasked;
+  final double amountUsdt;
+  final DateTime timestamp;
+  _SaleOffer({required this.userMasked, required this.amountUsdt, required this.timestamp});
+}
+
+class _ActiveTrade {
+  final String id;
+  final double amountUsdt;
+  final String status;
+  _ActiveTrade({required this.id, required this.amountUsdt, required this.status});
+}
