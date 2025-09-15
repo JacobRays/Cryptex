@@ -9,7 +9,7 @@ class TransactionPreview extends StatelessWidget {
   final double merchantRate;   // Merchant’s actual rate
   final double fees;           // Total fees MWK
 
-  const TransactionPreview({
+  TransactionPreview({ // removed const here
     super.key,
     this.party = 'MerchantX',
     this.amountUsdt = 100,
@@ -27,10 +27,10 @@ class TransactionPreview extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary), // removed const
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Confirm Transaction', style: TextStyle(color: AppColors.textPrimary)),
+        title: Text('Confirm Transaction', style: TextStyle(color: AppColors.textPrimary)), // removed const
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -42,7 +42,13 @@ class TransactionPreview extends StatelessWidget {
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColors.border),
-              boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.08), blurRadius: 12, spreadRadius: 1)],
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.08),
+                  blurRadius: 12,
+                  spreadRadius: 1,
+                )
+              ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -52,24 +58,30 @@ class TransactionPreview extends StatelessWidget {
                 _row('Base rate', '${_fmtMoney(baseRate)} MWK/USDT'),
                 _row('Merchant rate', '${_fmtMoney(merchantRate)} MWK/USDT'),
                 _row('Fees', '${_fmtMoney(fees)} MWK'),
-                const Divider(color: AppColors.border),
+                Divider(color: AppColors.border), // removed const
                 _row('Total', '${_fmtMoney(total)} MWK', emphasize: true),
                 const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, padding: const EdgeInsets.symmetric(vertical: 14)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
                         onPressed: () => _showPinSheet(context),
-                        child: const Text('SEND', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                        child: Text('SEND', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)), // removed const
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, padding: const EdgeInsets.symmetric(vertical: 14)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.error,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('CANCEL', style: TextStyle(color: Colors.white)),
+                        child: Text('CANCEL', style: TextStyle(color: Colors.white)), // removed const
                       ),
                     ),
                   ],
@@ -87,7 +99,7 @@ class TransactionPreview extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Expanded(child: Text(label, style: const TextStyle(color: AppColors.textSecondary))),
+          Expanded(child: Text(label, style: TextStyle(color: AppColors.textSecondary))), // removed const
           Text(
             value,
             style: TextStyle(
@@ -105,7 +117,7 @@ class TransactionPreview extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder( // removed const
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (_) {
@@ -115,20 +127,27 @@ class TransactionPreview extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(height: 4, width: 40, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(4))),
+              Container(
+                height: 4,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
               const SizedBox(height: 12),
-              const Text('Enter PIN to Confirm', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w600)),
+              Text('Enter PIN to Confirm', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w600)), // removed const
               const SizedBox(height: 12),
               TextField(
                 controller: pinCtrl,
                 keyboardType: TextInputType.number,
                 obscureText: true,
                 maxLength: 6,
-                style: const TextStyle(color: AppColors.textPrimary),
-                decoration: const InputDecoration(
+                style: TextStyle(color: AppColors.textPrimary), // removed const
+                decoration: InputDecoration(
                   counterText: '',
                   hintText: '••••',
-                  hintStyle: TextStyle(color: AppColors.textSecondary),
+                  hintStyle: TextStyle(color: AppColors.textSecondary), // removed const
                 ),
               ),
               const SizedBox(height: 12),
@@ -136,23 +155,31 @@ class TransactionPreview extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, padding: const EdgeInsets.symmetric(vertical: 14)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
                       onPressed: () {
                         Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          backgroundColor: AppColors.surface,
-                          content: Text('PIN verified. Sending…', style: TextStyle(color: AppColors.textPrimary)),
-                        ));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar( // removed const
+                            backgroundColor: AppColors.surface,
+                            content: Text('PIN verified. Sending…', style: TextStyle(color: AppColors.textPrimary)),
+                          ),
+                        );
                       },
-                      child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+                      child: Text('Confirm', style: TextStyle(color: Colors.white)), // removed const
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, padding: const EdgeInsets.symmetric(vertical: 14)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.error,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+                      child: Text('Cancel', style: TextStyle(color: Colors.white)), // removed const
                     ),
                   ),
                 ],
@@ -164,5 +191,7 @@ class TransactionPreview extends StatelessWidget {
     );
   }
 
-  String _fmtMoney(double v) => v.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
+  String _fmtMoney(double v) => v
+      .toStringAsFixed(0)
+      .replaceAllMapped(RegExp(r'(\\d{1,3})(?=(\\d{3})+(?!\\d))'), (m) => '${m[1]},');
 }
