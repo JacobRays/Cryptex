@@ -4,7 +4,7 @@ import '../../theme.dart';
 import '../../widgets/app_scaffold.dart';
 
 class TransactionHistoryPage extends StatelessWidget {
-  const TransactionHistoryPage({super.key});
+  TransactionHistoryPage({super.key}); // removed const for consistency
 
   @override
   Widget build(BuildContext context) {
