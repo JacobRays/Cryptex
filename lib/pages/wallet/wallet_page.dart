@@ -18,10 +18,10 @@ class WalletPage extends StatelessWidget {
           const SizedBox(height: 8),
           const SizedBox(height: 24),
           Text(
-  "MWK Equivalent: MK 140,000",
-  style: TextStyle(color: AppColors.textSecondary),
-),
-
+            "MWK Equivalent: MK 140,000",
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 24),
           Wrap(
             spacing: 12,
             runSpacing: 12,
