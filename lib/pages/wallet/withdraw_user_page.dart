@@ -4,7 +4,7 @@ import '../../widgets/app_scaffold.dart';
 import '../../widgets/pin_sheet.dart';
 
 class WithdrawUserPage extends StatelessWidget {
-  const WithdrawUserPage({super.key});
+  WithdrawUserPage({super.key}); // removed const for consistency
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,10 @@ class WithdrawUserPage extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Withdraw to external USDT wallet", style: TextStyle(fontSize: 16)),
+          const Text(
+            "Withdraw to external USDT wallet",
+            style: TextStyle(fontSize: 16),
+          ),
           const SizedBox(height: 12),
           TextField(
             controller: controller,
