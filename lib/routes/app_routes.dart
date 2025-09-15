@@ -13,23 +13,18 @@ import '../pages/wallet/withdraw_user_page.dart';
 class AppRoutes {
   static const String initial = '/';
   static const String home = '/home';
-  static const String merchantDashboard = '/merchant-dashboard';
-  static const String transactionPreview = '/transaction-preview';
-  static const String adminDashboard = '/admin-dashboard';
-  static const String wallet = '/wallet';
-  static const String walletHistory = '/wallet/history';
-  static const String walletRecharge = '/wallet/recharge';
-  static const String walletWithdraw = '/wallet/withdraw';
+  // ... other route names
 
   static Map<String, WidgetBuilder> routes = {
     initial: (context) => HomeDashboardPage(),
     home: (context) => HomeDashboardPage(),
-    merchantDashboard: (context) => MerchantDashboard(),
-    transactionPreview: (context) => TransactionPreview(),
-    adminDashboard: (context) => AdminDashboard(),
-    wallet: (context) => WalletPage(),
-    walletHistory: (context) => TransactionHistoryPage(),
-    walletRecharge: (context) => RechargeUserPage(),
-    walletWithdraw: (context) => WithdrawUserPage(),
+    '/merchant-dashboard': (context) => MerchantDashboard(),
+    '/transaction-preview': (context) => TransactionPreview(),
+    '/admin-dashboard': (context) => AdminDashboard(),
+    '/wallet': (context) => WalletPage(),
+    '/wallet/history': (context) => TransactionHistoryPage(),
+    '/wallet/recharge': (context) => RechargeUserPage(),
+    '/wallet/withdraw': (context) => WithdrawUserPage(),
   };
 }
+
