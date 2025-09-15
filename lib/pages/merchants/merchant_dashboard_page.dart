@@ -1,6 +1,5 @@
 import 'package:cryptex_malawi/theme/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:cryptex_malawi/theme/app_colors.dart';
 
 class MerchantDashboard extends StatefulWidget {
   const MerchantDashboard({super.key});
