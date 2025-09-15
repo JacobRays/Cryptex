@@ -10,6 +10,14 @@ import 'package:cryptex_malawi/pages/transactions/transaction_preview.dart';
 import 'package:cryptex_malawi/pages/admin/admin_dashboard.dart';
 import 'package:cryptex_malawi/pages/merchants/escrow_management_page.dart';
 
+// Import your existing pages
+import 'package:cryptex_malawi/pages/wallet_page.dart';
+import 'package:cryptex_malawi/pages/buy_usdt_page.dart';
+import 'package:cryptex_malawi/pages/sell_usdt_page.dart';
+import 'package:cryptex_malawi/pages/recharge_page.dart';
+import 'package:cryptex_malawi/pages/withdraw_page.dart';
+import 'package:cryptex_malawi/pages/transaction_history_page.dart';
+
 class HomeDashboardPage extends StatelessWidget {
   const HomeDashboardPage({super.key});
 
@@ -67,13 +75,60 @@ class HomeDashboardPage extends StatelessWidget {
               );
             },
           ),
-          // You can keep your original buttons too if needed
-          NeonButton(label: "Wallet", onPressed: () {}),
-          NeonButton(label: "Buy USDT", onPressed: () {}),
-          NeonButton(label: "Sell USDT", onPressed: () {}),
-          NeonButton(label: "Recharge", onPressed: () {}),
-          NeonButton(label: "Withdraw", onPressed: () {}),
-          NeonButton(label: "History", onPressed: () {}),
+          NeonButton(
+            label: "Wallet",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const WalletPage()),
+              );
+            },
+          ),
+          NeonButton(
+            label: "Buy USDT",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const BuyUsdtPage()),
+              );
+            },
+          ),
+          NeonButton(
+            label: "Sell USDT",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SellUsdtPage()),
+              );
+            },
+          ),
+          NeonButton(
+            label: "Recharge",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const RechargePage()),
+              );
+            },
+          ),
+          NeonButton(
+            label: "Withdraw",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const WithdrawPage()),
+              );
+            },
+          ),
+          NeonButton(
+            label: "History",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const TransactionHistoryPage()),
+              );
+            },
+          ),
         ],
       ),
     );
