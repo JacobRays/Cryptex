@@ -9,7 +9,7 @@ class TransactionPreview extends StatelessWidget {
   final double merchantRate;   // Merchant’s actual rate
   final double fees;           // Total fees MWK
 
-  TransactionPreview({ // removed const here
+  TransactionPreview({
     super.key,
     this.party = 'MerchantX',
     this.amountUsdt = 100,
@@ -27,10 +27,10 @@ class TransactionPreview extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary), // removed const
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('Confirm Transaction', style: TextStyle(color: AppColors.textPrimary)), // removed const
+        title: Text('Confirm Transaction', style: TextStyle(color: AppColors.textPrimary)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -58,7 +58,7 @@ class TransactionPreview extends StatelessWidget {
                 _row('Base rate', '${_fmtMoney(baseRate)} MWK/USDT'),
                 _row('Merchant rate', '${_fmtMoney(merchantRate)} MWK/USDT'),
                 _row('Fees', '${_fmtMoney(fees)} MWK'),
-                Divider(color: AppColors.border), // removed const
+                Divider(color: AppColors.border),
                 _row('Total', '${_fmtMoney(total)} MWK', emphasize: true),
                 const SizedBox(height: 16),
                 Row(
@@ -70,7 +70,7 @@ class TransactionPreview extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         onPressed: () => _showPinSheet(context),
-                        child: Text('SEND', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)), // removed const
+                        child: Text('SEND', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -81,7 +81,7 @@ class TransactionPreview extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         onPressed: () => Navigator.pop(context),
-                        child: Text('CANCEL', style: TextStyle(color: Colors.white)), // removed const
+                        child: Text('CANCEL', style: TextStyle(color: Colors.white)),
                       ),
                     ),
                   ],
@@ -99,7 +99,7 @@ class TransactionPreview extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Expanded(child: Text(label, style: TextStyle(color: AppColors.textSecondary))), // removed const
+          Expanded(child: Text(label, style: TextStyle(color: AppColors.textSecondary))),
           Text(
             value,
             style: TextStyle(
@@ -117,7 +117,7 @@ class TransactionPreview extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surface,
-      shape: RoundedRectangleBorder( // removed const
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (_) {
@@ -136,18 +136,18 @@ class TransactionPreview extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              Text('Enter PIN to Confirm', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w600)), // removed const
+              Text('Enter PIN to Confirm', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w600)),
               const SizedBox(height: 12),
               TextField(
                 controller: pinCtrl,
                 keyboardType: TextInputType.number,
                 obscureText: true,
                 maxLength: 6,
-                style: TextStyle(color: AppColors.textPrimary), // removed const
+                style: TextStyle(color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   counterText: '',
                   hintText: '••••',
-                  hintStyle: TextStyle(color: AppColors.textSecondary), // removed const
+                  hintStyle: TextStyle(color: AppColors.textSecondary),
                 ),
               ),
               const SizedBox(height: 12),
@@ -162,13 +162,13 @@ class TransactionPreview extends StatelessWidget {
                       onPressed: () {
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar( // removed const
+                          SnackBar(
                             backgroundColor: AppColors.surface,
                             content: Text('PIN verified. Sending…', style: TextStyle(color: AppColors.textPrimary)),
                           ),
                         );
                       },
-                      child: Text('Confirm', style: TextStyle(color: Colors.white)), // removed const
+                      child: Text('Confirm', style: TextStyle(color: Colors.white)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -179,7 +179,7 @@ class TransactionPreview extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       onPressed: () => Navigator.pop(context),
-                      child: Text('Cancel', style: TextStyle(color: Colors.white)), // removed const
+                      child: Text('Cancel', style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],
@@ -193,5 +193,5 @@ class TransactionPreview extends StatelessWidget {
 
   String _fmtMoney(double v) => v
       .toStringAsFixed(0)
-      .replaceAllMapped(RegExp(r'(\\d{1,3})(?=(\\d{3})+(?!\\d))'), (m) => '${m[1]},');
+      .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
 }
