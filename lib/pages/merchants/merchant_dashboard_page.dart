@@ -225,4 +225,10 @@ class _ActiveTrade {
   final String id;
   final double amountUsdt;
   final String status;
-  _ActiveTrade({required this.id, required this.amountUsdt, required
+
+  _ActiveTrade({
+    required this.id,
+    required this.amountUsdt,
+    required this.status,
+  });
+}
