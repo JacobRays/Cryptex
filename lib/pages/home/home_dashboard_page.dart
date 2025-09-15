@@ -12,14 +12,12 @@ import 'package:cryptex_malawi/pages/merchants/escrow_management_page.dart';
 
 // Import your existing pages
 import 'package:cryptex_malawi/pages/wallet_page.dart';
-import 'package:cryptex_malawi/pages/buy_usdt_page.dart';
-import 'package:cryptex_malawi/pages/sell_usdt_page.dart';
 import 'package:cryptex_malawi/pages/recharge_page.dart';
 import 'package:cryptex_malawi/pages/withdraw_page.dart';
 import 'package:cryptex_malawi/pages/transaction_history_page.dart';
 
 class HomeDashboardPage extends StatelessWidget {
-  const HomeDashboardPage({super.key});
+  HomeDashboardPage({super.key}); // removed const
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +33,7 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const UserDashboard()),
+                MaterialPageRoute(builder: (_) => UserDashboard()),
               );
             },
           ),
@@ -44,7 +42,7 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const MerchantDashboard()),
+                MaterialPageRoute(builder: (_) => MerchantDashboard()),
               );
             },
           ),
@@ -53,7 +51,7 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const TransactionPreview()),
+                MaterialPageRoute(builder: (_) => TransactionPreview()),
               );
             },
           ),
@@ -62,7 +60,7 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const AdminDashboard()),
+                MaterialPageRoute(builder: (_) => AdminDashboard()),
               );
             },
           ),
@@ -71,7 +69,7 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const EscrowManagementPage()),
+                MaterialPageRoute(builder: (_) => EscrowManagementPage()),
               );
             },
           ),
@@ -80,7 +78,7 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const WalletPage()),
+                MaterialPageRoute(builder: (_) => WalletPage()),
               );
             },
           ),
@@ -89,7 +87,16 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const BuyUsdtPage()),
+                MaterialPageRoute(
+                  builder: (_) => TransactionPreview(
+                    party: 'MerchantX',
+                    amountUsdt: 100,
+                    amountMwk: 182000,
+                    baseRate: 1800,
+                    merchantRate: 1820,
+                    fees: 1500,
+                  ),
+                ),
               );
             },
           ),
@@ -98,7 +105,16 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const SellUsdtPage()),
+                MaterialPageRoute(
+                  builder: (_) => TransactionPreview(
+                    party: 'MerchantX',
+                    amountUsdt: 50,
+                    amountMwk: 91000,
+                    baseRate: 1800,
+                    merchantRate: 1790,
+                    fees: 800,
+                  ),
+                ),
               );
             },
           ),
@@ -107,7 +123,7 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const RechargePage()),
+                MaterialPageRoute(builder: (_) => RechargePage()),
               );
             },
           ),
@@ -116,7 +132,7 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const WithdrawPage()),
+                MaterialPageRoute(builder: (_) => WithdrawPage()),
               );
             },
           ),
@@ -125,7 +141,7 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const TransactionHistoryPage()),
+                MaterialPageRoute(builder: (_) => TransactionHistoryPage()),
               );
             },
           ),
