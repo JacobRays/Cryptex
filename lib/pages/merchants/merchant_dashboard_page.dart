@@ -1,21 +1,19 @@
-import 'package:cryptex_malawi/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:cryptex_malawi/theme/app_colors.dart';
 
 class MerchantDashboard extends StatefulWidget {
-  MerchantDashboard({super.key}); // removed const
+  MerchantDashboard({super.key});
 
   @override
   State<MerchantDashboard> createState() => _MerchantDashboardState();
 }
 
 class _MerchantDashboardState extends State<MerchantDashboard> {
-  double usdtBalance = 320.75;
-  double mwkBalance = 685000;
+  final TextEditingController _buyRateCtrl = TextEditingController(text: '1800');
+  final TextEditingController _sellRateCtrl = TextEditingController(text: '1820');
 
-  final TextEditingController _buyRateCtrl = TextEditingController(text: '1780');
-  final TextEditingController _sellRateCtrl = TextEditingController(text: '1825');
-
-  String availability = 'Online';
+  double usdtBalance = 500.0;
+  double mwkBalance = 900000;
 
   final List<_SaleOffer> incomingOffers = [
     _SaleOffer(userMasked: 'user****91', amountUsdt: 150, timestamp: DateTime.now().subtract(Duration(minutes: 7))),
@@ -24,6 +22,7 @@ class _MerchantDashboardState extends State<MerchantDashboard> {
 
   final List<_ActiveTrade> activeTrades = [
     _ActiveTrade(id: 'TRD-2025-0001', amountUsdt: 100, status: 'In Progress'),
+    _ActiveTrade(id: 'TRD-2025-0002', amountUsdt: 50, status: 'Pending Payment'),
   ];
 
   @override
@@ -32,16 +31,12 @@ class _MerchantDashboardState extends State<MerchantDashboard> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: Text('Merchant Dashboard', style: TextStyle(color: AppColors.textPrimary)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _sectionTitle('Balances'),
+          _title('Wallet Balances'),
           Row(
             children: [
               Expanded(child: _balanceCard('USDT', usdtBalance.toStringAsFixed(2))),
@@ -50,47 +45,23 @@ class _MerchantDashboardState extends State<MerchantDashboard> {
             ],
           ),
           const SizedBox(height: 20),
-          _sectionTitle('Set rates'),
-          _rateRow('Buy rate (MWK/USDT)', _buyRateCtrl),
-          const SizedBox(height: 10),
-          _rateRow('Sell rate (MWK/USDT)', _sellRateCtrl),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-              onPressed: () {
-                _toast(context, 'Rates saved: Buy ${_buyRateCtrl.text}, Sell ${_sellRateCtrl.text}');
-              },
-              child: Text('Save', style: TextStyle(color: Colors.white)),
-            ),
-          ),
+          _title('Set Rates'),
+          _rateCard(),
           const SizedBox(height: 20),
-          _sectionTitle('Incoming sale offers'),
-          if (incomingOffers.isEmpty)
-            _emptyCard('No new sale offers')
-          else
-            ...incomingOffers.map((o) => _offerCard(context, o)).toList(),
+          _title('Incoming Offers'),
+          ...incomingOffers.map((o) => _offerCard(context, o)),
           const SizedBox(height: 20),
-          _sectionTitle('Active trades'),
-          if (activeTrades.isEmpty)
-            _emptyCard('No active trades')
-          else
-            ...activeTrades.map((t) => _tradeCard(t)).toList(),
-          const SizedBox(height: 20),
-          _sectionTitle('Availability'),
-          _availabilityPicker(),
+          _title('Active Trades'),
+          ...activeTrades.map((t) => _tradeCard(t)),
         ],
       ),
     );
   }
 
-  Widget _sectionTitle(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(text, style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w600)),
-    );
-  }
+  Widget _title(String t) => Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Text(t, style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w600)),
+      );
 
   Widget _balanceCard(String currency, String amount) {
     return Container(
@@ -111,7 +82,7 @@ class _MerchantDashboardState extends State<MerchantDashboard> {
     );
   }
 
-  Widget _rateRow(String label, TextEditingController controller) {
+  Widget _rateCard() {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -119,38 +90,54 @@ class _MerchantDashboardState extends State<MerchantDashboard> {
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.border),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(child: Text(label, style: TextStyle(color: AppColors.textSecondary))),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 120,
-            child: TextField(
-              controller: controller,
-              keyboardType: TextInputType.number,
-              style: TextStyle(color: AppColors.textPrimary),
-              decoration: InputDecoration(
-                isDense: true,
-                filled: true,
-                fillColor: Colors.black.withOpacity(0.2),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-                hintText: '0',
-                hintStyle: TextStyle(color: AppColors.textSecondary),
-              ),
-            ),
+          _rateRow('Buy rate (MWK/USDT)', _buyRateCtrl),
+          const SizedBox(height: 10),
+          _rateRow('Sell rate (MWK/USDT)', _sellRateCtrl),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            onPressed: () {
+              _toast(context, 'Rates saved: Buy ${_buyRateCtrl.text}, Sell ${_sellRateCtrl.text}');
+            },
+            child: Text('Save Rates', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
     );
   }
 
+  Widget _rateRow(String label, TextEditingController controller) {
+    return Row(
+      children: [
+        Expanded(child: Text(label, style: TextStyle(color: AppColors.textSecondary))),
+        const SizedBox(width: 10),
+        SizedBox(
+          width: 130,
+          child: TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            style: TextStyle(color: AppColors.textPrimary),
+            decoration: InputDecoration(
+              isDense: true,
+              filled: true,
+              fillColor: Colors.black.withOpacity(0.2),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+              hintText: '0',
+              hintStyle: TextStyle(color: AppColors.textSecondary),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _offerCard(BuildContext context, _SaleOffer offer) {
     return Card(
       color: AppColors.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: AppColors.border)),
-      margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
-        title: Text('${offer.amountUsdt.toStringAsFixed(2)} USDT', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
+        title: Text('${offer.amountUsdt.toStringAsFixed(2)} USDT', style: TextStyle(color: AppColors.textPrimary)),
         subtitle: Text('From: ${offer.userMasked} • ${_ago(offer.timestamp)}', style: TextStyle(color: AppColors.textSecondary)),
         trailing: ElevatedButton(
           style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
@@ -161,70 +148,17 @@ class _MerchantDashboardState extends State<MerchantDashboard> {
     );
   }
 
-  Widget _emptyCard(String message) {
-    return Card(
-      color: AppColors.surface,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Center(
-          child: Text(
-            message,
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _tradeCard(_ActiveTrade trade) {
     return Card(
       color: AppColors.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: AppColors.border)),
-      margin: const EdgeInsets.only(bottom: 10),
       child: ListTile(
         title: Text('${trade.amountUsdt.toStringAsFixed(2)} USDT', style: TextStyle(color: AppColors.textPrimary)),
-        subtitle: Text('${trade.id} • ${trade.status}', style: TextStyle(color: AppColors.textSecondary)),
-        trailing: Icon(Icons.timelapse, color: AppColors.warning),
+        subtitle: Text('Trade ID: ${trade.id} • Status: ${trade.status}', style: TextStyle(color: AppColors.textSecondary)),
       ),
     );
   }
 
-  Widget _availabilityPicker() {
-    final color = {
-      'Online': AppColors.success,
-      'Busy': AppColors.warning,
-      'Offline': AppColors.error,
-    }[availability]!;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-          const SizedBox(width: 8),
-          Text('Status', style: TextStyle(color: AppColors.textSecondary)),
-          const Spacer(),
-          DropdownButton<String>(
-            value: availability,
-            dropdownColor: AppColors.surface,
-            iconEnabledColor: AppColors.textPrimary,
-            items: [
-              DropdownMenuItem(value: 'Online', child: Text('Online', style: TextStyle(color: AppColors.textPrimary))),
-              DropdownMenuItem(value: 'Busy', child: Text('Busy', style: TextStyle(color: AppColors.textPrimary))),
-              DropdownMenuItem(value: 'Offline', child: Text('Offline', style: TextStyle(color: AppColors.textPrimary))),
-            ],
-            onChanged: (v) => setState(() => availability = v ?? availability),
-          ),
-        ],
-      ),
-    );
-  }
-
-    void _openMakeOffer(BuildContext context, _SaleOffer offer) {
+  void _openMakeOffer(BuildContext context, _SaleOffer offer) {
     final ctrl = TextEditingController();
     showDialog(
       context: context,
@@ -291,5 +225,4 @@ class _ActiveTrade {
   final String id;
   final double amountUsdt;
   final String status;
-  _ActiveTrade({required this.id, required this.amountUsdt, required this.status});
-}
+  _ActiveTrade({required this.id, required this.amountUsdt, required
