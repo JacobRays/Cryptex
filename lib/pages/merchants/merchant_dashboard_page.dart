@@ -1,3 +1,4 @@
+import 'package:cryptex_malawi/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:cryptex_malawi/theme/app_colors.dart';
 
@@ -170,7 +171,22 @@ class _MerchantDashboardState extends State<MerchantDashboard> {
     );
   }
 
-  Widget _tradeCard(_ActiveTrade trade) {
+  Widget _emptyCard(String message) {
+  return Card(
+    color: AppColors.surface,
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: Text(
+          message,
+          style: const TextStyle(color: AppColors.textSecondary),
+        ),
+      ),
+    ),
+  );
+}
+  
+Widget _tradeCard(_ActiveTrade trade) {
     return Card(
       color: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: const BorderSide(color: AppColors.border)),
