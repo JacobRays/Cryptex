@@ -6,7 +6,7 @@ import '../../widgets/app_scaffold.dart';
 // Import the new pages
 import 'package:cryptex_malawi/pages/user_dashboard.dart';
 import 'package:cryptex_malawi/pages/merchants/merchant_dashboard_page.dart';
-import 'package:cryptex_malawi/pages/transactions/transaction_preview.dart';
+import 'package:cryptex_malawi/pages/wallet/transaction_preview_page.dart';
 import 'package:cryptex_malawi/pages/admin/admin_dashboard_page.dart';
 import 'package:cryptex_malawi/pages/merchants/escrow_management_page.dart';
 
