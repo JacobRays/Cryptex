@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 // Import actual existing pages
 import '../pages/home/home_dashboard_page.dart';
 import '../pages/merchants/merchant_dashboard_page.dart';
-import '../pages/transactions/transaction_preview.dart';
+import '../pages/wallet/transaction_preview_page.dart';
 import '../pages/admin/admin_dashboard_page.dart';
 import '../pages/wallet/wallet_page.dart';
 import '../pages/wallet/transaction_history_page.dart';
