@@ -26,6 +26,25 @@ import '../pages/system/error_page.dart';
 import '../pages/system/no_connection_page.dart';
 import '../pages/system/secure_pin_verification_page.dart';
 import '../pages/airtel_mpamba_integration_page.dart';
+import 'package:cryptex_malawi/pages/user_dashboard.dart';
+import 'package:cryptex_malawi/pages/merchants/merchant_dashboard.dart';
+import 'package:cryptex_malawi/pages/transactions/transaction_preview.dart';
+import 'package:cryptex_malawi/pages/admin/admin_dashboard.dart';
+import 'package:cryptex_malawi/pages/merchants/escrow_management_page.dart';
+
+static const String userDashboard = '/user-dashboard';
+static const String merchantDashboard = '/merchant-dashboard';
+static const String transactionPreview = '/transaction-preview';
+static const String adminDashboard = '/admin-dashboard';
+static const String escrowManagement = '/escrow-management';
+
+static Map<String, WidgetBuilder> routes = {
+  userDashboard: (context) => const UserDashboard(),
+  merchantDashboard: (context) => const MerchantDashboard(),
+  transactionPreview: (context) => const TransactionPreview(),
+  adminDashboard: (context) => const AdminDashboard(),
+  escrowManagement: (context) => const EscrowManagementPage(),
+};
 
 class AppRoutes {
   static Map<String, WidgetBuilder> routes = {
