@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  
+  static const Color neon = Color(0xFF00FFFF); // Cyan neon
+
   // Brand
   static const Color primary = Color(0xFF00BFFF); // Neon blue
   static const Color secondary = Color(0xFF8A2BE2); // Neon purple
