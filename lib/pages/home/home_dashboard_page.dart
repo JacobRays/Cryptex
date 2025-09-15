@@ -5,16 +5,16 @@ import '../../widgets/app_scaffold.dart';
 
 // Import the new pages
 import 'package:cryptex_malawi/pages/user_dashboard.dart';
-import 'package:cryptex_malawi/pages/merchants/merchant_dashboard.dart';
+import 'package:cryptex_malawi/pages/merchants/merchant_dashboard_page.dart';
 import 'package:cryptex_malawi/pages/transactions/transaction_preview.dart';
-import 'package:cryptex_malawi/pages/admin/admin_dashboard.dart';
+import 'package:cryptex_malawi/pages/admin/admin_dashboard_page.dart';
 import 'package:cryptex_malawi/pages/merchants/escrow_management_page.dart';
 
-// Import your existing pages
-import 'package:cryptex_malawi/pages/wallet_page.dart';
-import 'package:cryptex_malawi/pages/recharge_page.dart';
-import 'package:cryptex_malawi/pages/withdraw_page.dart';
-import 'package:cryptex_malawi/pages/transaction_history_page.dart';
+// Import your existing pages (corrected paths)
+import 'package:cryptex_malawi/pages/wallet/wallet_page.dart';
+import 'package:cryptex_malawi/pages/wallet/recharge_user_page.dart';
+import 'package:cryptex_malawi/pages/wallet/withdraw_user_page.dart';
+import 'package:cryptex_malawi/pages/wallet/transaction_history_page.dart';
 
 class HomeDashboardPage extends StatelessWidget {
   HomeDashboardPage({super.key}); // removed const
@@ -123,7 +123,7 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => RechargePage()),
+                MaterialPageRoute(builder: (_) => RechargeUserPage()),
               );
             },
           ),
@@ -132,7 +132,7 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => WithdrawPage()),
+                MaterialPageRoute(builder: (_) => WithdrawUserPage()),
               );
             },
           ),
