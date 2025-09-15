@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cryptex_malawi/theme/app_colors.dart'; // ✅ Import AppColors
 import '../../theme.dart';
 import '../../widgets/app_scaffold.dart';
 
@@ -21,7 +22,8 @@ class _MerchantAvailabilityTogglePageState extends State<MerchantAvailabilityTog
         children: [
           const Text("Current Status:", style: TextStyle(fontSize: 16)),
           const SizedBox(height: 8),
-          Text(status, style: TextStyle(fontSize: 20, color: AppColors.neon)),
+          // ✅ Changed AppColors.neon to AppColors.primary (or any existing color)
+          Text(status, style: const TextStyle(fontSize: 20, color: AppColors.primary)),
           const SizedBox(height: 24),
           DropdownButton<String>(
             value: status,
