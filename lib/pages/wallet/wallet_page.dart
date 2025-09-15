@@ -15,8 +15,12 @@ class WalletPage extends StatelessWidget {
         children: [
           const NeonText(text: "USDT Balance: \$120.00", fontSize: 20),
           const SizedBox(height: 8),
-          const Text("MWK Equivalent: MK 140,000", style: TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: 24),
+          Text(
+  "MWK Equivalent: MK 140,000",
+  style: TextStyle(color: AppColors.textSecondary),
+),
+
           Wrap(
             spacing: 12,
             runSpacing: 12,
