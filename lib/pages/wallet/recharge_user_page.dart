@@ -4,7 +4,7 @@ import '../../widgets/app_scaffold.dart';
 import '../../widgets/pin_sheet.dart';
 
 class RechargeUserPage extends StatelessWidget {
-  const RechargeUserPage({super.key});
+  RechargeUserPage({super.key}); // removed const for consistency
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,10 @@ class RechargeUserPage extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Recharge with Airtel or Mpamba", style: TextStyle(fontSize: 16)),
+          const Text(
+            "Recharge with Airtel or Mpamba",
+            style: TextStyle(fontSize: 16),
+          ),
           const SizedBox(height: 12),
           TextField(
             controller: controller,
