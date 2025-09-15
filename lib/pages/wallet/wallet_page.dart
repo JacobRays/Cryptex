@@ -5,7 +5,7 @@ import '../../widgets/neon.dart';
 import '../../widgets/app_scaffold.dart';
 
 class WalletPage extends StatelessWidget {
-  const WalletPage({super.key});
+  WalletPage({super.key}); // removed const here to avoid const constructor issues
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +17,7 @@ class WalletPage extends StatelessWidget {
           const NeonText(text: "USDT Balance: \$120.00", fontSize: 20),
           const SizedBox(height: 8),
           const SizedBox(height: 24),
+          // No const here because AppColors.textSecondary is not a compile-time constant
           Text(
             "MWK Equivalent: MK 140,000",
             style: TextStyle(color: AppColors.textSecondary),
