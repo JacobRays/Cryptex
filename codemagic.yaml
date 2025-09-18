@@ -1,0 +1,13 @@
+workflows:
+  cryptex_malawi_android:
+    name: Cryptex Malawi Android
+    max_build_duration: 60
+    environment:
+      flutter: stable
+    scripts:
+      - flutter pub get
+      - flutter analyze
+      - flutter test
+      - flutter build apk --release
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
