@@ -115,9 +115,7 @@ class TransactionPreview extends StatelessWidget {
     );
   }
 
-  String _fmtMoney(double v) => v
-      .toStringAsFixed(0)
-      .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
+  String _fmtMoney(double v) => v.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
 
   void _showPinSheet(BuildContext context) async {
     final pin = await showPinSheet(context);
