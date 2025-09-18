@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cryptex_malawi/theme/app_colors.dart';
-import 'package:cryptex_malawi/widgets/pin_modal.dart';
+import 'package:cryptex_malawi/widgets/pin_sheet.dart';
+import 'package:cryptex_malawi/services/pin_service.dart';
 
 class TransactionPreview extends StatelessWidget {
   final String party;          // Merchant or counterparty name
@@ -114,22 +115,40 @@ class TransactionPreview extends StatelessWidget {
     );
   }
 
-  void _showPinSheet(BuildContext context) {
-    PinModal.show(
-      context,
-      onSubmit: (pin) {
-        // In a full flow, verify the PIN securely here
+  String _fmtMoney(double v) => v
+      .toStringAsFixed(0)
+      .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
+
+  void _showPinSheet(BuildContext context) async {
+    final pin = await showPinSheet(context);
+    if (pin == null) return;
+    final service = PinService();
+    final hasPin = await service.hasPin();
+    if (hasPin) {
+      final ok = await service.verifyPin(pin);
+      if (ok) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: AppColors.surface,
             content: const Text('PIN verified. Sending…', style: TextStyle(color: AppColors.textPrimary)),
           ),
         );
-      },
-    );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.surface,
+            content: const Text('Incorrect PIN', style: TextStyle(color: AppColors.textPrimary)),
+          ),
+        );
+      }
+    } else {
+      await service.setPin(pin);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: AppColors.surface,
+          content: const Text('PIN saved. You can use it for future transactions.', style: TextStyle(color: AppColors.textPrimary)),
+        ),
+      );
+    }
   }
-
-  String _fmtMoney(double v) => v
-      .toStringAsFixed(0)
-      .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
 }
