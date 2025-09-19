@@ -1,42 +1,31 @@
-import 'package:cryptex_malawi/theme/app_colors.dart';
 import 'package:flutter/material.dart';
-import '../../theme.dart';
-import '../../widgets/app_scaffold.dart';
+import 'package:cryptex_malawi/theme/app_colors.dart';
+import 'package:cryptex_malawi/widgets/neon.dart';
 
 class TransactionHistoryPage extends StatelessWidget {
-  TransactionHistoryPage({super.key}); // removed const for consistency
+  const TransactionHistoryPage({Key? key}) :	super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final transactions = [
-      {"type": "Buy", "amount": "50 USDT", "status": "Completed"},
-      {"type": "Withdraw", "amount": "MK 40,000", "status": "Pending"},
-      {"type": "Recharge", "amount": "MK 20,000", "status": "Completed"},
-    ];
-
-    return AppScaffold(
-      title: "Transaction History",
-      body: ListView.builder(
-        itemCount: transactions.length,
-        itemBuilder: (context, index) {
-          final tx = transactions[index];
-          final color = tx["status"] == "Completed"
-              ? Colors.green
-              : tx["status"] == "Pending"
-                  ? Colors.orange
-                  : Colors.red;
-
-          return Card(
-            color: AppColors.surface,
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            child: ListTile(
-              title: Text("${tx["type"]} - ${tx["amount"]}"),
-              subtitle: Text("Status: ${tx["status"]}"),
-              trailing: Icon(Icons.circle, color: color, size: 12),
-            ),
-          );
-        },
-      ),
+    final items = List.generate(6, (i) => {
+      'id': i + 1,
+      'type': i % 2 == 0 ? 'BUY' : 'SELL',
+      'amount': (50 + i * 5).toDouble(),
+      'status': i % 3 == 0 ? 'COMPLETED' : 'PENDING',
+    });
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final it = items[index];
+        return NeonCard(
+          padding: const EdgeInsets.all(12),
+          child: ListTile(
+            title: Text('${it['type']} ${it['amount']} USDT', style: const TextStyle(color: Colors.white)),
+            subtitle: Text('Trade #${it['id']} • ${it['status']}', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+        );
+      },
     );
   }
 }
