@@ -1,44 +1,29 @@
 import 'package:flutter/material.dart';
-import '../../theme.dart';
-import '../../widgets/app_scaffold.dart';
-import '../../widgets/pin_sheet.dart';
+import 'package:cryptex_malawi/theme/app_colors.dart';
+import 'package:cryptex_malawi/widgets/neon.dart';
 
-class WithdrawUserPage extends StatelessWidget {
-  WithdrawUserPage({super.key}); // removed const for consistency
+class WithdrawPage extends StatelessWidget {
+  const WithdrawPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final controller = TextEditingController();
-
-    return AppScaffold(
-      title: "Withdraw USDT",
-      body: Column(
+    final TextEditingController usdtCtl = TextEditingController(text: '20');
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Withdraw to external USDT wallet",
-            style: TextStyle(fontSize: 16),
-          ),
+          NeonText(text: "Withdraw USDT", fontSize: 22),
           const SizedBox(height: 12),
           TextField(
-            controller: controller,
-            decoration: const InputDecoration(labelText: "USDT Wallet Address"),
-          ),
-          const SizedBox(height: 12),
-          TextField(
+            controller: usdtCtl,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: "Amount in USDT"),
+            decoration: const InputDecoration(labelText: 'Amount USDT'),
           ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () async {
-              final pin = await showPinSheet(context);
-              if (pin != null) {
-                // TODO: Trigger withdrawal API with PIN
-              }
-            },
-            child: const Text("Withdraw"),
-          ),
+          const SizedBox(height: 12),
+          NeonButton(label: "Withdraw", onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Withdrawal requested')));
+          }),
         ],
       ),
     );
