@@ -21,15 +21,9 @@ class WalletOverview extends StatelessWidget {
             spacing: 12,
             runSpacing: 12,
             children: [
-              NeonButton(label: "Recharge", onPressed: () {
-                Navigator.of(context).pushNamed('/wallet/recharge');
-              }),
-              NeonButton(label: "Withdraw", onPressed: () {
-                Navigator.of(context).pushNamed('/wallet/withdraw');
-              }),
-              NeonButton(label: "Transfer", onPressed: () {
-                // Optional: navigate to transfer flow
-              }),
+              NeonButton(label: "Recharge", onPressed: () {}),
+              NeonButton(label: "Withdraw", onPressed: () {}),
+              NeonButton(label: "Transfer", onPressed: () {}),
               NeonButton(label: "History", onPressed: () {
                 Navigator.of(context).pushNamed('/wallet/history');
               }),
