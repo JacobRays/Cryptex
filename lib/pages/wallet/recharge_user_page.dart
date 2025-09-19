@@ -1,40 +1,29 @@
 import 'package:flutter/material.dart';
-import '../../theme.dart';
-import '../../widgets/app_scaffold.dart';
-import '../../widgets/pin_sheet.dart';
+import 'package:cryptex_malawi/theme/app_colors.dart';
+import 'package:cryptex_malawi/widgets/neon.dart';
 
-class RechargeUserPage extends StatelessWidget {
-  RechargeUserPage({super.key}); // removed const for consistency
+class RechargePage extends StatelessWidget {
+  const RechargePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final controller = TextEditingController();
-
-    return AppScaffold(
-      title: "Recharge Wallet",
-      body: Column(
+    final TextEditingController mwkCtl = TextEditingController();
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Recharge with Airtel or Mpamba",
-            style: TextStyle(fontSize: 16),
-          ),
+          NeonText(text: "Recharge MWK", fontSize: 22),
           const SizedBox(height: 12),
           TextField(
-            controller: controller,
+            controller: mwkCtl,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: "Amount in MWK"),
+            decoration: const InputDecoration(labelText: 'Amount MWK'),
           ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () async {
-              final pin = await showPinSheet(context);
-              if (pin != null) {
-                // TODO: Trigger recharge API with PIN
-              }
-            },
-            child: const Text("Recharge"),
-          ),
+          const SizedBox(height: 12),
+          NeonButton(label: "Recharge", onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Recharge request submitted')));
+          }),
         ],
       ),
     );
