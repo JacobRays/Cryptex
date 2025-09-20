@@ -9,7 +9,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-    flutter_secure_storage: ^9.0.0
+  # PIN storage and crypto
+  flutter_secure_storage: ^9.0.0
   crypto: ^3.0.0
 
   # UI & Styling
@@ -32,14 +33,10 @@ dependencies:
   universal_html: ^2.2.4
   web: any
 
-  # 🔥 Firebase
+  # Firebase
   firebase_core: ^3.6.0
   firebase_auth: ^5.3.1
   cloud_firestore: ^5.4.4
-
-  # Optional: Secure PIN storage (useful for real PIN flows)
-  flutter_secure_storage: ^6.0.0
-  crypto: ^3.0.0
 
 dev_dependencies:
   flutter_test:
