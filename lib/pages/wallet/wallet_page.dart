@@ -27,30 +27,44 @@ class _WalletPageState extends State<WalletPage> {
         initialRoute: '/wallet/overview',
         onGenerateRoute: (RouteSettings settings) {
           WidgetBuilder builder;
+
           switch (settings.name) {
             case '/wallet/overview':
-            default:
-              builder = (BuildContext _) => const WalletOverview();
+              builder = (_) => WalletOverview();
               break;
             case '/wallet/buy':
-              builder = (BuildContext _) => const BuyUSDTPage();
+              builder = (_) => BuyUSDTPage();
               break;
             case '/wallet/sell':
-              builder = (BuildContext _) => const SellUSDTPage();
+              builder = (_) => SellUSDTPage();
+              break;
+            case '/wallet/preview':
+              final args = settings.arguments as Map<String, dynamic>? ?? {};
+              builder = (_) => TransactionPreview(
+                    party: args['party'] ?? 'MerchantX',
+                    amountUsdt: args['amountUsdt'] ?? 100,
+                    amountMwk: args['amountMwk'] ?? 182000,
+                    baseRate: args['baseRate'] ?? 1800,
+                    merchantRate: args['merchantRate'] ?? 1820,
+                    fees: args['fees'] ?? 1500,
+                  );
               break;
             case '/wallet/history':
-              builder = (BuildContext _) => const TransactionHistoryPage();
+              builder = (_) => TransactionHistoryPage();
               break;
             case '/wallet/recharge':
-              builder = (BuildContext _) => const RechargePage();
+              builder = (_) => RechargePage();
               break;
             case '/wallet/withdraw':
-              builder = (BuildContext _) => const WithdrawPage();
+              builder = (_) => WithdrawPage();
               break;
             case '/wallet/manual-bank':
-              builder = (BuildContext _) => const ManualBankWithdrawalPage();
+              builder = (_) => ManualBankWithdrawalPage();
               break;
+            default:
+              builder = (_) => WalletOverview(); // Default fallback
           }
+
           return MaterialPageRoute(builder: builder, settings: settings);
         },
       ),
