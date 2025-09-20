@@ -4,12 +4,12 @@ import 'package:cryptex_malawi/widgets/pin_sheet.dart';
 import 'package:cryptex_malawi/services/pin_service.dart';
 
 class TransactionPreview extends StatelessWidget {
-  final String party;          // Merchant or counterparty name
+  final String party;
   final double amountUsdt;
   final double amountMwk;
-  final double baseRate;       // Admin base rate
-  final double merchantRate;   // Merchant’s actual rate
-  final double fees;           // Total fees MWK
+  final double baseRate;
+  final double merchantRate;
+  final double fees;
 
   TransactionPreview({
     Key? key,
@@ -71,7 +71,7 @@ class TransactionPreview extends StatelessWidget {
                           backgroundColor: AppColors.primary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        onPressed: () => _showPinSheet(context),
+                        onPressed: () => _handlePinAndSubmit(context),
                         child: const Text('SEND', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
                       ),
                     ),
@@ -83,70 +83,4 @@ class TransactionPreview extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('CANCEL', style: TextStyle(color: Colors.white)),
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _row(String label, String value, {bool emphasize = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Expanded(child: Text(label, style: const TextStyle(color: AppColors.textSecondary))),
-          Text(
-            value,
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: emphasize ? 18 : 16,
-              fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _fmtMoney(double v) => v.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
-
-  void _showPinSheet(BuildContext context) async {
-    final pin = await showPinSheet(context);
-    if (pin == null) return;
-    final service = PinService();
-    final hasPin = await service.hasPin();
-    if (hasPin) {
-      final ok = await service.verifyPin(pin);
-      if (ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.surface,
-            content: const Text('PIN verified. Sending…', style: TextStyle(color: AppColors.textPrimary)),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.surface,
-            content: const Text('Incorrect PIN', style: TextStyle(color: AppColors.textPrimary)),
-          ),
-        );
-      }
-    } else {
-      await service.setPin(pin);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.surface,
-          content: const Text('PIN saved. You can use it for future transactions.', style: TextStyle(color: AppColors.textPrimary)),
-        ),
-      );
-    }
-  }
-}
+                        child: const 
