@@ -5,19 +5,8 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
-buildscript {
-    ext.kotlin_version = '1.8.10'
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-
 android {
-    // Updated: ensure a proper module namespace
+    // Added: proper module namespace to fix AGP namespace issue
     namespace "com.cryptex_malawi.app"
 
     compileSdk = flutter.compileSdkVersion
@@ -35,11 +24,12 @@ android {
 
     defaultConfig {
         applicationId = "com.cryptex_malawi.app"
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled true
+        minSdkVersion 23
     }
 
     buildTypes {
