@@ -5,6 +5,7 @@ workflows:
     environment:
       flutter: stable
     scripts:
+      - flutter clean
       - flutter pub get
       - flutter analyze
       - flutter test
