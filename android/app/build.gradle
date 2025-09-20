@@ -6,7 +6,9 @@ plugins {
 }
 
 android {
-    namespace = "com.cryptex_malawi.app"
+    // Updated: ensure a proper module namespace
+    namespace "com.cryptex_malawi"
+
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
