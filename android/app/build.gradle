@@ -1,12 +1,12 @@
 plugins {
     id "com.android.application"
-    id "kotlin-android"
+    id "org.jetbrains.kotlin.android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
 }
 
 android {
-    // Added: proper module namespace to fix AGP namespace issue
+    // Required by AGP 8+
     namespace "com.cryptex_malawi.app"
 
     compileSdk = flutter.compileSdkVersion
@@ -24,12 +24,12 @@ android {
 
     defaultConfig {
         applicationId = "com.cryptex_malawi.app"
-        minSdk = flutter.minSdkVersion
+        // Single, explicit minSdk for AGP 8.x
+        minSdkVersion 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled true
-        minSdkVersion 23
     }
 
     buildTypes {
@@ -51,7 +51,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.concurrent:concurrent-futures:1.1.0'
 
-    // 🔥 Firebase SDKs
+    // Firebase via BoM (keeps versions aligned)
     implementation platform('com.google.firebase:firebase-bom:32.7.0')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-firestore'
