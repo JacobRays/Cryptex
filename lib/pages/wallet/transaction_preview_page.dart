@@ -24,6 +24,70 @@ class TransactionPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final total = amountMwk + fees;
+
+    /// Formats a number with commas (e.g. 1,000)
+    String _fmtMoney(double v) {
+      return v
+          .toStringAsFixed(0)
+          .replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},');
+    }
+
+    /// Row UI widget for displaying transaction details
+    Widget _row(String label, String value, {bool emphasize = false}) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Expanded(child: Text(label, style: const TextStyle(color: AppColors.textSecondary))),
+            Text(
+              value,
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: emphasize ? 18 : 16,
+                fontWeight: emphasize ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    /// Handles PIN input and verification
+    Future<void> _handlePinAndSubmit(BuildContext context) async {
+      final pin = await showPinSheet(context);
+      if (pin == null) return;
+
+      final service = PinService();
+      final hasPin = await service.hasPin();
+
+      if (hasPin) {
+        final ok = await service.verifyPin(pin);
+        if (ok) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: AppColors.surface,
+              content: const Text('PIN verified. Sending…', style: TextStyle(color: AppColors.textPrimary)),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: AppColors.surface,
+              content: const Text('Incorrect PIN', style: TextStyle(color: AppColors.textPrimary)),
+            ),
+          );
+        }
+      } else {
+        await service.setPin(pin);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.surface,
+            content: const Text('PIN saved. You can use it for future transactions.', style: TextStyle(color: AppColors.textPrimary)),
+          ),
+        );
+      }
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -83,4 +147,16 @@ class TransactionPreview extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         onPressed: () => Navigator.pop(context),
-                        child: const 
+                        child: const Text('CANCEL', style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
