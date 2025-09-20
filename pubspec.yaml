@@ -9,6 +9,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+    flutter_secure_storage: ^9.0.0
+  crypto: ^3.0.0
+
   # UI & Styling
   cupertino_icons: ^1.0.6
   google_fonts: ^6.2.1

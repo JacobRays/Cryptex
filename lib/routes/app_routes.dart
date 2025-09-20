@@ -1,35 +1,15 @@
 import 'package:flutter/material.dart';
-
-// Import actual existing pages
-import '../pages/home/home_dashboard_page.dart';
-import '../pages/merchants/merchant_dashboard_page.dart';
-import '../pages/wallet/transaction_preview_page.dart';
-import '../pages/admin/admin_dashboard_page.dart';
-import '../pages/wallet/wallet_page.dart';
-import '../pages/wallet/transaction_history_page.dart';
-import '../pages/wallet/recharge_user_page.dart';
-import '../pages/wallet/withdraw_user_page.dart';
-
-class AppRoutes {
-  static const String initial = '/';
-  static const String home = '/home';
-  static const String merchantDashboard = '/merchant-dashboard';
-  static const String transactionPreview = '/transaction-preview';
-  static const String adminDashboard = '/admin-dashboard';
-  static const String wallet = '/wallet';
-  static const String walletHistory = '/wallet/history';
-  static const String walletRecharge = '/wallet/recharge';
-  static const String walletWithdraw = '/wallet/withdraw';
-
-  static Map<String, WidgetBuilder> routes = {
-    initial: (context) => HomeDashboardPage(),
-    home: (context) => HomeDashboardPage(),
-    merchantDashboard: (context) => MerchantDashboard(),
-    transactionPreview: (context) => TransactionPreview(),
-    adminDashboard: (context) => AdminDashboard(),
-    wallet: (context) => WalletPage(),
-    walletHistory: (context) => TransactionHistoryPage(),
-    walletRecharge: (context) => RechargeUserPage(),
-    walletWithdraw: (context) => WithdrawUserPage(),
-  };
-}
+// Admin
+import 'package:cryptex_malawi/pages/admin/admin_dashboard.dart';
+import 'package:cryptex_malawi/pages/admin/global_rate_management.dart';
+import 'package:cryptex_malawi/pages/admin/escrow_management.dart';
+import 'package:cryptex_malawi/pages/admin/user_management.dart';
+import 'package:cryptex_malawi/pages/admin/fee_wallet.dart';
+import 'package:cryptex_malawi/pages/admin/admin_override.dart';
+// KYC
+import 'package:cryptex_malawi/pages/kyc/kyc_page.dart';
+// Wallet (nested)
+import 'package:cryptex_malawi/pages/wallet/wallet_page.dart';
+import 'package:cryptex_malawi/pages/wallet/transaction_history.dart';
+import 'package:cryptex_malawi/pages/wallet/recharge.dart';
+import 'package:cryptex_malawi/pages/wallet/withdraw.dart';
