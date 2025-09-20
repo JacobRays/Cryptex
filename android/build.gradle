@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // Updated AGP plugin to a compatible version
+        // Updated AGP (Android Gradle Plugin) to a compatible version
         classpath 'com.android.tools.build:gradle:7.4.2'
         classpath 'com.google.gms:google-services:4.4.0'
     }
