@@ -9,24 +9,24 @@ android {
     // Required by AGP 8+
     namespace "com.cryptex_malawi.app"
 
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 34  // UPDATED: Set explicit SDK version
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
         coreLibraryDesugaringEnabled true
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17  // UPDATED from VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_17  // UPDATED from VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = "17"  // UPDATED from VERSION_1_8
     }
 
     defaultConfig {
         applicationId = "com.cryptex_malawi.app"
         // Single, explicit minSdk for AGP 8.x
         minSdkVersion 23
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 34  // UPDATED: Set explicit target SDK
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled true
@@ -51,8 +51,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.concurrent:concurrent-futures:1.1.0'
 
-    // Firebase via BoM (keeps versions aligned)
-    implementation platform('com.google.firebase:firebase-bom:32.7.0')
+    // Firebase via BoM (keeps versions aligned) - UPDATED to latest
+    implementation platform('com.google.firebase:firebase-bom:33.1.0')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-firestore'
     implementation 'com.google.firebase:firebase-storage'
