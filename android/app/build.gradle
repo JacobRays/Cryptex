@@ -1,6 +1,7 @@
 plugins {
     id "com.android.application"
     id "org.jetbrains.kotlin.android"
+    id "com.google.gms.google-services"  // ADDED
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
 }
@@ -9,24 +10,24 @@ android {
     // Required by AGP 8+
     namespace "com.cryptex_malawi.app"
 
-    compileSdk = 34  // UPDATED: Set explicit SDK version
+    compileSdk = 34
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
         coreLibraryDesugaringEnabled true
-        sourceCompatibility = JavaVersion.VERSION_17  // UPDATED from VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_17  // UPDATED from VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "17"  // UPDATED from VERSION_1_8
+        jvmTarget = "17"
     }
 
     defaultConfig {
         applicationId = "com.cryptex_malawi.app"
         // Single, explicit minSdk for AGP 8.x
         minSdkVersion 23
-        targetSdk = 34  // UPDATED: Set explicit target SDK
+        targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled true
@@ -51,7 +52,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.concurrent:concurrent-futures:1.1.0'
 
-    // Firebase via BoM (keeps versions aligned) - UPDATED to latest
+    // Firebase via BoM (keeps versions aligned)
     implementation platform('com.google.firebase:firebase-bom:33.1.0')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-firestore'
@@ -59,4 +60,4 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging'
 }
 
-apply plugin: 'com.google.gms.google-services'
+// REMOVED: apply plugin: 'com.google.gms.google-services' - Already added in plugins block above
