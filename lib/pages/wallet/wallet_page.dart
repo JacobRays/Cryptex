@@ -6,9 +6,9 @@ import '../../widgets/app_scaffold.dart';
 import 'wallet_overview.dart';
 import 'buy_usdt.dart';
 import 'sell_usdt.dart';
-import 'transaction_history.dart';
-import 'recharge.dart';
-import 'withdraw.dart';
+import 'transaction_history_page.dart';  // Changed from transaction_history.dart
+import 'recharge_user_page.dart';        // Changed from recharge.dart
+import 'withdraw_user_page.dart';        // Changed from withdraw.dart
 import 'manual_bank_withdrawal.dart';
 import 'transaction_preview_page.dart';
 
