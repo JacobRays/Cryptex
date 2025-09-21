@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:cryptex_malawi/routes/app_routes.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+import 'package:cryptex_malawi/services/app_state.dart';
+import 'package:cryptex_malawi/pages/splash_screen.dart';
+import 'package:cryptex_malawi/theme/phoenix_theme.dart';
 
-void main() {
-  runApp(CryptexApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(PhoenixCryptex());
 }
 
-class CryptexApp extends StatelessWidget {
+class PhoenixCryptex extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Cryptex Malawi',
-      theme: ThemeData.dark().copyWith(
-        primaryColor: Color(0xFF00D4FF),
-        scaffoldBackgroundColor: Color(0xFF0A0E27),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AppState()),
+      ],
+      child: MaterialApp(
+        title: 'Cryptex Malawi',
+        theme: PhoenixTheme.darkGoldTheme,
+        debugShowCheckedModeBanner: false,
+        home: SplashScreen(),
       ),
-      debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.initial,
-      routes: AppRoutes.routes,
     );
   }
 }
