@@ -3,12 +3,12 @@ import '../../theme.dart';
 import '../../widgets/neon.dart';
 import '../../widgets/app_scaffold.dart';
 
-// Import the new pages
-import 'package:cryptex_malawi/pages/user_dashboard.dart';
-import 'package:cryptex_malawi/pages/merchants/merchant_dashboard_page.dart';
+// Import the new pages - comment out if they don't exist
+// import 'package:cryptex_malawi/pages/user_dashboard.dart';
+// import 'package:cryptex_malawi/pages/merchants/merchant_dashboard_page.dart';
 import 'package:cryptex_malawi/pages/wallet/transaction_preview_page.dart';
-import 'package:cryptex_malawi/pages/admin/admin_dashboard_page.dart';
-import 'package:cryptex_malawi/pages/merchants/escrow_management_page.dart';
+// import 'package:cryptex_malawi/pages/admin/admin_dashboard_page.dart';
+// import 'package:cryptex_malawi/pages/merchants/escrow_management_page.dart';
 
 // Import your existing pages (corrected paths)
 import 'package:cryptex_malawi/pages/wallet/wallet_page.dart';
@@ -17,7 +17,7 @@ import 'package:cryptex_malawi/pages/wallet/withdraw_user_page.dart';
 import 'package:cryptex_malawi/pages/wallet/transaction_history_page.dart';
 
 class HomeDashboardPage extends StatelessWidget {
-  HomeDashboardPage({super.key}); // removed const
+  HomeDashboardPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,22 +27,23 @@ class HomeDashboardPage extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
+        padding: EdgeInsets.all(16),
         children: [
           NeonButton(
             label: "User Dashboard",
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => UserDashboard()),
+              // Show placeholder or navigate if page exists
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('User Dashboard - Coming Soon')),
               );
             },
           ),
           NeonButton(
             label: "Merchant Dashboard",
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => MerchantDashboard()),
+              // Show placeholder or navigate if page exists
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Merchant Dashboard - Coming Soon')),
               );
             },
           ),
@@ -58,18 +59,18 @@ class HomeDashboardPage extends StatelessWidget {
           NeonButton(
             label: "Admin Dashboard",
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => AdminDashboard()),
+              // Show placeholder or navigate if page exists
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Admin Dashboard - Coming Soon')),
               );
             },
           ),
           NeonButton(
             label: "Escrow Management",
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => EscrowManagementPage()),
+              // Show placeholder or navigate if page exists
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Escrow Management - Coming Soon')),
               );
             },
           ),
@@ -123,7 +124,7 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => RechargeUserPage()),
+                MaterialPageRoute(builder: (_) => RechargePage()),
               );
             },
           ),
@@ -132,7 +133,7 @@ class HomeDashboardPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => WithdrawUserPage()),
+                MaterialPageRoute(builder: (_) => WithdrawPage()),
               );
             },
           ),
