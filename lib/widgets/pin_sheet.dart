@@ -1,6 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:cryptex_malawi/theme/app_colors.dart';
 
+// Add this function that's being called from transaction_preview_page.dart
+Future<String?> showPinSheet(BuildContext context) async {
+  String? pinResult;
+  
+  await showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: AppColors.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (_) => Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: _PinModalContent(
+        title: 'Enter PIN to Confirm',
+        minLength: 4,
+        maxLength: 6,
+        onSubmit: (pin) {
+          pinResult = pin;
+        },
+      ),
+    ),
+  );
+  
+  return pinResult;
+}
+
 class PinModal {
   static void show(
     BuildContext context, {
@@ -119,8 +146,8 @@ class __PinModalContentState extends State<_PinModalContent> {
                 child: ElevatedButton(
                   onPressed: _isValid
                       ? () {
-                          Navigator.pop(context);
                           widget.onSubmit(_pin);
+                          Navigator.pop(context, _pin);
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
