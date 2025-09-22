@@ -1,31 +1,55 @@
 import 'package:flutter/material.dart';
 
-// Only import the essential pages that we know work
+// Auth screens
+import 'package:cryptex_malawi/presentation/login_screen/login_screen.dart';
+
+// Main dashboard
+import 'package:cryptex_malawi/pages/main_dashboard.dart';
+
+// Existing pages
+import 'package:cryptex_malawi/pages/user_dashboard.dart';
 import 'package:cryptex_malawi/pages/wallet/wallet_page.dart';
 import 'package:cryptex_malawi/pages/wallet/transaction_history_page.dart';
 import 'package:cryptex_malawi/pages/wallet/recharge_user_page.dart';
 import 'package:cryptex_malawi/pages/wallet/withdraw_user_page.dart';
 import 'package:cryptex_malawi/pages/wallet/transaction_preview_page.dart';
-import 'package:cryptex_malawi/pages/user_dashboard.dart';
 
 class AppRoutes {
   // Define initial route
-  static const String initial = '/';
+  static const String initial = '/login';
   
-  // Essential routes only
-  static const String home = '/';
-  static const String wallet = '/wallet';
+  // Auth routes
+  static const String login = '/login';
+  
+  // Dashboard routes - all point to MainDashboard for now
+  static const String adminDashboard = '/admin-dashboard';
+  static const String merchantDashboard = '/merchant-dashboard';
   static const String userDashboard = '/user-dashboard';
+  
+  // Main routes
+  static const String home = '/home';
+  static const String mainDashboard = '/main-dashboard';
+  
+  // Wallet routes
+  static const String wallet = '/wallet';
   static const String transactionHistory = '/wallet/history';
   static const String recharge = '/wallet/recharge';
   static const String withdraw = '/wallet/withdraw';
   static const String transactionPreview = '/wallet/preview';
   
-  // Define routes map - minimal working set
+  // Define routes map
   static Map<String, WidgetBuilder> routes = {
-    initial: (context) => UserDashboard(), // Use UserDashboard as main page
-    home: (context) => UserDashboard(),
-    userDashboard: (context) => UserDashboard(),
+    // Auth
+    login: (context) => LoginScreen(),
+    
+    // All dashboard routes point to MainDashboard
+    adminDashboard: (context) => MainDashboard(),
+    merchantDashboard: (context) => MainDashboard(),
+    userDashboard: (context) => MainDashboard(),
+    mainDashboard: (context) => MainDashboard(),
+    home: (context) => MainDashboard(),
+    
+    // Wallet pages
     wallet: (context) => WalletPage(),
     transactionHistory: (context) => TransactionHistoryPage(),
     recharge: (context) => RechargePage(),
