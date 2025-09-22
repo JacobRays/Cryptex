@@ -16,6 +16,7 @@ void main() async {
     print("Firebase initialized successfully");
   } catch (e) {
     print("Firebase initialization error: $e");
+    // Continue without Firebase for now
   }
   
   runApp(PhoenixCryptex());
