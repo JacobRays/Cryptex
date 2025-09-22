@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cryptex_malawi/services/app_state.dart';
 import 'package:cryptex_malawi/theme/phoenix_theme.dart';
-import 'package:cryptex_malawi/pages/trading/buy_usdt_page.dart';
-import 'package:cryptex_malawi/pages/trading/sell_usdt_page.dart';
-import 'package:cryptex_malawi/pages/wallet/deposit_page.dart';
-import 'package:cryptex_malawi/pages/wallet/withdraw_page.dart';
-import 'package:cryptex_malawi/pages/merchant/merchant_list_page.dart';
-import 'package:cryptex_malawi/pages/admin/admin_panel.dart';
+// Use your existing pages
+import 'package:cryptex_malawi/pages/wallet/buy_usdt.dart';
+import 'package:cryptex_malawi/pages/wallet/sell_usdt.dart';
+import 'package:cryptex_malawi/pages/wallet/recharge_user_page.dart';
+import 'package:cryptex_malawi/pages/wallet/withdraw_user_page.dart';
+// Remove missing imports
+// import 'package:cryptex_malawi/pages/merchant/merchant_list_page.dart';
+// import 'package:cryptex_malawi/pages/admin/admin_panel.dart';
 
 class MainDashboard extends StatefulWidget {
   @override
@@ -35,10 +37,12 @@ class _MainDashboardState extends State<MainDashboard> {
           if (appState.isAdmin)
             IconButton(
               icon: Icon(Icons.admin_panel_settings),
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => AdminPanel()),
-              ),
+              onPressed: () {
+                // Show admin message for now
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Admin Panel Coming Soon')),
+                );
+              },
             ),
         ],
       ),
@@ -205,10 +209,10 @@ class _MainDashboardState extends State<MainDashboard> {
         ),
         _actionCard(
           context,
-          'Deposit',
+          'Recharge',
           Icons.account_balance_wallet,
           Colors.blue,
-          () => Navigator.push(context, MaterialPageRoute(builder: (_) => DepositPage())),
+          () => Navigator.push(context, MaterialPageRoute(builder: (_) => RechargePage())),
         ),
         _actionCard(
           context,
