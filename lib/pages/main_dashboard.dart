@@ -7,9 +7,8 @@ import 'package:cryptex_malawi/pages/wallet/buy_usdt.dart';
 import 'package:cryptex_malawi/pages/wallet/sell_usdt.dart';
 import 'package:cryptex_malawi/pages/wallet/recharge_user_page.dart';
 import 'package:cryptex_malawi/pages/wallet/withdraw_user_page.dart';
-// Remove missing imports
-// import 'package:cryptex_malawi/pages/merchant/merchant_list_page.dart';
-// import 'package:cryptex_malawi/pages/admin/admin_panel.dart';
+import 'package:cryptex_malawi/pages/wallet/wallet_page.dart';
+import 'package:cryptex_malawi/pages/wallet/transaction_history_page.dart';
 
 class MainDashboard extends StatefulWidget {
   @override
@@ -34,48 +33,29 @@ class _MainDashboardState extends State<MainDashboard> {
           ],
         ),
         actions: [
-          if (appState.isAdmin)
-            IconButton(
-              icon: Icon(Icons.admin_panel_settings),
-              onPressed: () {
-                // Show admin message for now
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Admin Panel Coming Soon')),
-                );
-              },
-            ),
+          IconButton(
+            icon: Icon(Icons.logout, color: PhoenixTheme.goldPrimary),
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Balance Card
-            _buildBalanceCard(appState),
-            SizedBox(height: 24),
-            
-            // Quick Actions
-            Text(
-              'Quick Actions',
-              style: TextStyle(
-                color: PhoenixTheme.goldPrimary,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 16),
-            _buildQuickActions(context, appState),
-            SizedBox(height: 24),
-            
-            // Market Info
-            _buildMarketInfo(appState),
-            SizedBox(height: 24),
-            
-            // Recent Transactions
-            _buildRecentTransactions(appState),
-          ],
-        ),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          // Home Tab
+          _buildHomeTab(appState),
+          
+          // Trade Tab
+          _buildTradeTab(appState),
+          
+          // Wallet Tab
+          _buildWalletTab(appState),
+          
+          // Profile Tab
+          _buildProfileTab(appState),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
@@ -83,11 +63,308 @@ class _MainDashboardState extends State<MainDashboard> {
         backgroundColor: PhoenixTheme.blackSecondary,
         selectedItemColor: PhoenixTheme.goldPrimary,
         unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.swap_horiz), label: 'Trade'),
           BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet), label: 'Wallet'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        ],
+      ),
+    );
+  }
+  
+  // HOME TAB
+  Widget _buildHomeTab(AppState appState) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildBalanceCard(appState),
+          SizedBox(height: 24),
+          Text(
+            'Quick Actions',
+            style: TextStyle(
+              color: PhoenixTheme.goldPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 16),
+          _buildQuickActions(context, appState),
+          SizedBox(height: 24),
+          _buildMarketInfo(appState),
+          SizedBox(height: 24),
+          _buildRecentTransactions(appState),
+        ],
+      ),
+    );
+  }
+  
+  // TRADE TAB
+  Widget _buildTradeTab(AppState appState) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: PhoenixTheme.greyDark,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: PhoenixTheme.goldPrimary.withOpacity(0.3)),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'Live Rate',
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'MWK ${appState.globalRate.toStringAsFixed(0)}/USDT',
+                  style: TextStyle(
+                    color: PhoenixTheme.goldPrimary,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton.icon(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => BuyUSDTPage()),
+              ),
+              icon: Icon(Icons.add_circle),
+              label: Text('BUY USDT'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: PhoenixTheme.success,
+              ),
+            ),
+          ),
+          SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton.icon(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => SellUSDTPage()),
+              ),
+              icon: Icon(Icons.remove_circle),
+              label: Text('SELL USDT'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: PhoenixTheme.error,
+              ),
+            ),
+          ),
+          SizedBox(height: 24),
+          Text(
+            'Active Merchants',
+            style: TextStyle(
+              color: PhoenixTheme.goldPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 16),
+          ...List.generate(3, (index) => _merchantCard(index)),
+        ],
+      ),
+    );
+  }
+  
+  // WALLET TAB
+  Widget _buildWalletTab(AppState appState) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: [
+          _buildBalanceCard(appState),
+          SizedBox(height: 24),
+          ListTile(
+            leading: Icon(Icons.history, color: PhoenixTheme.goldPrimary),
+            title: Text('Transaction History', style: TextStyle(color: Colors.white)),
+            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => TransactionHistoryPage()),
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.add_circle, color: Colors.green),
+            title: Text('Recharge MWK', style: TextStyle(color: Colors.white)),
+            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => RechargePage()),
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.remove_circle, color: Colors.orange),
+            title: Text('Withdraw MWK', style: TextStyle(color: Colors.white)),
+            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => WithdrawPage()),
+            ),
+          ),
+          SizedBox(height: 24),
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: PhoenixTheme.greyDark,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Total Transactions', style: TextStyle(color: Colors.grey)),
+                    Text('${appState.transactions.length}', style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Total Volume', style: TextStyle(color: Colors.grey)),
+                    Text('MWK 0', style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // PROFILE TAB
+  Widget _buildProfileTab(AppState appState) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 50,
+            backgroundColor: PhoenixTheme.goldPrimary,
+            child: Icon(Icons.person, size: 50, color: PhoenixTheme.blackPrimary),
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Demo User',
+            style: TextStyle(
+              color: PhoenixTheme.goldPrimary,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            'demo@cryptex.mw',
+            style: TextStyle(color: Colors.grey),
+          ),
+          SizedBox(height: 24),
+          if (appState.canApplyForMerchant)
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: PhoenixTheme.goldPrimary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: PhoenixTheme.goldPrimary),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'Become a Merchant',
+                    style: TextStyle(
+                      color: PhoenixTheme.goldPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'You qualify! Your balance is over \$100',
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                  SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () => appState.applyForMerchant(),
+                    child: Text('Apply Now'),
+                  ),
+                ],
+              ),
+            ),
+          SizedBox(height: 24),
+          ListTile(
+            leading: Icon(Icons.verified_user, color: PhoenixTheme.goldPrimary),
+            title: Text('KYC Verification', style: TextStyle(color: Colors.white)),
+            subtitle: Text('Not Verified', style: TextStyle(color: Colors.grey)),
+            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+          ),
+          ListTile(
+            leading: Icon(Icons.security, color: PhoenixTheme.goldPrimary),
+            title: Text('Security Settings', style: TextStyle(color: Colors.white)),
+            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+          ),
+          ListTile(
+            leading: Icon(Icons.support, color: PhoenixTheme.goldPrimary),
+            title: Text('Support', style: TextStyle(color: Colors.white)),
+            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+          ),
+          ListTile(
+            leading: Icon(Icons.info, color: PhoenixTheme.goldPrimary),
+            title: Text('About', style: TextStyle(color: Colors.white)),
+            trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _merchantCard(int index) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: PhoenixTheme.greyDark,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PhoenixTheme.goldPrimary.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: PhoenixTheme.goldPrimary,
+            child: Text('M${index + 1}', style: TextStyle(color: PhoenixTheme.blackPrimary)),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Merchant ${index + 1}', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                Text('Rate: MWK 1820/USDT', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                Text('Min: \$10 - Max: \$1000', style: TextStyle(color: Colors.grey, fontSize: 12)),
+              ],
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: PhoenixTheme.success.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text('ONLINE', style: TextStyle(color: PhoenixTheme.success, fontSize: 10)),
+          ),
         ],
       ),
     );
@@ -168,17 +445,6 @@ class _MainDashboardState extends State<MainDashboard> {
               ),
             ],
           ),
-          if (appState.canApplyForMerchant) ...[
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => appState.applyForMerchant(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: PhoenixTheme.blackPrimary,
-                foregroundColor: PhoenixTheme.goldPrimary,
-              ),
-              child: Text('Apply to Become Merchant'),
-            ),
-          ],
         ],
       ),
     );
