@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:provider/provider.dart';
+import 'package:sizer/sizer.dart';  // ADD THIS
 import 'package:cryptex_malawi/services/app_state.dart';
 import 'package:cryptex_malawi/routes/app_routes.dart';
 import 'package:cryptex_malawi/theme/phoenix_theme.dart';
@@ -25,17 +26,21 @@ void main() async {
 class PhoenixCryptex extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => AppState()),
-      ],
-      child: MaterialApp(
-        title: 'Cryptex Malawi',
-        theme: PhoenixTheme.darkGoldTheme,
-        debugShowCheckedModeBanner: false,
-        initialRoute: AppRoutes.initial,
-        routes: AppRoutes.routes,
-      ),
+    return Sizer(  // WRAP WITH SIZER
+      builder: (context, orientation, deviceType) {
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => AppState()),
+          ],
+          child: MaterialApp(
+            title: 'Cryptex Malawi',
+            theme: PhoenixTheme.darkGoldTheme,
+            debugShowCheckedModeBanner: false,
+            initialRoute: AppRoutes.initial,
+            routes: AppRoutes.routes,
+          ),
+        );
+      },
     );
   }
 }
