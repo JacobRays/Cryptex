@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:cryptex_malawi/services/app_state.dart';
-import 'package:cryptex_malawi/pages/splash_screen.dart';
+import 'package:cryptex_malawi/pages/auth/login_page.dart';
 import 'package:cryptex_malawi/theme/phoenix_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    print('Firebase init error: $e');
+  }
   runApp(PhoenixCryptex());
 }
 
@@ -22,7 +26,7 @@ class PhoenixCryptex extends StatelessWidget {
         title: 'Cryptex Malawi',
         theme: PhoenixTheme.darkGoldTheme,
         debugShowCheckedModeBanner: false,
-        home: SplashScreen(),
+        home: LoginPage(), // Go straight to login
       ),
     );
   }
