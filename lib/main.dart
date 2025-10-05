@@ -1,8 +1,8 @@
-import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 // This is required for Android versions of webview_flutter
 void main() {
