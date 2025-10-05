@@ -1,0 +1,2531 @@
+<!-- SETTINGS • CHUNK 1/10
+     Purpose: Pro head + theme, polished app bar with back thumbnail, global layout,
+     bottom nav, and base components. Paste this at the top of settings.html. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Settings - Cryptex Malawi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#121212" />
+  <style>
+    :root{
+      --bg:#121212; --bg2:#0f0f10; --surface:#1E1E1E; --card:#2C2C2C;
+      --gold:#D4AF37; --gold2:#E0C16A; --text:#DADADA; --muted:#9E9E9E; --border:#333;
+      --green:#4CAF50; --red:#F44336; --orange:#FF9800; --info:#2196F3;
+      --radius:12px; --radius-lg:16px; --shadow:0 10px 30px rgba(0,0,0,.45); --ring:0 0 0 2px rgba(212,175,55,.35);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      min-height:100vh; background:
+        radial-gradient(60vw 60vw at 10% -10%, rgba(212,175,55,.08), transparent 60%),
+        radial-gradient(70vw 70vw at 110% -20%, rgba(224,193,106,.06), transparent 60%),
+        linear-gradient(135deg, var(--bg2), var(--bg));
+      color:var(--text);
+      font-family:'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+      padding-bottom: 100px;
+    }
+    a{ color:inherit; text-decoration:none; }
+    button{ font-family:inherit; }
+
+    /* App bar */
+    .app-bar{
+      position: sticky; top:0; z-index:10;
+      background: rgba(30,30,30,.86);
+      border-bottom: 1px solid rgba(212,175,55,.18);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    }
+    .bar-inner{
+      max-width: 1000px; margin: 0 auto; padding: .75rem 1rem;
+      display:flex; align-items:center; justify-content:space-between; gap:.75rem;
+    }
+    .back-thumb{
+      display:inline-flex; align-items:center; gap:.45rem; padding:.4rem .6rem;
+      border:1px solid rgba(212,175,55,.35); border-radius:999px;
+      background:#1b1b1b; color:var(--gold2); font-weight:800; font-size:.9rem;
+      transition: .15s;
+    }
+    .back-thumb:hover{ transform: translateY(-1px); box-shadow: 0 10px 20px rgba(212,175,55,.25), 0 0 0 1px rgba(212,175,55,.25); }
+    .back-ico{
+      width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#121212; font-weight:900; box-shadow: 0 6px 18px rgba(212,175,55,.35);
+    }
+
+    .brand{
+      display:flex; align-items:center; gap:.55rem; margin:0 auto;
+    }
+    .logo{
+      font-weight:900; letter-spacing:.18rem; font-size: clamp(1.1rem, 3.5vw, 1.6rem); line-height:1;
+      background: linear-gradient(135deg, var(--gold), var(--gold2) 70%);
+      background-clip: text; -webkit-background-clip: text;
+      color: transparent; -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      transform: rotateX(12deg) rotateY(-8deg);
+      text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 10px 22px rgba(212,175,55,.25);
+      transition: transform .35s ease, text-shadow .35s ease;
+    }
+    .logo:hover{ transform: rotateX(0) rotateY(0) translateY(-1px) scale(1.02); text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 16px 32px rgba(212,175,55,.35); }
+    .subtitle{ color:#e7d59b; font-weight:800; letter-spacing:.06em; font-size:.95rem; }
+
+    .avatar-mini{
+      width:32px; height:32px; border-radius:999px; background:#151515;
+      border:1px solid rgba(212,175,55,.4); color:#e7d59b; display:flex; align-items:center; justify-content:center; font-weight:900;
+    }
+
+    /* Container + Cards */
+    .container{ padding:1.25rem; max-width: 1000px; margin: 0 auto; }
+    .section-title{ color:#E0C16A; font-weight:800; margin: 1.1rem 0 .65rem; display:flex; align-items:center; gap:.5rem; }
+    .settings-card{ background:var(--card); border:1px solid var(--border); border-radius: var(--radius); padding:1.1rem; box-shadow: var(--shadow); }
+    .grid-2{ display:grid; grid-template-columns: 1fr; gap:.9rem; }
+    @media(min-width: 720px){ .grid-2{ grid-template-columns: 1fr 1fr; } }
+    .row{ display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
+    .muted{ color:var(--muted); font-size:.92rem; }
+
+    /* Inputs / Selects / Toggles */
+    .field{ margin-bottom:.9rem; }
+    .field label{ display:block; font-size:.9rem; margin-bottom:.35rem; color:#E0C16A; }
+    .input, .select{
+      width:100%; padding:.9rem; background:#1E1E1E; border:1px solid #444; border-radius: 10px; color:#fff; font-size:.95rem;
+      transition:border-color .2s, box-shadow .2s, background .2s;
+    }
+    .input:focus, .select:focus{ outline:none; border-color:var(--gold2); box-shadow: var(--ring); background:#191919; }
+
+    .btn{
+      padding:.8rem 1rem; border-radius:10px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:.5rem;
+      background: linear-gradient(135deg, var(--gold), var(--gold2)); color:#121212; border:none; box-shadow: 0 8px 20px rgba(212,175,55,.25);
+      transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); box-shadow: 0 12px 26px rgba(212,175,55,.35); }
+    .btn:active{ transform: translateY(0); filter: saturate(.95); }
+    .btn.block{ width:100%; justify-content:center; }
+    .btn.small{ padding:.55rem .8rem; font-weight:700; font-size:.9rem; }
+    .btn.ghost{ background:#2C2C2C; color:var(--gold); border:1px solid var(--gold); }
+    .btn.danger{ background:#2C2C2C; border:1px solid var(--red); color:var(--red); }
+
+    .chip{ padding:.25rem .55rem; border:1px solid #444; border-radius:999px; font-size:.78rem; color:#E0C16A; background:#1E1E1E; }
+    .badge{ padding:.12rem .55rem; border-radius:999px; font-size:.74rem; font-weight:800; color:#121212; background: linear-gradient(135deg, var(--gold), var(--gold2)); border:1px solid var(--gold); }
+
+    .switch{ position:relative; display:inline-block; width:46px; height:26px; }
+    .switch input{ opacity:0; width:0; height:0; }
+    .slider{ position:absolute; cursor:pointer; inset:0; background:#444; border-radius:26px; transition:.2s; }
+    .slider:before{ content:""; position:absolute; height:20px; width:20px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; }
+    input:checked + .slider{ background:var(--gold); }
+    input:checked + .slider:before{ transform: translateX(20px); }
+
+    /* Modals (base) */
+    .modal{ display:none; position:fixed; z-index:1000; inset:0; background: rgba(0,0,0,.85); }
+    .modal-content{ background:#1E1E1E; margin: 5% auto; width:95%; max-width: 720px; border: 2px solid var(--gold); border-radius: 12px; box-shadow: 0 0 40px rgba(212,175,55,.4); max-height: 90vh; overflow:auto; }
+    .modal-header{ padding: .9rem 1.1rem; border-bottom:1px solid #444; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:#1E1E1E; }
+    .modal-title{ color:var(--gold); font-weight:900; }
+    .close{ border:1px solid var(--gold); color:var(--gold); padding:.25rem .6rem; border-radius:8px; cursor:pointer; background:#2C2C2C; }
+    .modal-body{ padding: 1rem 1.1rem; }
+
+    /* Security alert */
+    .security-alert{
+      background: rgba(244, 67, 54, 0.1); border:1px solid var(--red); border-radius: 10px; padding: 1rem; margin: 1rem 0; display:none;
+    }
+
+    /* Bottom nav */
+    .nav-bar{ position:fixed; bottom:0; left:0; right:0; background:#1E1E1E; display:flex; justify-content:space-around; padding:.75rem; border-top:1px solid var(--gold); }
+    .nav-item{ text-align:center; color:#9E9E9E; }
+    .nav-item.active{ color:var(--gold2); }
+    .nav-icon{ font-size:1.5rem; margin-bottom:.25rem; }
+    .nav-label{ font-size:.75rem; }
+
+    /* Toast */
+    .toast{ position:fixed; right:16px; bottom:90px; background:#1E1E1E; border:1px solid var(--gold); color:var(--gold2); padding:.7rem 1rem; border-radius:10px; box-shadow: 0 8px 24px rgba(0,0,0,.35); display:none; z-index:1500; min-width:220px; text-align:center; }
+
+    /* Focus styles for accessibility */
+    :focus-visible{ outline: 2px solid var(--gold2); outline-offset: 2px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+  <!-- App Bar with back thumbnail, brand, and avatar -->
+  <header class="app-bar">
+    <div class="bar-inner">
+      <a class="back-thumb" href="dashboard.html" title="Back to Home">
+        <span class="back-ico">↩</span><span>Home</span>
+      </a>
+      <div class="brand">
+        <div class="logo">CRYPT-X</div>
+        <div class="subtitle">Account Settings</div>
+      </div>
+      <div id="headerAvatar" class="avatar-mini">U</div>
+    </div>
+  </header>
+
+  <!-- Main container (content for chunks 2–10 will be placed inside) -->
+  <main class="container" id="settingsContainer">
+
+    <!-- Security Alert -->
+    <div id="securityAlert" class="security-alert">
+      <strong>Security Alert:</strong> <span id="alertMessage"></span>
+    </div>
+
+    <!-- CONTENT CONTINUES IN CHUNKS 2–10 -->
+
+  </main>
+
+  <!-- Bottom navigation -->
+  <nav class="nav-bar">
+    <a href="dashboard.html" class="nav-item">
+      <div class="nav-icon">🏠</div><div class="nav-label">Home</div>
+    </a>
+    <a href="wallet.html" class="nav-item">
+      <div class="nav-icon">💼</div><div class="nav-label">Wallet</div>
+    </a>
+    <a href="merchants.html" class="nav-item">
+      <div class="nav-icon">🏪</div><div class="nav-label">Merchants</div>
+    </a>
+    <a href="settings.html" class="nav-item active">
+      <div class="nav-icon">⚙️</div><div class="nav-label">Settings</div>
+    </a>
+  </nav>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">Saved</div>
+
+  <!-- Tiny boot script: header avatar + favicon -->
+  <script>
+    (function(){
+      // Header avatar initial from user/localStorage
+      const email = localStorage.getItem('user') || 'user@example.com';
+      const name  = localStorage.getItem('userName') || '';
+      const av    = document.getElementById('headerAvatar');
+      if (av){ av.textContent = (name || email).trim().slice(0,1).toUpperCase(); }
+
+      // Lightweight runtime favicon (gradient CX)
+      try{
+        const canvas = document.createElement('canvas'); canvas.width=64; canvas.height=64;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#121212'; ctx.fillRect(0,0,64,64);
+        const g = ctx.createLinearGradient(0,0,64,64); g.addColorStop(0,'#D4AF37'); g.addColorStop(1,'#E0C16A');
+        ctx.beginPath(); ctx.arc(32,32,26,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+        ctx.fillStyle='#121212'; ctx.font='bold 26px Segoe UI, Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText('CX',32,36);
+        const link = document.createElement('link'); link.rel='icon'; link.href=canvas.toDataURL('image/png');
+        document.head.appendChild(link);
+      }catch(_){}
+    })();
+  </script>
+  <!-- SETTINGS • CHUNK 2/10
+     Purpose: Profile & Identity + Security (PIN, 2FA, Auto‑lock, Sessions)
+     Paste this right after Chunk 1, inside <main id="settingsContainer"> … </main>. -->
+
+<!-- Profile & Identity -->
+<section aria-label="Profile & Identity">
+  <div class="section-title">👤 Profile & Identity</div>
+  <div class="settings-card" id="profileCard">
+    <div class="row" style="justify-content:space-between;">
+      <div class="row">
+        <div class="avatar" id="avatarBig" style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;border:2px solid var(--gold);border-radius:50%;background:#1E1E1E;color:var(--gold);font-weight:900;">U</div>
+        <div>
+          <div id="displayName" style="font-weight:900;">User</div>
+          <div class="muted" id="displayEmail">user@example.com</div>
+          <div class="row" style="margin-top:.35rem;">
+            <span class="chip" id="kycStatusChip">KYC: Pending</span>
+            <span class="chip" id="emailStatusChip">Email: Unverified</span>
+            <span class="chip">User ID: <span id="userIdShort">—</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <button id="btnCopyUid" class="btn small ghost" type="button">Copy User ID</button>
+        <button data-modal="editProfileModal" class="btn small" type="button">Edit Profile</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Security -->
+<section aria-label="Security">
+  <div class="section-title">🔐 Security</div>
+  <div class="settings-card">
+    <div class="grid-2">
+      <!-- PIN -->
+      <div>
+        <div class="field">
+          <label for="newPin">New 4–6 Digit Transaction PIN</label>
+          <input class="input" type="password" id="newPin" maxlength="6" placeholder="Enter new PIN" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="confirmPin">Confirm PIN</label>
+          <input class="input" type="password" id="confirmPin" maxlength="6" placeholder="Confirm new PIN" inputmode="numeric">
+        </div>
+        <button id="btnUpdatePin" class="btn block" type="button">Update PIN</button>
+        <div class="muted" style="margin-top:.45rem;">Your PIN protects approvals and withdrawals.</div>
+      </div>
+
+      <!-- 2FA + Auto‑lock + Sessions -->
+      <div>
+        <div class="field">
+          <label>Two-Factor Authentication (2FA)</label>
+          <label class="switch">
+            <input id="twoFAChk" type="checkbox">
+            <span class="slider"></span>
+          </label>
+          <div class="muted" style="margin-top:.35rem;">Add a second step for sign-in and sensitive actions.</div>
+          <div class="row" style="margin-top:.55rem;">
+            <button data-modal="twoFAModal" class="btn small ghost" type="button">Set up 2FA</button>
+            <button id="btnBackupCodes" class="btn small ghost" type="button">Backup Codes</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="autoLock">Auto-lock</label>
+          <select id="autoLock" class="select">
+            <option value="5">Lock after 5 minutes</option>
+            <option value="10">Lock after 10 minutes</option>
+            <option value="30">Lock after 30 minutes</option>
+            <option value="never">Never</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Active Sessions</label>
+          <div id="sessionsList" class="settings-card" style="padding:.7rem; background:#1E1E1E; border-color:#444; border-radius:10px;"></div>
+          <div class="row" style="margin-top:.55rem;">
+            <button id="btnSignOutOthers" class="btn small ghost" type="button">Sign out other devices</button>
+            <button id="btnRefreshSessions" class="btn small ghost" type="button">Refresh</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:.65rem;">
+      <button data-modal="changePasswordModal" class="btn small ghost" type="button">Change Password</button>
+      <button data-modal="kycModal" class="btn small ghost" type="button">Continue KYC</button>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function(){
+    'use strict';
+
+    // Safe UI helpers (use global toast if exists)
+    function toast(msg){
+      const t = document.getElementById('toast');
+      if(!t){ alert(msg); return; }
+      t.textContent = msg;
+      t.style.display = 'block';
+      setTimeout(()=> t.style.display='none', 1800);
+    }
+    function openModal(id){
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'block';
+    }
+    function closeModal(id){
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    }
+    window.addEventListener('keydown', e=>{
+      if(e.key==='Escape'){
+        document.querySelectorAll('.modal').forEach(m=> m.style.display='none');
+      }
+    });
+
+    // Settings store helpers (flat-key approach: settings['security.2fa'] etc.)
+    function getSettings(){ try{ return JSON.parse(localStorage.getItem('settings')||'{}'); }catch{ return {}; } }
+    function setSettings(s){ localStorage.setItem('settings', JSON.stringify(s)); }
+    function savePref(key, val){ const s=getSettings(); s[key]=val; setSettings(s); toast('Saved'); }
+    function loadPref(key, elId, def){
+      const s=getSettings(); const v = (key in s) ? s[key] : def;
+      const el = document.getElementById(elId);
+      if (el && el.tagName==='SELECT') el.value = v;
+    }
+    function loadBool(key, elId, def){
+      const s=getSettings(); const v = (key in s) ? !!s[key] : !!def;
+      const el = document.getElementById(elId);
+      if (el && el.type==='checkbox') el.checked = v;
+    }
+
+    // Profile bootstrap
+    function initProfile(){
+      const email = localStorage.getItem('user') || 'user@example.com';
+      const name  = localStorage.getItem('userName') || 'User';
+      const emailVerified = localStorage.getItem('emailVerified') === 'true';
+      const kyc   = (localStorage.getItem('kycStatus') || 'pending');
+
+      // Header avatar (from Chunk 1) already set; update big avatar
+      const avBig = document.getElementById('avatarBig');
+      if (avBig) avBig.textContent = (name || email).trim().slice(0,1).toUpperCase();
+
+      const displayNameEl  = document.getElementById('displayName');
+      const displayEmailEl = document.getElementById('displayEmail');
+      const userIdShortEl  = document.getElementById('userIdShort');
+      if (displayNameEl)  displayNameEl.textContent = name;
+      if (displayEmailEl) displayEmailEl.textContent = email;
+      if (userIdShortEl)  userIdShortEl.textContent = btoa(email).slice(0,10).toUpperCase();
+
+      const emailChip = document.getElementById('emailStatusChip');
+      const kycChip   = document.getElementById('kycStatusChip');
+      if (emailChip) emailChip.textContent = 'Email: ' + (emailVerified ? 'Verified' : 'Unverified');
+      if (kycChip)   kycChip.textContent   = 'KYC: ' + kyc.charAt(0).toUpperCase() + kyc.slice(1);
+    }
+
+    // Copy UID
+    function bindCopyUid(){
+      const btn = document.getElementById('btnCopyUid');
+      if (!btn) return;
+      btn.addEventListener('click', ()=>{
+        const uid = (document.getElementById('userIdShort')||{}).textContent || '';
+        if (uid) navigator.clipboard?.writeText(uid);
+        toast('User ID copied');
+      });
+    }
+
+    // Modal triggers (deferred: modals may be injected by later chunks)
+    function bindModalTriggers(){
+      document.querySelectorAll('[data-modal]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const id = btn.getAttribute('data-modal');
+          openModal(id);
+        });
+      });
+    }
+
+    // PIN update
+    function bindPinUpdate(){
+      const btn = document.getElementById('btnUpdatePin');
+      if (!btn) return;
+      btn.addEventListener('click', ()=>{
+        const p1 = (document.getElementById('newPin')||{}).value || '';
+        const p2 = (document.getElementById('confirmPin')||{}).value || '';
+        if (p1.length<4 || p1.length>6) return toast('PIN must be 4–6 digits');
+        if (!/^\d+$/.test(p1)) return toast('PIN must be digits only');
+        if (p1 !== p2) return toast('PINs do not match');
+        localStorage.setItem('userPin', p1);
+        (document.getElementById('newPin')||{}).value='';
+        (document.getElementById('confirmPin')||{}).value='';
+        toast('PIN updated');
+      });
+    }
+
+    // 2FA toggle + actions
+    function bind2FA(){
+      const chk = document.getElementById('twoFAChk');
+      // initial
+      loadBool('security.2fa','twoFAChk', false);
+      if (chk){
+        chk.addEventListener('change', e=>{
+          savePref('security.2fa', e.target.checked);
+          toast(e.target.checked ? '2FA enabled' : '2FA disabled');
+        });
+      }
+      // Backup codes
+      const bc = document.getElementById('btnBackupCodes');
+      if (bc){
+        bc.addEventListener('click', ()=>{
+          // Lazy generate + show modal (if available in later chunks)
+          let codes = [];
+          try{ codes = JSON.parse(localStorage.getItem('backupCodes')||'[]'); }catch(_){}
+          if (!codes.length){
+            codes = Array.from({length:8}, ()=> Math.random().toString(36).slice(2,7).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase());
+            localStorage.setItem('backupCodes', JSON.stringify(codes));
+          }
+          const box = document.getElementById('backupCodesBox');
+          if (box) box.innerHTML = codes.map(c=>`<div>${c}</div>`).join('');
+          openModal('backupCodesModal');
+        });
+      }
+      // Ensure twoFASecret exists for later modal
+      if (!localStorage.getItem('twoFASecret')){
+        localStorage.setItem('twoFASecret','CRX-' + Math.random().toString(36).slice(2,8).toUpperCase());
+      }
+    }
+
+    // Auto-lock preference
+    function bindAutoLock(){
+      loadPref('security.autoLock','autoLock','5');
+      const sel = document.getElementById('autoLock');
+      if (sel){
+        sel.addEventListener('change', ()=> savePref('security.autoLock', sel.value));
+      }
+    }
+
+    // Sessions handling
+    function getSessionList(){
+      let sessions = [];
+      try{ sessions = JSON.parse(localStorage.getItem('sessions')||'[]'); }catch(_){}
+      if (!Array.isArray(sessions) || !sessions.length){
+        sessions = [{
+          id:'s_'+Date.now(),
+          device: navigator.platform || 'Device',
+          browser: (navigator.userAgent.match(/(Firefox|Chrome|Safari|Edg)/)||['','Browser'])[1],
+          lastActive: Date.now(),
+          current: true
+        }];
+        localStorage.setItem('sessions', JSON.stringify(sessions));
+      }
+      return sessions;
+    }
+    function renderSessions(){
+      const wrap = document.getElementById('sessionsList');
+      if (!wrap) return;
+      const sessions = getSessionList();
+      wrap.innerHTML = sessions.map(s=>`
+        <div class="row" style="justify-content:space-between; padding:.35rem 0; border-bottom:1px solid #333;">
+          <div>
+            <div style="font-weight:700;">${s.device} · ${s.browser}</div>
+            <div class="muted" style="font-size:.85rem;">Last active: ${new Date(s.lastActive).toLocaleString()} ${s.current?'<span class="badge" style="margin-left:.35rem;">Current</span>':''}</div>
+          </div>
+          ${s.current ? '' : `<button class="btn small ghost" data-session="${s.id}" data-action="remove">Sign out</button>`}
+        </div>
+      `).join('');
+      // bind remove
+      wrap.querySelectorAll('button[data-action="remove"]').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          const id = b.getAttribute('data-session');
+          let list = getSessionList().filter(x=> x.id !== id);
+          localStorage.setItem('sessions', JSON.stringify(list));
+          toast('Session removed');
+          renderSessions();
+        });
+      });
+    }
+    function bindSessionsControls(){
+      const outOthers = document.getElementById('btnSignOutOthers');
+      const refresh   = document.getElementById('btnRefreshSessions');
+      outOthers?.addEventListener('click', ()=>{
+        let sessions = getSessionList().filter(s=> s.current);
+        localStorage.setItem('sessions', JSON.stringify(sessions));
+        toast('Signed out other devices');
+        renderSessions();
+      });
+      refresh?.addEventListener('click', ()=>{
+        let sessions = getSessionList().map(s=> s.current ? {...s, lastActive: Date.now()} : s);
+        localStorage.setItem('sessions', JSON.stringify(sessions));
+        renderSessions();
+        toast('Sessions refreshed');
+      });
+      // live update if other tabs/pages change sessions
+      window.addEventListener('storage', (e)=>{
+        if (e.key === 'sessions') renderSessions();
+      });
+    }
+
+    // Initialize chunk 2
+    function initSettingsProfileSecurity(){
+      initProfile();
+      bindCopyUid();
+      bindModalTriggers();
+      bindPinUpdate();
+      bind2FA();
+      bindAutoLock();
+      renderSessions();
+      bindSessionsControls();
+    }
+
+    // Kick off
+    initSettingsProfileSecurity();
+
+    // Expose basic helpers for later chunks (only if not defined)
+    window.openModal = window.openModal || openModal;
+    window.closeModal = window.closeModal || closeModal;
+    window.savePref = window.savePref || savePref;
+    window.loadPref = window.loadPref || loadPref;
+    window.loadBool = window.loadBool || loadBool;
+
+  })();
+</script>
+<!-- SETTINGS • CHUNK 3/10
+     Purpose: Notifications + Preferences (live, cross‑tab synchronized)
+     Paste this right after Chunk 2 inside <main id="settingsContainer"> … </main>. -->
+
+<!-- Notifications -->
+<section aria-label="Notifications">
+  <div class="section-title">🔔 Notifications</div>
+  <div class="settings-card">
+    <div class="grid-2">
+      <div class="row" style="justify-content:space-between;">
+        <div>Email notifications</div>
+        <label class="switch">
+          <input id="nEmail" type="checkbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="row" style="justify-content:space-between;">
+        <div>SMS notifications</div>
+        <label class="switch">
+          <input id="nSMS" type="checkbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="row" style="justify-content:space-between;">
+        <div>Push notifications</div>
+        <label class="switch">
+          <input id="nPush" type="checkbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="row" style="justify-content:space-between;">
+        <div>Marketing & tips</div>
+        <label class="switch">
+          <input id="nMarketing" type="checkbox">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:.6rem; gap:.5rem; flex-wrap:wrap;">
+      <button id="btnTestPush" class="btn small ghost" type="button">Test notification</button>
+      <span class="muted">We’ll save these preferences on this device and sync across pages.</span>
+    </div>
+  </div>
+</section>
+
+<!-- Preferences -->
+<section aria-label="Preferences">
+  <div class="section-title">⚙️ Preferences</div>
+  <div class="settings-card">
+    <div class="grid-2">
+      <div>
+        <div class="field">
+          <label for="prefCurrency">Display currency</label>
+          <select id="prefCurrency" class="select">
+            <option value="MWK">MWK (Kwacha)</option>
+            <option value="USD">USD (US Dollar)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="prefLang">Language</label>
+          <select id="prefLang" class="select">
+            <option value="en">English</option>
+            <option value="ny">Chichewa</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <div class="row" style="justify-content:space-between;">
+          <div>High contrast mode</div>
+          <label class="switch">
+            <input id="prefContrast" type="checkbox">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="muted" style="margin-top:.35rem;">Improves visibility with stronger borders and colors.</div>
+        <div id="prefPreview" class="row" style="gap:.5rem; margin-top:.6rem;">
+          <span class="chip">Lang: <span id="chipLang">en</span></span>
+          <span class="chip">Currency: <span id="chipCurr">MWK</span></span>
+          <span class="chip">Contrast: <span id="chipConstr">Off</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function(){
+    'use strict';
+
+    // Respect helpers from Chunk 2 if present; provide safe fallbacks otherwise
+    function getSettings(){ try{ return JSON.parse(localStorage.getItem('settings')||'{}'); }catch{ return {}; } }
+    function setSettings(s){ localStorage.setItem('settings', JSON.stringify(s)); }
+    function toast(msg){
+      const t = document.getElementById('toast');
+      if (!t){ alert(msg); return; }
+      t.textContent = msg; t.style.display = 'block'; setTimeout(()=> t.style.display='none', 1800);
+    }
+    function savePref(key, val){ const s=getSettings(); s[key]=val; setSettings(s); }
+    function loadBool(key, def){
+      const s=getSettings();
+      return (key in s) ? !!s[key] : !!def;
+    }
+    function loadVal(key, def){
+      const s=getSettings();
+      return (key in s) ? s[key] : def;
+    }
+
+    // UI refs
+    const elEmail = document.getElementById('nEmail');
+    const elSMS = document.getElementById('nSMS');
+    const elPush = document.getElementById('nPush');
+    const elMarketing = document.getElementById('nMarketing');
+    const btnTestPush = document.getElementById('btnTestPush');
+
+    const elCurrency = document.getElementById('prefCurrency');
+    const elLang = document.getElementById('prefLang');
+    const elContrast = document.getElementById('prefContrast');
+
+    // Preview chips
+    const chipLang = document.getElementById('chipLang');
+    const chipCurr = document.getElementById('chipCurr');
+    const chipConstr= document.getElementById('chipConstr');
+
+    // Sync UI from settings
+    function syncUIFromSettings(){
+      // Notifications
+      if (elEmail)    elEmail.checked    = loadBool('notifications.email', true);
+      if (elSMS)      elSMS.checked      = loadBool('notifications.sms', false);
+      if (elPush)     elPush.checked     = loadBool('notifications.push', true);
+      if (elMarketing)elMarketing.checked= loadBool('notifications.marketing', false);
+
+      // Preferences
+      if (elCurrency) elCurrency.value = loadVal('prefs.currency', 'MWK');
+      if (elLang){
+        const lang = loadVal('prefs.lang', 'en');
+        elLang.value = lang;
+        document.documentElement.lang = lang;
+      }
+      if (elContrast){
+        const on = loadBool('prefs.contrast', false);
+        elContrast.checked = on;
+        // If Chunk 2 toggleContrast exists, call it so UI reflects
+        if (typeof window.toggleContrast === 'function') window.toggleContrast(on);
+      }
+
+      // Update preview chips
+      chipLang && (chipLang.textContent = elLang?.value || 'en');
+      chipCurr && (chipCurr.textContent = elCurrency?.value || 'MWK');
+      chipConstr && (chipConstr.textContent = (elContrast?.checked ? 'On' : 'Off'));
+    }
+
+    // Notifications handlers
+    function bindNotificationHandlers(){
+      elEmail?.addEventListener('change', e=>{
+        savePref('notifications.email', e.target.checked);
+        toast('Email notifications ' + (e.target.checked?'on':'off'));
+      });
+      elSMS?.addEventListener('change', e=>{
+        savePref('notifications.sms', e.target.checked);
+        toast('SMS notifications ' + (e.target.checked?'on':'off'));
+      });
+      elPush?.addEventListener('change', async (e)=>{
+        const on = e.target.checked;
+        if (on){
+          // Request permission
+          try{
+            const perm = await Notification.requestPermission();
+            if (perm !== 'granted'){
+              e.target.checked = false;
+              savePref('notifications.push', false);
+              return toast('Push permission denied');
+            } else {
+              savePref('notifications.push', true);
+              toast('Push enabled');
+              try{
+                new Notification('Cryptex', { body: 'Push notifications enabled ✅' });
+              }catch(_){}
+            }
+          }catch(_){
+            e.target.checked = false;
+            savePref('notifications.push', false);
+            toast('Push not available on this device');
+          }
+        } else {
+          savePref('notifications.push', false);
+          toast('Push disabled');
+        }
+      });
+      elMarketing?.addEventListener('change', e=>{
+        savePref('notifications.marketing', e.target.checked);
+        toast('Marketing tips ' + (e.target.checked?'on':'off'));
+      });
+
+      btnTestPush?.addEventListener('click', ()=>{
+        try{
+          if (Notification?.permission === 'granted'){
+            new Notification('Cryptex', { body:'Hello from Cryptex 👋', icon:'' });
+          } else {
+            toast('Enable push, then test again');
+          }
+        }catch(_){
+          toast('Push not supported on this device');
+        }
+      });
+    }
+
+    // Preferences handlers
+    function bindPreferenceHandlers(){
+      elCurrency?.addEventListener('change', ()=>{
+        savePref('prefs.currency', elCurrency.value);
+        chipCurr && (chipCurr.textContent = elCurrency.value);
+        toast('Currency saved');
+        // Broadcast to other tabs via storage event (already happens when saving)
+      });
+      elLang?.addEventListener('change', ()=>{
+        savePref('prefs.lang', elLang.value);
+        document.documentElement.lang = elLang.value;
+        chipLang && (chipLang.textContent = elLang.value);
+        toast('Language saved');
+      });
+      elContrast?.addEventListener('change', ()=>{
+        savePref('prefs.contrast', elContrast.checked);
+        if (typeof window.toggleContrast === 'function') window.toggleContrast(elContrast.checked);
+        chipConstr && (chipConstr.textContent = (elContrast.checked?'On':'Off'));
+      });
+    }
+
+    // Cross-tab live sync for settings
+    window.addEventListener('storage', (e)=>{
+      if (e.key === 'settings'){
+        // Another tab changed settings => update UI to match
+        syncUIFromSettings();
+      }
+    });
+
+    // Init
+    function initNotificationsPreferences(){
+      syncUIFromSettings();
+      bindNotificationHandlers();
+      bindPreferenceHandlers();
+    }
+    initNotificationsPreferences();
+
+    // Expose savePref for other chunks if not present
+    window.savePref = window.savePref || savePref;
+
+  })();
+</script>
+<!-- SETTINGS • CHUNK 4/10
+     Purpose: Administration + Account sections (with live admin guard, export, logout, delete)
+     Paste this right after Chunk 3 inside <main id="settingsContainer"> … </main>. -->
+
+<!-- Administration (auto-visible for authorized admins) -->
+<section aria-label="Administration">
+  <div id="adminSection" class="settings-card" style="display:none;">
+    <div class="section-title" style="margin-top:0;">👨‍💼 Administration</div>
+    <p class="muted">Restricted to authorized administrators only.</p>
+
+    <div class="row" style="gap:.5rem; flex-wrap:wrap;">
+      <a id="btnAdminDash" href="admin_dashboard.html" class="btn">🛠️ Open Admin Dashboard</a>
+      <button id="btnAdminLogs" class="btn ghost" type="button">🔒 Security Logs</button>
+      <button id="btnAdminConfig" class="btn ghost" type="button">📦 Export Config</button>
+      <span id="devGrantWrap" style="display:none;">
+        <button id="btnDevGrant" class="btn small ghost" type="button">⚙️ Grant Admin (dev)</button>
+      </span>
+    </div>
+
+    <div id="adminMeta" class="muted" style="margin-top:.5rem; font-size:.9rem;">Admin session: —</div>
+  </div>
+</section>
+
+<!-- Account -->
+<section aria-label="Account">
+  <div class="section-title">🚪 Account</div>
+  <div class="settings-card">
+    <div class="row" style="gap:.5rem; flex-wrap: wrap;">
+      <button id="btnExportData" class="btn ghost" type="button">Download My Data</button>
+      <button id="btnSignOutEverywhere" class="btn ghost" type="button">Sign out everywhere</button>
+      <button id="btnDeleteAccount" class="btn danger" type="button">Delete Account</button>
+      <a id="smallAdminButton" class="btn small ghost" href="admin_dashboard.html" style="display:none;">🛠️ Admin</a>
+      <button id="btnLogout" class="btn block" type="button">Logout</button>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function(){
+    'use strict';
+
+    // Lightweight toast (uses global if present)
+    function toast(msg){
+      const t = document.getElementById('toast');
+      if (!t){ alert(msg); return; }
+      t.textContent = msg;
+      t.style.display = 'block';
+      setTimeout(()=> t.style.display='none', 1800);
+    }
+    function openModal(id){ const el=document.getElementById(id); if(el) el.style.display='block'; }
+
+    // Admin Guard (define once)
+    if (!window.CryptexAdminSecurity){
+      window.CryptexAdminSecurity = {
+        authorizedAdmins: ['admin@cryptex.mw','jacob@cryptex.mw'],
+        config: { sessionTimeout: 24*60*60*1000, lockout: 30*60*1000 },
+        isValidAdminToken(t){ return /^ADM-\d{13}-[a-z0-9]{9}$/.test(String(t||'')); },
+        fp(){ try{ return btoa(JSON.stringify({
+          ua:navigator.userAgent, lang:navigator.language, plat:navigator.platform,
+          tz:Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC'
+        })); }catch(_){ return ''; } },
+        log(event, details){
+          const entry = { ts:new Date().toISOString(), event, details, ua:navigator.userAgent };
+          try{
+            const arr = JSON.parse(localStorage.getItem('securityLogs')||'[]');
+            arr.push(entry);
+            localStorage.setItem('securityLogs', JSON.stringify(arr.slice(-500)));
+          }catch(_){}
+          console.log('🔒', event, details||'');
+        },
+        initAdminVisibility(){
+          const email = localStorage.getItem('user') || '';
+          const role  = localStorage.getItem('role') || '';
+          const token = localStorage.getItem('adminToken') || '';
+          const time  = parseInt(localStorage.getItem('tokenTime')||'0',10);
+          const fp    = localStorage.getItem('adminDeviceFingerprint') || '';
+
+          // Basic checks
+          const okEmail = this.authorizedAdmins.includes(email);
+          const okRole  = (role === 'admin');
+          const okTok   = (this.isValidAdminToken(token) && (Date.now()-time < this.config.sessionTimeout));
+          const okFp    = (!fp || fp === this.fp());
+
+          const isAdmin = !!(okEmail && okRole && okTok && okFp);
+
+          const adminSection = document.getElementById('adminSection');
+          const smallBtn     = document.getElementById('smallAdminButton');
+          const meta         = document.getElementById('adminMeta');
+
+          if (adminSection) adminSection.style.display = isAdmin ? 'block':'none';
+          if (smallBtn)     smallBtn.style.display     = isAdmin ? 'inline-flex':'none';
+          if (meta){
+            meta.textContent = isAdmin
+              ? `Admin: ${email} • Token OK • ${new Date(time).toLocaleString()}`
+              : `Admin: Not signed in`;
+          }
+
+          this.log(isAdmin ? 'Admin access granted' : 'Admin access denied', { email, role, hasToken:!!token });
+          return isAdmin;
+        },
+        grantDev(email){
+          if (!email || !this.authorizedAdmins.includes(email)) return false;
+          localStorage.setItem('role','admin');
+          localStorage.setItem('user', email);
+          localStorage.setItem('adminToken', 'ADM-'+Date.now()+'-'+Math.random().toString(36).substr(2,9));
+          localStorage.setItem('tokenTime', String(Date.now()));
+          localStorage.setItem('adminDeviceFingerprint', this.fp());
+          this.log('Admin granted (dev)', { email });
+          return true;
+        }
+      };
+    }
+
+    // Admin tools (safe fallbacks for exportConfig/logs)
+    function exportConfig(){
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        rates: JSON.parse(localStorage.getItem('platform.rates')||'{}'),
+        rateHistory: JSON.parse(localStorage.getItem('platform.rateHistory')||'[]'),
+        fees: JSON.parse(localStorage.getItem('platform.fees')||'{}'),
+        settings: JSON.parse(localStorage.getItem('platform.settings')||'{}'),
+        logs: JSON.parse(localStorage.getItem('platform.logs')||'[]'),
+        users: JSON.parse(localStorage.getItem('platform.users')||'[]'),
+        merchants: JSON.parse(localStorage.getItem('platform.merchants')||'[]'),
+        recharges: JSON.parse(localStorage.getItem('platform.recharges')||'[]'),
+        wallets: JSON.parse(localStorage.getItem('wallets')||'{}')
+      };
+      const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob); a.download='cryptex_backup.json'; a.click();
+      URL.revokeObjectURL(a.href);
+      toast('Export started');
+    }
+    function exportMyData(){
+      const data = {
+        user: localStorage.getItem('user'),
+        name: localStorage.getItem('userName'),
+        phone: localStorage.getItem('userPhone'),
+        settings: JSON.parse(localStorage.getItem('settings')||'{}'),
+        kycStatus: localStorage.getItem('kycStatus') || 'pending',
+        sessions: JSON.parse(localStorage.getItem('sessions')||'[]')
+      };
+      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'cryptex-my-data.json'; a.click();
+      URL.revokeObjectURL(a.href);
+      toast('Data exported');
+    }
+    function signOutOthers(){
+      try{
+        let sessions = JSON.parse(localStorage.getItem('sessions')||'[]');
+        sessions = sessions.filter(s => s.current);
+        localStorage.setItem('sessions', JSON.stringify(sessions));
+        toast('Signed out other devices');
+        // chunk 2 will re-render sessions via storage event
+      }catch(_){}
+    }
+    function logout(){
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('tokenTime');
+      localStorage.removeItem('role');
+      toast('Logged out');
+      setTimeout(()=> window.location.href='index.html', 500);
+    }
+
+    // Bind Administration actions
+    function bindAdminSection(){
+      const isAdmin = window.CryptexAdminSecurity.initAdminVisibility();
+
+      // Show dev grant if ?dev=1
+      const dev = new URLSearchParams(location.search).get('dev') === '1';
+      const devWrap = document.getElementById('devGrantWrap');
+      if (dev && devWrap) devWrap.style.display='inline-block';
+
+      document.getElementById('btnAdminLogs')?.addEventListener('click', ()=>{
+        // Quick view of local security logs
+        const logs = JSON.parse(localStorage.getItem('securityLogs')||'[]');
+        alert(`Security logs (last ${Math.min(logs.length,5)}):\n\n` + logs.slice(-5).map(l=> `${l.timestamp} • ${l.event}`).join('\n'));
+      });
+      document.getElementById('btnAdminConfig')?.addEventListener('click', exportConfig);
+      document.getElementById('btnDevGrant')?.addEventListener('click', ()=>{
+        const email = prompt('Enter authorized admin email:', 'admin@cryptex.mw');
+        if (window.CryptexAdminSecurity.grantDev(email)){
+          toast('Admin granted (dev)');
+          window.CryptexAdminSecurity.initAdminVisibility();
+        }else{
+          toast('Email not authorized');
+        }
+      });
+
+      // Also update small admin button
+      const smallBtn = document.getElementById('smallAdminButton');
+      if (smallBtn) smallBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+
+      // Listen for role/user/token changes from other tabs
+      window.addEventListener('storage', (e)=>{
+        if (['user','role','adminToken','tokenTime'].includes(e.key||'')){
+          window.CryptexAdminSecurity.initAdminVisibility();
+        }
+      });
+    }
+
+    // Bind Account actions
+    function bindAccountSection(){
+      document.getElementById('btnExportData')?.addEventListener('click', exportMyData);
+      document.getElementById('btnSignOutEverywhere')?.addEventListener('click', signOutOthers);
+      document.getElementById('btnDeleteAccount')?.addEventListener('click', ()=> openModal('deleteModal'));
+      document.getElementById('btnLogout')?.addEventListener('click', logout);
+    }
+
+    // Initialize chunk 4
+    function initAdminAndAccount(){
+      bindAdminSection();
+      bindAccountSection();
+    }
+    initAdminAndAccount();
+
+    // Expose some functions globally only if not yet present (avoid duplication)
+    window.exportMyData = window.exportMyData || exportMyData;
+    window.signOutOthers = window.signOutOthers || signOutOthers;
+    window.logout = window.logout || logout;
+
+  })();
+</script>
+<!-- SETTINGS • CHUNK 5/10
+     Purpose: All Settings modals (Edit Profile, Change Password, 2FA, Backup Codes, KYC, Delete)
+     + Professional UX (password strength, show/hide, safe validation) and live hooks.
+     Paste this AFTER Chunk 4 (near the end of the page, before </body>). -->
+
+<!-- Edit Profile Modal -->
+<div id="editProfileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="editProfileTitle">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div id="editProfileTitle" class="modal-title">Edit Profile</div>
+      <button class="close" onclick="closeModal('editProfileModal')" aria-label="Close">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="editName">Name</label>
+        <input id="editName" class="input" type="text" placeholder="Your name">
+      </div>
+      <div class="field">
+        <label for="editPhone">Phone</label>
+        <input id="editPhone" class="input" type="tel" placeholder="+265 ..." inputmode="tel">
+      </div>
+      <div class="row"><button class="btn" onclick="saveProfile()">Save changes</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="changePasswordModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="changePwdTitle">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div id="changePwdTitle" class="modal-title">Change Password</div>
+      <button class="close" onclick="closeModal('changePasswordModal')" aria-label="Close">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="oldPass">Current password</label>
+        <div class="row" style="gap:.4rem;">
+          <input id="oldPass" class="input" type="password" placeholder="Current password" style="flex:1;">
+          <button class="btn small ghost" type="button" data-toggle="oldPass">Show</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="newPass1">New password</label>
+        <div class="row" style="gap:.4rem;">
+          <input id="newPass1" class="input" type="password" placeholder="At least 8 characters" style="flex:1;">
+          <button class="btn small ghost" type="button" data-toggle="newPass1">Show</button>
+        </div>
+        <div id="pwdStrength" class="muted" style="margin-top:.35rem;">Strength: —</div>
+      </div>
+      <div class="field">
+        <label for="newPass2">Confirm new password</label>
+        <div class="row" style="gap:.4rem;">
+          <input id="newPass2" class="input" type="password" placeholder="Repeat new password" style="flex:1;">
+          <button class="btn small ghost" type="button" data-toggle="newPass2">Show</button>
+        </div>
+      </div>
+      <div class="row"><button class="btn" onclick="changePassword()">Update Password</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Two-Factor Modal -->
+<div id="twoFAModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="twoFATitle">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div id="twoFATitle" class="modal-title">Two-Factor Authentication</div>
+      <button class="close" onclick="closeModal('twoFAModal')" aria-label="Close">✖</button>
+    </div>
+    <div class="modal-body">
+      <p class="muted">Use this secret in your authenticator app (TOTP):</p>
+      <div class="settings-card" style="text-align:center; font-weight:800; font-size:1.1rem;">
+        <span id="twoFASecret">—</span>
+      </div>
+      <div class="row" style="margin-top:.6rem; gap:.5rem;">
+        <button class="btn ghost" type="button" onclick="generateNew2FASecret()">Generate new secret</button>
+        <button class="btn" type="button" onclick="closeModal('twoFAModal')">Done</button>
+      </div>
+      <div class="muted" style="margin-top:.6rem; font-size:.9rem;">
+        Tip: Add an account named “Cryptex Malawi” with issuer “CRYPT‑X”. Backup your secret safely.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Backup Codes Modal -->
+<div id="backupCodesModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="codesTitle">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div id="codesTitle" class="modal-title">Backup Codes</div>
+      <button class="close" onclick="closeModal('backupCodesModal')" aria-label="Close">✖</button>
+    </div>
+    <div class="modal-body">
+      <p class="muted">Use each code once if you lose access to your authenticator.</p>
+      <div id="backupCodesBox" class="settings-card" style="font-family:monospace;"></div>
+      <div class="row" style="margin-top:.6rem; gap:.5rem;">
+        <button class="btn ghost" type="button" onclick="downloadBackupCodes()">Download</button>
+        <button class="btn" type="button" onclick="closeModal('backupCodesModal')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KYC Modal -->
+<div id="kycModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="kycTitle">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div id="kycTitle" class="modal-title">KYC Verification</div>
+      <button class="close" onclick="closeModal('kycModal')" aria-label="Close">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label for="kycName">Full Name</label>
+        <input id="kycName" class="input" type="text" placeholder="As per your ID">
+      </div>
+      <div class="field">
+        <label for="kycDoc">National ID / Passport</label>
+        <input id="kycDoc" class="input" type="text" placeholder="Document number">
+      </div>
+      <div class="field">
+        <label for="kycDOB">Date of Birth</label>
+        <input id="kycDOB" class="input" type="date">
+      </div>
+      <div class="row"><button class="btn" type="button" onclick="submitKYC()">Submit</button></div>
+      <div class="muted" style="margin-top:.55rem; font-size:.9rem;">Your details are stored locally until you submit to server (production API).</div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div id="deleteModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="delTitle">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div id="delTitle" class="modal-title">Delete Account</div>
+      <button class="close" onclick="closeModal('deleteModal')" aria-label="Close">✖</button>
+    </div>
+    <div class="modal-body">
+      <p class="muted">This action is permanent and cannot be undone.</p>
+      <div class="row" style="gap:.5rem; flex-wrap:wrap;">
+        <button class="btn danger" type="button" onclick="confirmDelete()">Delete permanently</button>
+        <button class="btn ghost" type="button" onclick="closeModal('deleteModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    'use strict';
+
+    // Fallback toast if chunk 1/2 not loaded
+    function toast(msg){
+      const t = document.getElementById('toast');
+      if (!t){ alert(msg); return; }
+      t.textContent = msg; t.style.display='block'; setTimeout(()=> t.style.display='none', 1800);
+    }
+
+    // Utility: settings store (shared)
+    function getSettings(){ try{ return JSON.parse(localStorage.getItem('settings')||'{}'); }catch{ return {}; } }
+    function setSettings(s){ localStorage.setItem('settings', JSON.stringify(s)); }
+
+    // Save Profile
+    window.saveProfile = window.saveProfile || function(){
+      const name = (document.getElementById('editName')||{}).value?.trim();
+      const phone= (document.getElementById('editPhone')||{}).value?.trim();
+      if (!name && !phone) return toast('Nothing to update');
+
+      if (name){
+        localStorage.setItem('userName', name);
+        const dn = document.getElementById('displayName'); if (dn) dn.textContent = name;
+        const av = document.getElementById('avatarBig'); if (av) av.textContent = name.slice(0,1).toUpperCase();
+        const avH= document.getElementById('headerAvatar'); if (avH) avH.textContent = name.slice(0,1).toUpperCase();
+      }
+      if (phone){ localStorage.setItem('userPhone', phone); }
+      toast('Profile updated');
+      if (typeof closeModal === 'function') closeModal('editProfileModal');
+    };
+
+    // Change Password with basic strength check
+    window.changePassword = window.changePassword || function(){
+      const oldP = (document.getElementById('oldPass')||{}).value || '';
+      const p1   = (document.getElementById('newPass1')||{}).value || '';
+      const p2   = (document.getElementById('newPass2')||{}).value || '';
+
+      if (p1.length < 8) return toast('Password must be at least 8 characters');
+      if (p1 !== p2) return toast('Passwords do not match');
+
+      const current = localStorage.getItem('userPass') || '';
+      if (current && current !== oldP) return toast('Current password is incorrect');
+
+      localStorage.setItem('userPass', p1);
+      toast('Password updated');
+      if (typeof closeModal === 'function') closeModal('changePasswordModal');
+    };
+
+    // Password strength meter
+    (function bindPwdStrength(){
+      const p = document.getElementById('newPass1');
+      const meter = document.getElementById('pwdStrength');
+      if (!p || !meter) return;
+      p.addEventListener('input', ()=>{
+        const v = p.value || '';
+        let score = 0;
+        if (v.length >= 8) score++;
+        if (/[A-Z]/.test(v)) score++;
+        if (/[a-z]/.test(v)) score++;
+        if (/\d/.test(v)) score++;
+        if (/[^A-Za-z0-9]/.test(v)) score++;
+        const labels = ['Very weak','Weak','Fair','Good','Strong','Very strong'];
+        meter.textContent = 'Strength: ' + labels[Math.min(score, labels.length-1)];
+      });
+      // Show/hide toggles
+      document.querySelectorAll('button[data-toggle]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const id = btn.getAttribute('data-toggle');
+          const input = document.getElementById(id);
+          if (!input) return;
+          input.type = (input.type === 'password') ? 'text' : 'password';
+          btn.textContent = (input.type === 'password') ? 'Show' : 'Hide';
+        });
+      });
+    })();
+
+    // Generate / refresh 2FA secret
+    window.generateNew2FASecret = window.generateNew2FASecret || function(){
+      const secret = 'CRX-' + Math.random().toString(36).slice(2,8).toUpperCase();
+      localStorage.setItem('twoFASecret', secret);
+      const el = document.getElementById('twoFASecret'); if (el) el.textContent = secret;
+      toast('New secret generated');
+    };
+
+    // Backup codes (regenerate on demand)
+    function ensureBackupCodes(){
+      let codes = [];
+      try{ codes = JSON.parse(localStorage.getItem('backupCodes')||'[]'); }catch(_){}
+      if (!codes.length){
+        codes = Array.from({length:8}, ()=> Math.random().toString(36).slice(2,7).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase());
+        localStorage.setItem('backupCodes', JSON.stringify(codes));
+      }
+      return codes;
+    }
+    window.downloadBackupCodes = window.downloadBackupCodes || function(){
+      const codes = ensureBackupCodes();
+      const blob = new Blob([codes.join('\n')],{type:'text/plain'});
+      const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='cryptex-backup-codes.txt'; a.click();
+      URL.revokeObjectURL(a.href);
+      toast('Backup codes downloaded');
+    };
+
+    // Show backup codes when opening modal (if Chunk 2 didn’t already handle)
+    (function bindBackupModalOpen(){
+      const observer = new MutationObserver(()=>{
+        const modal = document.getElementById('backupCodesModal');
+        if (!modal) return;
+        if (modal.style.display === 'block'){
+          const box = document.getElementById('backupCodesBox');
+          const codes = ensureBackupCodes();
+          if (box) box.innerHTML = codes.map(c=>`<div>${c}</div>`).join('');
+        }
+      });
+      observer.observe(document.body, { attributes:true, subtree:true, attributeFilter:['style'] });
+    })();
+
+    // Submit KYC (local only)
+    window.submitKYC = window.submitKYC || function(){
+      const name = (document.getElementById('kycName')||{}).value?.trim();
+      const doc  = (document.getElementById('kycDoc')||{}).value?.trim();
+      const dob  = (document.getElementById('kycDOB')||{}).value?.trim();
+
+      if (!name || !doc || !dob) return toast('Please fill all fields');
+      localStorage.setItem('kycStatus', 'under review');
+      const chip = document.getElementById('kycStatusChip'); if (chip) chip.textContent = 'KYC: Under review';
+      toast('KYC submitted');
+      if (typeof closeModal === 'function') closeModal('kycModal');
+    };
+
+    // Confirm delete account
+    window.confirmDelete = window.confirmDelete || function(){
+      localStorage.clear();
+      sessionStorage.clear();
+      toast('Account deleted');
+      setTimeout(()=> window.location.href='index.html', 700);
+    };
+
+    // Sync TwoFA secret display when modal opens
+    (function sync2FASecretOnOpen(){
+      const observer = new MutationObserver(()=>{
+        const modal = document.getElementById('twoFAModal');
+        if (!modal) return;
+        if (modal.style.display === 'block'){
+          const el = document.getElementById('twoFASecret');
+          if (el){
+            const secret = localStorage.getItem('twoFASecret') || 'CRX-' + Math.random().toString(36).slice(2,8).toUpperCase();
+            localStorage.setItem('twoFASecret', secret);
+            el.textContent = secret;
+          }
+        }
+      });
+      observer.observe(document.body, { attributes:true, subtree:true, attributeFilter:['style'] });
+    })();
+
+    // Prefill Edit Profile fields when modal opens
+    (function syncEditProfileOnOpen(){
+      const observer = new MutationObserver(()=>{
+        const modal = document.getElementById('editProfileModal');
+        if (!modal) return;
+        if (modal.style.display === 'block'){
+          const name  = localStorage.getItem('userName') || '';
+          const phone = localStorage.getItem('userPhone') || '';
+          const n = document.getElementById('editName');  if (n) n.value = name;
+          const p = document.getElementById('editPhone'); if (p) p.value = phone;
+        }
+      });
+      observer.observe(document.body, { attributes:true, subtree:true, attributeFilter:['style'] });
+    })();
+
+  })();
+</script>
+<!-- SETTINGS • CHUNK 6/10
+     Purpose: Pro Idle Auto‑Lock (PIN unlock overlay) + Quick Email Verify + Admin Announcement banner
+     Live cross‑tab sync. Paste after Chunk 5, before </body>. -->
+
+<!-- Lock Overlay (full-screen) -->
+<div id="lockOverlay" class="modal" role="dialog" aria-modal="true" aria-labelledby="lockTitle" style="display:none;">
+  <div class="modal-content" style="max-width:420px;">
+    <div class="modal-header">
+      <div id="lockTitle" class="modal-title">🔒 Session Locked</div>
+    </div>
+    <div class="modal-body">
+      <p class="muted" id="lockReason">For your security, your session was locked due to inactivity.</p>
+      <div class="field" style="margin-top:.6rem;">
+        <label for="lockPin">Enter your 4–6 digit PIN to unlock</label>
+        <input id="lockPin" class="input" type="password" placeholder="••••" inputmode="numeric" maxlength="6" autocomplete="off" />
+      </div>
+      <div class="row" style="gap:.5rem; margin-top:.6rem;">
+        <button id="btnUnlock" class="btn" type="button">Unlock</button>
+        <button id="btnLockForgot" class="btn ghost" type="button">Forgot PIN?</button>
+      </div>
+      <div id="lockHelp" class="muted" style="margin-top:.5rem; font-size:.9rem; display:none;">
+        Reset your PIN under Security › Update PIN. You’ll need your account password.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    'use strict';
+
+    // Safe helpers
+    const $ = id => document.getElementById(id);
+    function toast(msg){
+      const t = $('toast'); if(!t){ alert(msg); return; }
+      t.textContent = msg; t.style.display='block'; setTimeout(()=> t.style.display='none', 1800);
+    }
+
+    // ============ Admin Announcement banner on Settings ============ //
+    // Render admin announcement (from platform.settings) at top of container
+    function renderSettingsAnnouncement(){
+      const hostId = 'annHostSettings';
+      let host = document.getElementById(hostId);
+      if (!host){
+        const container = document.getElementById('settingsContainer');
+        if (!container) return;
+        host = document.createElement('div');
+        host.id = hostId;
+        host.style.margin = '0 0 .75rem 0';
+        container.insertBefore(host, container.firstChild);
+      }
+      const s = JSON.parse(localStorage.getItem('platform.settings')||'null');
+      if (!s || !s.announcement){ host.innerHTML=''; return; }
+      const {title,msg,style} = s.announcement;
+      const styles = {
+        info:    { bg:'#182022', bd:'#2b464d', color:'#9fd3e6', emoji:'ℹ️' },
+        success: { bg:'#162318', bd:'#1a5a22', color:'#a4f3b2', emoji:'✅' },
+        warn:    { bg:'#231f14', bd:'#5a4a1a', color:'#e8d69a', emoji:'⚠️' },
+        error:   { bg:'#2b1616', bd:'#5a1d1d', color:'#ffb0b0', emoji:'⛔' }
+      };
+      const st = styles[style] || styles.info;
+      host.innerHTML = `
+        <div style="background:${st.bg}; border:1px solid ${st.bd}; border-radius:12px; padding:.65rem .9rem; color:${st.color};">
+          <strong>${st.emoji} ${title||''}</strong>${msg?` — ${msg}`:''}
+        </div>
+      `;
+    }
+    renderSettingsAnnouncement();
+    window.addEventListener('storage', e=>{
+      if (e.key === 'platform.settings') renderSettingsAnnouncement();
+    });
+
+    // ============ Quick Email Verify action ============ //
+    function attachVerifyEmailAction(){
+      const chip = document.getElementById('emailStatusChip');
+      if (!chip) return;
+      const isVerified = localStorage.getItem('emailVerified') === 'true';
+      // If already verified, nothing to add
+      if (isVerified) return;
+
+      // Add a small "Verify" action next to chip once
+      if (!document.getElementById('btnVerifyEmail')){
+        const btn = document.createElement('button');
+        btn.id = 'btnVerifyEmail';
+        btn.className = 'btn small ghost';
+        btn.type = 'button';
+        btn.style.marginLeft = '.35rem';
+        btn.textContent = 'Verify Email';
+        btn.addEventListener('click', ()=>{
+          // Simulate verification
+          localStorage.setItem('emailVerified','true');
+          chip.textContent = 'Email: Verified';
+          toast('Email verified');
+          btn.remove();
+        });
+        // place after chip
+        chip.parentElement?.appendChild(btn);
+      }
+    }
+    attachVerifyEmailAction();
+    window.addEventListener('storage', e=>{
+      if (e.key === 'emailVerified') attachVerifyEmailAction();
+    });
+
+    // ============ Idle Auto‑Lock (PIN unlock) ============ //
+    // Read auto-lock preference from settings
+    function getAutoLockMs(){
+      try{
+        const s = JSON.parse(localStorage.getItem('settings')||'{}');
+        const v = s['security.autoLock'] || '5';
+        if (v === 'never') return Infinity;
+        const min = parseInt(v,10);
+        return isFinite(min) ? min*60*1000 : 5*60*1000;
+      }catch(_){ return 5*60*1000; }
+    }
+
+    let lastActivity = Date.now();
+    let lockTimer = null;
+    let checkTimer = null;
+
+    function bumpActivity(){
+      lastActivity = Date.now();
+      localStorage.setItem('settings.lastActivity', String(lastActivity));
+    }
+
+    // Show/hide overlay
+    function showLockOverlay(reason){
+      const overlay = $('lockOverlay'); if (!overlay) return;
+      const pin = $('lockPin'); const reasonEl = $('lockReason');
+      if (reasonEl) reasonEl.textContent = reason || 'For your security, your session was locked.';
+      overlay.style.display='block';
+      pin && (pin.value = '');
+      setTimeout(()=> pin?.focus(), 100);
+    }
+    function hideLockOverlay(){
+      const overlay = $('lockOverlay'); if (!overlay) return;
+      overlay.style.display='none';
+    }
+
+    // Broadcast to other tabs (storage events)
+    function broadcastLock(reason){
+      localStorage.setItem('app.locked', JSON.stringify({ ts:Date.now(), reason: reason||'idle' }));
+      showLockOverlay(reason);
+    }
+    function broadcastUnlock(){
+      localStorage.setItem('app.unlocked', JSON.stringify({ ts:Date.now() }));
+      hideLockOverlay();
+    }
+
+    // Verify PIN and unlock
+    function unlockWithPin(){
+      const pinInput = $('lockPin'); const pin = pinInput?.value || '';
+      const saved = localStorage.getItem('userPin') || '';
+      // If no PIN set, allow unlock (but guide)
+      if (!saved){
+        $('lockHelp') && ($('lockHelp').style.display='block');
+        broadcastUnlock();
+        toast('Unlocked (no PIN set)');
+        return;
+      }
+      if (pin && pin === saved){
+        broadcastUnlock();
+        toast('Unlocked');
+      } else {
+        toast('Incorrect PIN');
+        pinInput?.focus();
+      }
+    }
+
+    // Init auto‑lock timers
+    function initIdleLock(){
+      // Reset timers if present
+      lockTimer && clearTimeout(lockTimer);
+      checkTimer && clearInterval(checkTimer);
+
+      const autoMs = getAutoLockMs();
+      // If never, only listen to broadcasts from other tabs
+      if (!isFinite(autoMs)) return;
+
+      // Inactivity monitor
+      ['click','mousemove','keydown','scroll','touchstart'].forEach(ev=> {
+        document.addEventListener(ev, bumpActivity, { passive:true });
+      });
+      bumpActivity();
+
+      // Check every 20s
+      checkTimer = setInterval(()=>{
+        if (Date.now() - lastActivity >= autoMs){
+          // lock and stop further checks until unlock
+          clearInterval(checkTimer);
+          broadcastLock('Auto-lock after inactivity');
+        }
+      }, 20000);
+    }
+
+    // Storage listeners for cross‑tab locking
+    window.addEventListener('storage', e=>{
+      if (e.key === 'app.locked' && e.newValue){
+        try{
+          const data = JSON.parse(e.newValue||'{}');
+          showLockOverlay(data.reason || 'Locked by another tab');
+        }catch(_){ showLockOverlay('Locked'); }
+      }
+      if (e.key === 'app.unlocked'){
+        hideLockOverlay();
+        // resume idle checking
+        initIdleLock();
+      }
+      if (e.key === 'settings'){ // autoLock may have changed
+        initIdleLock();
+      }
+    });
+
+    // Bind unlock UI
+    $('btnUnlock')?.addEventListener('click', unlockWithPin);
+    $('lockPin')?.addEventListener('keydown', e=>{ if (e.key==='Enter') unlockWithPin(); });
+    $('btnLockForgot')?.addEventListener('click', ()=>{
+      const help = $('lockHelp'); if (help) help.style.display='block';
+      toast('Go to Security › Update PIN to reset');
+    });
+
+    // Optional: add a "Lock now" quick action under Security (if not exists)
+    (function injectLockNow(){
+      const securityCards = Array.from(document.querySelectorAll('.section-title'))
+        .filter(el => /Security/i.test(el.textContent||''))[0]?.nextElementSibling;
+      if (!securityCards) return;
+      if (document.getElementById('btnLockNow')) return;
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.style.cssText = 'margin-top:.5rem;';
+      row.innerHTML = `<button id="btnLockNow" class="btn small ghost" type="button">Lock now</button>`;
+      securityCards.appendChild(row);
+      document.getElementById('btnLockNow')?.addEventListener('click', ()=> {
+        bumpActivity(); // ensure timestamp
+        broadcastLock('Locked manually');
+      });
+    })();
+
+    // Start idle lock
+    initIdleLock();
+
+  })();
+</script>
+<!-- SETTINGS • CHUNK 7/10
+     Purpose: Appearance & Accessibility • Privacy & Data • Help & Support • My Security Events
+     Live, cross‑tab synchronized. Paste after Chunk 6 inside <main id="settingsContainer"> … </main>. -->
+
+<!-- Appearance & Accessibility -->
+<section aria-label="Appearance & Accessibility">
+  <div class="section-title">🎨 Appearance & Accessibility</div>
+  <div class="settings-card">
+    <div class="grid-2">
+      <div>
+        <div class="row" style="justify-content:space-between;">
+          <div>Reduce motion (limit animations)</div>
+          <label class="switch">
+            <input id="prefMotionReduced" type="checkbox" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="muted" style="margin-top:.35rem;">Helpful if animations feel distracting or heavy on device.</div>
+      </div>
+
+      <div>
+        <div class="row" style="justify-content:space-between;">
+          <div>Compact layout</div>
+          <label class="switch">
+            <input id="prefCompact" type="checkbox" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="muted" style="margin-top:.35rem;">Tighter spacing for dense information on small screens.</div>
+      </div>
+
+      <div>
+        <div class="row" style="justify-content:space-between;">
+          <div>Large text</div>
+          <label class="switch">
+            <input id="prefLargeText" type="checkbox" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="muted" style="margin-top:.35rem;">Increase base font size for readability.</div>
+      </div>
+
+      <div>
+        <div class="muted">Preview</div>
+        <div class="row" style="gap:.45rem; margin-top:.35rem;">
+          <span class="chip">Motion: <span id="chipMotion">Normal</span></span>
+          <span class="chip">Layout: <span id="chipLayout">Comfort</span></span>
+          <span class="chip">Text: <span id="chipText">Normal</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Privacy & Data -->
+<section aria-label="Privacy & Data">
+  <div class="section-title">🔐 Privacy & Data</div>
+  <div class="settings-card">
+    <div class="row" style="gap:.5rem; flex-wrap:wrap;">
+      <button id="btnExportAll" class="btn ghost" type="button">Export all data (JSON)</button>
+      <button id="btnClearCache" class="btn ghost" type="button">Clear local cache</button>
+      <button id="btnResetSettings" class="btn danger" type="button">Reset settings</button>
+    </div>
+    <div class="muted" style="margin-top:.5rem;">
+      Exports include your preferences, wallet (local snapshot), transactions, sessions and platform configuration stored on this device.
+    </div>
+  </div>
+</section>
+
+<!-- Help & Support -->
+<section aria-label="Help & Support">
+  <div class="section-title">🆘 Help & Support</div>
+  <div class="settings-card">
+    <div class="row" style="gap:.5rem; flex-wrap:wrap;">
+      <a class="btn ghost" href="mailto:support@cryptexmw.com" target="_blank" rel="noopener">✉️ Email support</a>
+      <a class="btn ghost" href="https://wa.me/265881234567" target="_blank" rel="noopener">💬 WhatsApp support</a>
+      <button id="btnReportIssue" class="btn" type="button">🐞 Report a problem</button>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  'use strict';
+  function applySupportLinks(){
+    try{
+      const s = JSON.parse(localStorage.getItem('platform.settings')||'{}');
+      const sup = s.support || {};
+      const wa = (sup.whatsapp||'').replace(/\s+/g,'');
+      const em = sup.email || 'support@cryptexmw.com';
+      const waBtn = document.querySelector('a[href^="https://wa.me/"]');
+      const emBtn = document.querySelector('a[href^="mailto:"]');
+      if (waBtn && wa) waBtn.href = 'https://wa.me/' + wa.replace(/^\+/,'');
+      if (emBtn && em) emBtn.href = 'mailto:' + em;
+    }catch(_){}
+  }
+  applySupportLinks();
+  window.addEventListener('storage', e=>{ if (e.key==='platform.settings') applySupportLinks(); });
+})();
+</script>
+
+<!-- My Security Events -->
+<section aria-label="My Security Events">
+  <div class="section-title">🛡️ My Security Events</div>
+  <div class="settings-card">
+    <div class="row" style="justify-content:space-between; margin-bottom:.5rem;">
+      <div class="muted">Recent local security events (device only)</div>
+      <div class="row" style="gap:.45rem;">
+        <button id="btnSecRefresh" class="btn small ghost" type="button">Refresh</button>
+        <button id="btnSecClear" class="btn small ghost" type="button">Clear local</button>
+      </div>
+    </div>
+    <div id="secEvents" class="grid" style="gap:.45rem;"></div>
+  </div>
+</section>
+
+<!-- Report Issue Modal -->
+<div id="supportModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="supportTitle" style="display:none;">
+  <div class="modal-content" style="max-width:720px;">
+    <div class="modal-header">
+      <div id="supportTitle" class="modal-title">Report a Problem</div>
+      <button class="close" onclick="document.getElementById('supportModal').style.display='none'" aria-label="Close">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid-2">
+        <div class="field">
+          <label for="supEmail">Your email</label>
+          <input id="supEmail" class="input" type="email" placeholder="you@cryptex.mw">
+        </div>
+        <div class="field">
+          <label for="supArea">Area</label>
+          <select id="supArea" class="select">
+            <option value="buy">Buy USDT</option>
+            <option value="sell">Sell USDT</option>
+            <option value="wallet">Wallet</option>
+            <option value="merchants">Merchants</option>
+            <option value="settings">Settings</option>
+            <option value="other" selected>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="supDetails">Details</label>
+        <textarea id="supDetails" class="input" rows="5" placeholder="Describe the issue…"></textarea>
+      </div>
+      <div class="row" style="gap:.5rem; margin-top:.5rem;">
+        <button id="btnSubmitIssue" class="btn" type="button">Submit</button>
+        <button class="btn ghost" type="button" onclick="document.getElementById('supportModal').style.display='none'">Cancel</button>
+      </div>
+      <div class="muted" style="margin-top:.5rem; font-size:.9rem;">Reports are stored locally (prototype). In production, they are sent securely to support.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    'use strict';
+
+    // Helpers
+    const $ = id => document.getElementById(id);
+    function toast(msg){
+      const t = $('toast'); if(!t){ alert(msg); return; }
+      t.textContent = msg; t.style.display='block'; setTimeout(()=> t.style.display='none', 1800);
+    }
+    function settings(){ try{ return JSON.parse(localStorage.getItem('settings')||'{}'); }catch{ return {}; } }
+    function saveSettings(obj){ localStorage.setItem('settings', JSON.stringify(obj)); }
+    function setPref(key, val){ const s=settings(); s[key]=val; saveSettings(s); }
+    function getPref(key, def){ const s=settings(); return (key in s)? s[key] : def; }
+
+    // ===== Appearance toggles =====
+    const elMotion   = $('prefMotionReduced');
+    const elCompact  = $('prefCompact');
+    const elLargeTxt = $('prefLargeText');
+
+    const chipMotion = $('chipMotion');
+    const chipLayout = $('chipLayout');
+    const chipText   = $('chipText');
+
+    // Apply classes/styles
+    function applyAppearance(){
+      const reduce = !!getPref('prefs.motionReduced', false);
+      const compact= !!getPref('prefs.compact', false);
+      const large  = !!getPref('prefs.largeText', false);
+
+      document.body.classList.toggle('reduce-motion', reduce);
+      document.body.classList.toggle('compact', compact);
+      document.body.classList.toggle('large-text', large);
+
+      // Inject styles once
+      if (!document.getElementById('appearanceStyle')){
+        const s = document.createElement('style'); s.id='appearanceStyle';
+        s.textContent = `
+          .reduce-motion *{ transition:none !important; animation:none !important; }
+          .compact .settings-card{ padding:.85rem; }
+          .compact .section-title{ margin: .85rem 0 .5rem; }
+          .large-text{ font-size: 112%; }
+        `;
+        document.head.appendChild(s);
+      }
+
+      // reflect in UI
+      if (elMotion)   elMotion.checked = reduce;
+      if (elCompact)  elCompact.checked = compact;
+      if (elLargeTxt) elLargeTxt.checked = large;
+
+      chipMotion && (chipMotion.textContent = reduce ? 'Reduced' : 'Normal');
+      chipLayout && (chipLayout.textContent = compact ? 'Compact' : 'Comfort');
+      chipText   && (chipText.textContent   = large ? 'Large' : 'Normal');
+    }
+
+    function bindAppearance(){
+      elMotion?.addEventListener('change', e=>{
+        setPref('prefs.motionReduced', e.target.checked);
+        applyAppearance();
+        toast('Motion preference saved');
+      });
+      elCompact?.addEventListener('change', e=>{
+        setPref('prefs.compact', e.target.checked);
+        applyAppearance();
+        toast('Layout preference saved');
+      });
+      elLargeTxt?.addEventListener('change', e=>{
+        setPref('prefs.largeText', e.target.checked);
+        applyAppearance();
+        toast('Text size saved');
+      });
+
+      // Live sync across tabs
+      window.addEventListener('storage', (e)=>{
+        if (e.key === 'settings') applyAppearance();
+      });
+
+      // initial
+      applyAppearance();
+    }
+
+    // ===== Privacy & Data =====
+    function exportAllData(){
+      const keys = Object.keys(localStorage);
+      const data = {};
+      keys.forEach(k=>{ try{ data[k] = JSON.parse(localStorage.getItem(k)); }catch{ data[k] = localStorage.getItem(k); } });
+      const blob = new Blob([JSON.stringify({exportedAt:new Date().toISOString(), data},null,2)],{type:'application/json'});
+      const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='cryptex-export-all.json'; a.click(); URL.revokeObjectURL(a.href);
+      toast('Export started');
+    }
+    function clearCache(){
+      if (!confirm('Clear local cache? This keeps your account & settings intact.')) return;
+      // Safe transient keys to clear
+      ['fxRateMWK','securityLogs'].forEach(k=> localStorage.removeItem(k));
+      toast('Local cache cleared');
+    }
+    function resetSettings(){
+      if (!confirm('Reset settings to defaults?')) return;
+      localStorage.removeItem('settings');
+      toast('Settings reset'); setTimeout(()=> location.reload(), 400);
+    }
+
+    function bindPrivacy(){
+      $('btnExportAll')?.addEventListener('click', exportAllData);
+      $('btnClearCache')?.addEventListener('click', clearCache);
+      $('btnResetSettings')?.addEventListener('click', resetSettings);
+    }
+
+    // ===== Help & Support =====
+    function bindSupport(){
+      $('btnReportIssue')?.addEventListener('click', ()=>{
+        // Prefill user email
+        const email = localStorage.getItem('user') || '';
+        const el = $('supEmail'); if (el) el.value = email;
+        $('supportModal').style.display='block';
+      });
+      $('btnSubmitIssue')?.addEventListener('click', ()=>{
+        const email = ($('supEmail')?.value||'').trim();
+        const area  = ($('supArea')?.value||'other');
+        const det   = ($('supDetails')?.value||'').trim();
+        if (!email || !det) return toast('Please add your email and details');
+
+        const logsKey = 'platform.reports';
+        let logs = [];
+        try{ logs = JSON.parse(localStorage.getItem(logsKey)||'[]'); }catch(_){}
+        logs.unshift({
+          id:'RP-'+Date.now()+'-'+Math.random().toString(36).slice(2,7).toUpperCase(),
+          type:'support',
+          user: email,
+          area, details: det,
+          ts: new Date().toISOString()
+        });
+        localStorage.setItem(logsKey, JSON.stringify(logs.slice(0,200)));
+        toast('Report submitted. Thank you!');
+        $('supportModal').style.display='none';
+        // notify other tabs
+        localStorage.setItem('platform.reports.updated', String(Date.now()));
+      });
+    }
+
+    // ===== My Security Events =====
+    function loadSecEvents(){ try{ return JSON.parse(localStorage.getItem('securityLogs')||'[]'); }catch{ return []; } }
+    function renderSecEvents(){
+      const host = $('secEvents'); if(!host) return;
+      const logs = loadSecEvents();
+      if (!logs.length){ host.innerHTML = '<div class="muted">No local security events found on this device.</div>'; return; }
+      const latest = logs.slice(-10).reverse();
+      host.innerHTML = latest.map(l=>`
+        <div class="row" style="justify-content:space-between; border:1px solid var(--border); border-radius:10px; padding:.6rem .75rem;">
+          <div>
+            <div style="font-weight:800;">${l.event || 'Event'}</div>
+            <div class="muted" style="font-size:.85rem;">${new Date(l.timestamp||l.ts||Date.now()).toLocaleString()}</div>
+          </div>
+          <div class="muted" style="max-width:60%; font-size:.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            ${l.details ? JSON.stringify(l.details) : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+    function bindSecurityEvents(){
+      $('btnSecRefresh')?.addEventListener('click', renderSecEvents);
+      $('btnSecClear')?.addEventListener('click', ()=>{
+        if (!confirm('Clear local security events on this device?')) return;
+        localStorage.removeItem('securityLogs');
+        renderSecEvents();
+        toast('Local security events cleared');
+      });
+      window.addEventListener('storage', (e)=>{
+        if (e.key === 'securityLogs') renderSecEvents();
+      });
+      renderSecEvents();
+    }
+
+    // Init Chunk 7
+    function initChunk7(){
+      bindAppearance();
+      bindPrivacy();
+      bindSupport();
+      bindSecurityEvents();
+    }
+    initChunk7();
+
+  })();
+</script>
+<!-- SETTINGS • CHUNK 8/10
+     Purpose: Settings Core Bus + i18n (EN/NY) + Currency formatter + Cross‑tab sync helpers.
+     Exposes SettingsAPI on window for other pages. Live applies language/currency changes.
+     Paste after Chunk 7, before </body>. -->
+<script>
+  (function(){
+    'use strict';
+
+    // ========= Utilities =========
+    const $ = id => document.getElementById(id);
+    function safeParse(str, fb){ try{ const v=JSON.parse(str); return (v===null||v===undefined)?fb:v; }catch{ return fb; } }
+    function getSettings(){ return safeParse(localStorage.getItem('settings'), {}); }
+    function setSettings(s){ localStorage.setItem('settings', JSON.stringify(s)); }
+    function mergeSettings(partial){
+      const s = getSettings(); const out = {...s, ...partial};
+      setSettings(out);
+      try{
+        window.dispatchEvent(new CustomEvent('settings:changed', { detail: { prev:s, next:out } }));
+      }catch(_){}
+      return out;
+    }
+    function toast(msg){
+      const t = $('toast'); if(!t){ alert(msg); return; }
+      t.textContent = msg; t.style.display='block'; setTimeout(()=> t.style.display='none', 1800);
+    }
+
+    // ========= Currency Formatter =========
+    function formatCurrency(value, curr){
+      const n = Number(value||0);
+      if (curr === 'USD') return n.toLocaleString(undefined, { style:'currency', currency:'USD', minimumFractionDigits:2, maximumFractionDigits:2 });
+      // MWK default
+      return 'MK ' + n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    }
+
+    // ========= i18n (English / Chichewa) =========
+    const dict = {
+      en: {
+        title: 'Account Settings',
+        profile: 'Profile & Identity',
+        security: 'Security',
+        notifications: 'Notifications',
+        preferences: 'Preferences',
+        admin: 'Administration',
+        account: 'Account',
+        downloadData: 'Download My Data',
+        signoutAll: 'Sign out everywhere',
+        deleteAccount: 'Delete Account',
+        logout: 'Logout',
+        verifyEmail: 'Verify Email'
+      },
+      ny: {
+        title: 'Zokonza Akaunti',
+        profile: 'Mbiri & Umboni',
+        security: 'Chitetezo',
+        notifications: 'Zidziwitso',
+        preferences: 'Zokonda',
+        admin: 'Kayendetsedwe',
+        account: 'Akaunti',
+        downloadData: 'Tsitsani Zambiri Zanga',
+        signoutAll: 'Tulukani kulikonse',
+        deleteAccount: 'Chotsa Akaunti',
+        logout: 'Tulukani',
+        verifyEmail: 'Tsimikizani Imelo'
+      }
+    };
+    function t(key){
+      const lang = getSettings()['prefs.lang'] || 'en';
+      return (dict[lang] && dict[lang][key]) || dict.en[key] || key;
+    }
+
+    // Apply language to a subset of UI (non-destructive)
+    function applyLanguage(){
+      // Document title
+      document.title = t('title') + ' - Cryptex Malawi';
+
+      // Header subtitle (Chunk 1)
+      const sub = document.querySelector('.app-bar .subtitle');
+      if (sub) sub.textContent = t('title');
+
+      // Section titles fallback if present (doesn't add/remove sections)
+      const map = [
+        { selector: '.section-title', contains:/Profile/i, key:'profile' },
+        { selector: '.section-title', contains:/Security/i, key:'security' },
+        { selector: '.section-title', contains:/Notifications/i, key:'notifications' },
+        { selector: '.section-title', contains:/Preferences/i, key:'preferences' },
+        { selector: '.section-title', contains:/Administration/i, key:'admin' },
+        { selector: '.section-title', contains:/Account$/i, key:'account' }
+      ];
+      document.querySelectorAll('.section-title').forEach(el=>{
+        const txt = (el.textContent||'').trim();
+        const it = map.find(m=> m.contains.test(txt));
+        if (it){ el.childNodes[el.childNodes.length-1].textContent = ' ' + t(it.key); }
+      });
+
+      // Buttons in Account card
+      if ($('btnExportData')) $('btnExportData').textContent = t('downloadData');
+      if ($('btnSignOutEverywhere')) $('btnSignOutEverywhere').textContent = t('signoutAll');
+      if ($('btnDeleteAccount')) $('btnDeleteAccount').textContent = t('deleteAccount');
+      if ($('btnLogout')) $('btnLogout').textContent = t('logout');
+
+      // Verify Email button if exists
+      if ($('btnVerifyEmail')) $('btnVerifyEmail').textContent = t('verifyEmail');
+    }
+
+    // ========= Live currency preview wiring =========
+    function applyCurrencyPreview(){
+      const curr = getSettings()['prefs.currency'] || 'MWK';
+      // Update chips (Chunk 3)
+      const chip = document.getElementById('chipCurr'); if (chip) chip.textContent = curr;
+      // Recompute totals if amount input is present (Chunk 2)
+      if (typeof window.recalc === 'function') window.recalc();
+    }
+
+    // ========= SettingsAPI exposed to other pages =========
+    if (!window.SettingsAPI){
+      window.SettingsAPI = {
+        get: (key, def) => {
+          const s=getSettings();
+          return (key in s)? s[key] : def;
+        },
+        set: (key, val) => mergeSettings({ [key]: val }),
+        all: () => getSettings(),
+        onChange: (cb) => {
+          if (typeof cb !== 'function') return ()=>{};
+          const handler = (e)=> {
+            if (e.type === 'storage' && e.key !== 'settings') return;
+            try{ cb({ settings: getSettings(), source:e.type }); }catch(_){}
+          };
+          window.addEventListener('storage', handler);
+          window.addEventListener('settings:changed', handler);
+          return ()=> {
+            window.removeEventListener('storage', handler);
+            window.removeEventListener('settings:changed', handler);
+          };
+        },
+        format: (value, currency) => formatCurrency(value, currency || (getSettings()['prefs.currency']||'MWK')),
+        i18n: { t, apply: applyLanguage }
+      };
+    }
+
+    // ========= Keep a small heartbeat (helps multi-tab coordination) =========
+    function startHeartbeat(){
+      const beat = () => localStorage.setItem('settings.heartbeat', String(Date.now()));
+      beat();
+      setInterval(beat, 30000);
+    }
+
+    // ========= React to settings changes from other tabs =========
+    window.addEventListener('storage', (e)=>{
+      if (e.key === 'settings'){
+        const s = getSettings();
+        // Language
+        applyLanguage();
+        // Contrast (Chunk 2 defined toggleContrast)
+        if (typeof window.toggleContrast === 'function'){
+          const on = !!s['prefs.contrast'];
+          window.toggleContrast(on);
+        }
+        // Currency preview
+        applyCurrencyPreview();
+        // Motion/Compact/Large text (Chunk 7)
+        document.body.classList.toggle('reduce-motion', !!s['prefs.motionReduced']);
+        document.body.classList.toggle('compact', !!s['prefs.compact']);
+        document.body.classList.toggle('large-text', !!s['prefs.largeText']);
+      }
+    });
+
+    // ========= Initial apply =========
+    applyLanguage();
+    applyCurrencyPreview();
+    startHeartbeat();
+
+    // ========= Optional: "Apply to app" micro-action injection =========
+    (function injectApplyToApp(){
+      if (document.getElementById('btnApplyToApp')) return;
+      const prefsSection = Array.from(document.querySelectorAll('.section-title'))
+        .find(el => /Preferences/i.test(el.textContent||''));
+      if (!prefsSection) return;
+      const container = prefsSection.nextElementSibling;
+      if (!container || !container.classList.contains('settings-card')) return;
+
+      const row = document.createElement('div');
+      row.className='row';
+      row.style.cssText='gap:.5rem; margin-top:.6rem;';
+      row.innerHTML = `<button id="btnApplyToApp" class="btn small" type="button">Apply to App</button>
+                       <span class="muted">Broadcasts your language and currency choices to all open tabs.</span>`;
+      container.appendChild(row);
+
+      document.getElementById('btnApplyToApp')?.addEventListener('click', ()=>{
+        // Nudge storage to trigger listeners in other tabs
+        const s = getSettings();
+        setSettings(s);
+        toast('Applied. Other tabs updated.');
+      });
+    })();
+
+  })();
+</script>
+<!-- SETTINGS • CHUNK 9/10
+     Purpose: App Status & Diagnostics • Rates & FX Live Snapshot • Device & App Info • PWA Install
+     Live, cross‑tab synchronized. Paste this after Chunk 8 (inside <main id="settingsContainer"> … </main>). -->
+
+<!-- App Status & Diagnostics -->
+<section aria-label="App Status & Diagnostics">
+  <div class="section-title">🧭 App Status & Diagnostics</div>
+  <div class="settings-card">
+    <div class="grid-2">
+      <!-- Platform Status -->
+      <div class="settings-card" style="background:#1b1b1b; border-color:#3a3a3a;">
+        <div class="row" style="justify-content:space-between; margin-bottom:.35rem;">
+          <div style="font-weight:800; color:#E0C16A;">Platform Status</div>
+          <button id="btnSyncSettings" class="btn small ghost" type="button">Sync now</button>
+        </div>
+        <div class="row" style="gap:.45rem; flex-wrap:wrap;">
+          <span class="chip">Maintenance: <span id="chipMaint" class="muted">—</span></span>
+          <span class="chip">Readonly: <span id="chipReadonly" class="muted">—</span></span>
+          <span class="chip">Announcement: <span id="chipAnn" class="muted">—</span></span>
+        </div>
+      </div>
+
+      <!-- Rates & FX -->
+      <div class="settings-card" style="background:#1b1b1b; border-color:#3a3a3a;">
+        <div class="row" style="justify-content:space-between; margin-bottom:.35rem;">
+          <div style="font-weight:800; color:#E0C16A;">Rates & FX Snapshot</div>
+          <div class="row" style="gap:.45rem;">
+            <button id="btnRefreshFx" class="btn small ghost" type="button">Refresh FX</button>
+            <a class="btn small ghost" href="merchants.html">Open Merchants</a>
+          </div>
+        </div>
+        <div class="row" style="gap:.6rem; flex-wrap:wrap;">
+          <span class="chip">Buy: <span id="chipBuy" class="muted">—</span></span>
+          <span class="chip">Sell: <span id="chipSell" class="muted">—</span></span>
+          <span class="chip">FX (USD→MWK): <span id="chipFx" class="muted">—</span></span>
+          <span class="chip">Updated: <span id="chipRatesUpd" class="muted">—</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Device & App Info -->
+    <div class="settings-card" style="margin-top:.65rem; background:#1b1b1b; border-color:#3a3a3a;">
+      <div style="font-weight:800; color:#E0C16A; margin-bottom:.35rem;">Device & App</div>
+      <div class="grid-2">
+        <div>
+          <div class="muted">User Agent</div>
+          <div id="infoUA" style="word-break:break-word;">—</div>
+          <div class="muted" style="margin-top:.5rem;">Platform</div>
+          <div id="infoPlat">—</div>
+          <div class="muted" style="margin-top:.5rem;">Language / Timezone</div>
+          <div><span id="infoLang">—</span> • <span id="infoTZ">—</span></div>
+        </div>
+        <div>
+          <div class="muted">Storage Used (est.)</div>
+          <div><span id="infoStorage">—</span></div>
+          <div class="muted" style="margin-top:.5rem;">App Version</div>
+          <div id="infoVersion">Phoenix v1.0</div>
+          <div class="row" style="gap:.45rem; margin-top:.6rem;">
+            <button id="btnInstallApp" class="btn small" type="button" style="display:none;">⬇️ Install App</button>
+            <button id="btnExportDiag" class="btn small ghost" type="button">Export diagnostics</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+  (function(){
+    'use strict';
+
+    const $ = id => document.getElementById(id);
+    function toast(msg){
+      const t = $('toast'); if(!t){ alert(msg); return; }
+      t.textContent = msg; t.style.display='block'; setTimeout(()=> t.style.display='none', 1800);
+    }
+    const safeParse = (s, f) => { try{ const v=JSON.parse(s); return (v===null||v===undefined)?f:v; }catch{ return f; } };
+
+    // ======= Platform Status =======
+    function renderPlatformStatus(){
+      const s = safeParse(localStorage.getItem('platform.settings'), null);
+      $('chipMaint')   && ($('chipMaint').textContent   = s ? (s.maintenance ? 'On' : 'Off') : '—');
+      $('chipReadonly')&& ($('chipReadonly').textContent= s ? (s.readonly ? 'On' : 'Off') : '—');
+      $('chipAnn')     && ($('chipAnn').textContent     = s && s.announcement ? 'Yes' : 'No');
+    }
+    $('btnSyncSettings')?.addEventListener('click', ()=>{
+      // Re-broadcast current settings so other tabs update (Chunk 8 listeners)
+      const s = safeParse(localStorage.getItem('settings'), {});
+      localStorage.setItem('settings', JSON.stringify(s));
+      renderPlatformStatus();
+      toast('Synchronized with app');
+    });
+
+    // ======= Rates & FX =======
+    function renderRatesFx(){
+      const rates = safeParse(localStorage.getItem('platform.rates'), {});
+      $('chipBuy')  && ($('chipBuy').textContent  = rates.buy ? ('MWK '+Number(rates.buy).toLocaleString()) : '—');
+      $('chipSell') && ($('chipSell').textContent = rates.sell? ('MWK '+Number(rates.sell).toLocaleString()) : '—');
+      $('chipRatesUpd') && ($('chipRatesUpd').textContent = rates.updatedAt ? new Date(rates.updatedAt).toLocaleString() : '—');
+      const fx = parseFloat(localStorage.getItem('fxRateMWK')||'0');
+      $('chipFx') && ($('chipFx').textContent = fx ? ('MWK '+fx.toLocaleString()) : '—');
+    }
+    async function refreshFx(){
+      const btn = $('btnRefreshFx'); if (btn){ btn.disabled = true; btn.textContent = 'Refreshing…'; }
+      try{
+        const ctrl = new AbortController(); const t = setTimeout(()=> ctrl.abort(), 4500);
+        const r = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=MWK', { signal: ctrl.signal });
+        clearTimeout(t);
+        if (!r.ok) throw new Error('rate fetch failed');
+        const data = await r.json();
+        const rate = data?.rates?.MWK;
+        if (!rate || rate <= 0) throw new Error('invalid rate');
+        localStorage.setItem('fxRateMWK', String(rate));
+        toast('FX rate updated');
+        renderRatesFx();
+      }catch(e){
+        toast('Failed to fetch FX (offline?)');
+      }finally{
+        if (btn){ btn.disabled = false; btn.textContent = 'Refresh FX'; }
+      }
+    }
+    $('btnRefreshFx')?.addEventListener('click', refreshFx);
+
+    // React to changes from Admin/other pages
+    window.addEventListener('storage', (e)=>{
+      if (e.key === 'platform.rates' || e.key === 'fxRateMWK' || e.key === 'platform.settings'){
+        renderRatesFx();
+        renderPlatformStatus();
+      }
+    });
+
+    // ======= Device & App Info =======
+    async function renderDeviceInfo(){
+      $('infoUA')   && ($('infoUA').textContent   = navigator.userAgent || '—');
+      $('infoPlat') && ($('infoPlat').textContent = navigator.platform || '—');
+      $('infoLang') && ($('infoLang').textContent = navigator.language || document.documentElement.lang || 'en');
+      try{
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+        $('infoTZ') && ($('infoTZ').textContent = tz);
+      }catch(_){ $('infoTZ') && ($('infoTZ').textContent = 'UTC'); }
+
+      // Storage estimate (if supported)
+      try{
+        if (navigator.storage && navigator.storage.estimate){
+          const est = await navigator.storage.estimate();
+          const used = est.usage || 0;
+          const quota= est.quota || 0;
+          const pct  = quota ? Math.round((used/quota)*100) : 0;
+          $('infoStorage') && ($('infoStorage').textContent = `${(used/1048576).toFixed(2)} MB of ${(quota/1048576).toFixed(0)} MB (${pct}%)`);
+        }else{
+          // Fallback approx from localStorage
+          let bytes = 0;
+          for (let i=0; i<localStorage.length; i++){
+            const k = localStorage.key(i) || '';
+            const v = localStorage.getItem(k) || '';
+            bytes += k.length + v.length;
+          }
+          $('infoStorage') && ($('infoStorage').textContent = `${(bytes/1024).toFixed(1)} KB (approx)`);
+        }
+      }catch(_){
+        $('infoStorage') && ($('infoStorage').textContent = '—');
+      }
+    }
+
+    // ======= PWA Install (if available) =======
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e)=>{
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = $('btnInstallApp'); if (btn) btn.style.display = 'inline-flex';
+    });
+    $('btnInstallApp')?.addEventListener('click', async ()=>{
+      try{
+        if (!deferredPrompt) return toast('Install not available');
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        $('btnInstallApp').style.display='none';
+      }catch(_){
+        toast('Install cancelled');
+      }
+    });
+
+    // ======= Diagnostics Export =======
+    function exportDiagnostics(){
+      const diag = {
+        exportedAt: new Date().toISOString(),
+        user: localStorage.getItem('user'),
+        settings: safeParse(localStorage.getItem('settings'), {}),
+        platform: safeParse(localStorage.getItem('platform.settings'), {}),
+        rates: safeParse(localStorage.getItem('platform.rates'), {}),
+        fxRateMWK: parseFloat(localStorage.getItem('fxRateMWK')||'0')||0,
+        sessions: safeParse(localStorage.getItem('sessions'), []),
+        secLocal: safeParse(localStorage.getItem('securityLogs'), []),
+        supportReports: safeParse(localStorage.getItem('platform.reports'), [])
+      };
+      const blob = new Blob([JSON.stringify(diag,null,2)], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'cryptex-diagnostics.json'; a.click();
+      URL.revokeObjectURL(a.href);
+      toast('Diagnostics exported');
+    }
+    $('btnExportDiag')?.addEventListener('click', exportDiagnostics);
+
+    // ======= Init =======
+    function initChunk9(){
+      renderPlatformStatus();
+      renderRatesFx();
+      renderDeviceInfo();
+      // If currency/lang changed in other tabs, our Chip preview from Chunk 3 is auto-updated by listeners
+    }
+    initChunk9();
+
+  })();
+</script>
+<!-- SETTINGS • CHUNK 10/10
+     Purpose: Final glue & polish — focus trapping for modals, cross‑tab UI sync, PWA SW registration,
+     app badge for pending txns, header avatar live updates, safe error reporting.
+     Paste after Chunk 9, before </body>. -->
+<script>
+  (function(){
+    'use strict';
+
+    const $ = id => document.getElementById(id);
+    const safeParse = (s, fb) => { try{ const v=JSON.parse(s); return (v===null||v===undefined)?fb:v; }catch{ return fb; } };
+    function toast(msg){
+      const t = $('toast'); if(!t){ alert(msg); return; }
+      t.textContent = msg; t.style.display='block'; setTimeout(()=> t.style.display='none', 1800);
+    }
+
+    // ========= 1) Focus trap for modals + return focus on close =========
+    (function focusTrap(){
+      let lastFocused = null;
+      let activeTrapRoot = null;
+
+      function getFocusable(root){
+        return Array.from(root.querySelectorAll('a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])'))
+          .filter(el => !el.hasAttribute('disabled') && el.offsetParent !== null);
+      }
+
+      function trapWithin(modal){
+        const f = getFocusable(modal);
+        if (!f.length) return;
+        const first = f[0], last = f[f.length-1];
+        function onKey(e){
+          if (e.key !== 'Tab') return;
+          if (e.shiftKey){
+            if (document.activeElement === first){ e.preventDefault(); last.focus(); }
+          }else{
+            if (document.activeElement === last){ e.preventDefault(); first.focus(); }
+          }
+        }
+        activeTrapRoot = modal;
+        modal.addEventListener('keydown', onKey);
+        // focus first interactive
+        setTimeout(()=> first.focus(), 60);
+        // cleanup hook when modal closes
+        const obs = new MutationObserver(()=>{
+          if (modal.style.display === 'none'){
+            modal.removeEventListener('keydown', onKey);
+            obs.disconnect();
+            activeTrapRoot = null;
+            if (lastFocused && lastFocused.focus) lastFocused.focus();
+          }
+        });
+        obs.observe(modal, { attributes:true, attributeFilter:['style'] });
+      }
+
+      // Wrap openModal if available, else observe openings
+      const originalOpen = window.openModal;
+      window.openModal = function(id){
+        try{
+          lastFocused = document.activeElement;
+          if (typeof originalOpen === 'function') originalOpen(id);
+          const el = document.getElementById(id);
+          if (el && el.classList.contains('modal') && el.style.display === 'block'){
+            trapWithin(el);
+          }
+        }catch(_){}
+      };
+
+      // Also observe direct openings (buttons with data-modal)
+      document.addEventListener('click', e=>{
+        const trg = e.target.closest('[data-modal]');
+        if (!trg) return;
+        lastFocused = document.activeElement;
+        const id = trg.getAttribute('data-modal');
+        const m = document.getElementById(id);
+        if (m){
+          m.style.display = 'block';
+          trapWithin(m);
+        }
+      });
+    })();
+
+    // ========= 2) Header avatar & name live sync across tabs =========
+    function syncHeaderAvatar(){
+      const email = localStorage.getItem('user') || 'user@example.com';
+      const name  = localStorage.getItem('userName') || '';
+      const avH   = $('headerAvatar');
+      const avBig = $('avatarBig');
+      if (avH)  avH.textContent  = (name || email).trim().slice(0,1).toUpperCase();
+      if (avBig) avBig.textContent = (name || email).trim().slice(0,1).toUpperCase();
+      const displayNameEl  = $('displayName');
+      const displayEmailEl = $('displayEmail');
+      if (displayNameEl)  displayNameEl.textContent = name || 'User';
+      if (displayEmailEl) displayEmailEl.textContent = email;
+    }
+    window.addEventListener('storage', (e)=>{
+      if (['user','userName'].includes(e.key||'')) syncHeaderAvatar();
+    });
+
+    // ========= 3) App Badge showing pending transactions (if supported) =========
+    async function updateAppBadge(){
+      try{
+        const tx = safeParse(localStorage.getItem('transactions'), []);
+        const pending = tx.filter(t=> String(t.status||'').toLowerCase()==='pending').length;
+        if ('setAppBadge' in navigator){
+          if (pending > 0) await navigator.setAppBadge(pending); else await navigator.clearAppBadge();
+        }else if (window.ExperimentalBadge){
+          // fallback experimental API if available
+          if (pending > 0) window.ExperimentalBadge.set(pending); else window.ExperimentalBadge.clear();
+        }
+      }catch(_){}
+    }
+    window.addEventListener('storage', (e)=>{
+      if (e.key === 'transactions') updateAppBadge();
+    });
+    updateAppBadge();
+
+    // ========= 4) Service Worker registration (if present) =========
+    (function registerSW(){
+      if (!('serviceWorker' in navigator)) return;
+      // Only attempt once per session
+      if (sessionStorage.getItem('swRegistered')==='1') return;
+      navigator.serviceWorker.register('/sw.js').then(reg=>{
+        sessionStorage.setItem('swRegistered','1');
+        console.log('SW registered', reg.scope);
+      }).catch(_=>{
+        console.warn('SW not available (optional)');
+      });
+    })();
+
+    // ========= 5) Global error handler (dev-friendly) =========
+    window.addEventListener('error', (e)=>{
+      try{
+        const logs = safeParse(localStorage.getItem('securityLogs'), []);
+        logs.push({ timestamp:new Date().toISOString(), event:'JS error', details:{ msg:e.message, src:e.filename, line:e.lineno }, ua:navigator.userAgent });
+        localStorage.setItem('securityLogs', JSON.stringify(logs.slice(-300)));
+      }catch(_){}
+    });
+
+    // ========= 6) Sign-out detection across tabs (role/user change) =========
+    (function signoutSync(){
+      function check(){
+        const role = localStorage.getItem('role') || 'user';
+        const user = localStorage.getItem('user') || '';
+        // if role removed but admin UI visible, hide quickly (Chunk 4 listens too)
+        const adminSection = $('adminSection');
+        const smallBtn     = $('smallAdminButton');
+        const isAdmin = (role === 'admin') && !!user;
+        if (adminSection) adminSection.style.display = isAdmin ? 'block':'none';
+        if (smallBtn)     smallBtn.style.display     = isAdmin ? 'inline-flex':'none';
+      }
+      window.addEventListener('storage', (e)=>{
+        if (['role','user','adminToken','tokenTime'].includes(e.key||'')) check();
+      });
+      check();
+    })();
+
+    // ========= 7) Smooth scroll to sections by hash (#security, #notifications, etc.) =========
+    (function sectionHashNav(){
+      function scrollToHash(){
+        const id = (location.hash||'').replace('#','');
+        if (!id) return;
+        // try titles
+        const all = Array.from(document.querySelectorAll('.section-title'));
+        const match = all.find(el => (el.textContent||'').toLowerCase().includes(id.toLowerCase()));
+        if (match){
+          match.scrollIntoView({ behavior:'smooth', block:'start' });
+        }
+      }
+      window.addEventListener('hashchange', scrollToHash);
+      setTimeout(scrollToHash, 50);
+    })();
+
+    // ========= 8) Keyboard shortcuts: "/" focus search (if present), "g" go top =========
+    (function shortcuts(){
+      document.addEventListener('keydown', (e)=>{
+        const tag = (document.activeElement && document.activeElement.tagName) || '';
+        if (e.key === '/' && !e.ctrlKey && !e.metaKey){
+          if (['INPUT','TEXTAREA','SELECT'].includes(tag)) return;
+          e.preventDefault();
+          // no universal search in settings; focus first input instead
+          const input = document.querySelector('.input, .select');
+          input?.focus();
+        }
+        if (e.key.toLowerCase()==='g' && (e.ctrlKey || e.metaKey)){
+          e.preventDefault();
+          window.scrollTo({ top:0, behavior:'smooth' });
+        }
+      });
+    })();
+
+    // ========= 9) Settings Ready event for other modules =========
+    (function signalReady(){
+      try{
+        window.dispatchEvent(new CustomEvent('settings:ready', { detail:{ at: Date.now() } }));
+      }catch(_){}
+    })();
+
+    // ========= 10) Initial UI sync after all chunks =========
+    function initChunk10(){
+      syncHeaderAvatar();
+      // Re-apply language and currency if chunk 8 is present
+      if (window.SettingsAPI){
+        window.SettingsAPI.i18n.apply();
+        // format previews already handled by earlier chunks
+      }
+    }
+    initChunk10();
+
+  })();
+</script>

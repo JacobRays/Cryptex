@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Deposit Funds - Cryptex Malawi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root{
+      --bg-0:#0f0f10; --bg-1:#121212; --surface:#1e1e1e; --surface-2:#2c2c2c;
+      --gold:#D4AF37; --gold-2:#E0C16A; --muted:#9E9E9E; --text:#f5f5f5;
+      --danger:#F44336; --success:#4CAF50; --warn:#FF9800;
+      --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.45); --ring:0 0 0 2px rgba(212,175,55,.35);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      min-height:100vh; background:
+        radial-gradient(60vw 60vw at 10% -10%, rgba(212,175,55,.08), transparent 60%),
+        radial-gradient(70vw 70vw at 110% -20%, rgba(224,193,106,.06), transparent 60%),
+        linear-gradient(135deg, var(--bg-0), var(--bg-1));
+      color:var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      padding-bottom: 80px;
+    }
+
+    /* App bar + 3D logo */
+    .app-bar{
+      background:rgba(30,30,30,.8); border-bottom:1px solid rgba(212,175,55,.18);
+      backdrop-filter: blur(8px); padding:.85rem 1rem; box-shadow:0 8px 24px rgba(0,0,0,.25); display:flex; align-items:center; gap:.75rem;
+      position: sticky; top:0; z-index:10;
+    }
+    .back-btn{ text-decoration:none; color:var(--gold-2); font-size:1.5rem; }
+    .brand{ margin:0 auto; display:flex; align-items:center; justify-content:center; gap:.5rem; }
+    .logo-wrap{ perspective: 900px; }
+    .logo{
+      font-weight:900; letter-spacing:.18rem; font-size: clamp(1.4rem,4.5vw,2rem); line-height:1;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2) 70%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      transform: rotateX(14deg) rotateY(-10deg); transform-style: preserve-3d;
+      text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 12px 24px rgba(212,175,55,.25);
+      position:relative; transition: transform .4s ease, text-shadow .4s ease;
+    }
+    .logo::after{
+      content:''; position:absolute; inset:-6px -12px;
+      background: linear-gradient(120deg, transparent 25%, rgba(255,255,255,.12) 40%, transparent 60%);
+      transform: translateZ(50px) skewX(-12deg); mix-blend-mode: screen; border-radius:24px;
+      animation: shine 4.5s linear infinite;
+    }
+    .logo:hover{ transform: rotateX(0deg) rotateY(0deg) translateY(-2px) scale(1.02); text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 20px 40px rgba(212,175,55,.35); }
+    @keyframes shine{ 0%{ transform: translateX(-120%) translateZ(50px) skewX(-12deg);} 100%{ transform: translateX(120%) translateZ(50px) skewX(-12deg);} }
+
+    .container{ padding:1rem; max-width:520px; margin: 0 auto; }
+
+    /* Tabs */
+    .deposit-tabs{ display:flex; background:#2C2C2C; border-radius:12px; padding:.25rem; margin:1rem 0 1.25rem; border:1px solid #333; }
+    .tab{ flex:1; padding:.75rem; text-align:center; background:transparent; border:none; color:#cfcfcf; cursor:pointer; border-radius:10px; transition:.2s; font-weight:800 }
+    .tab.active{ background:linear-gradient(135deg, var(--gold), var(--gold-2)); color:#121212; }
+
+    /* Cards and inputs */
+    .info-card{ background:#2C2C2C; border:1px solid rgba(212,175,55,.35); border-radius:12px; padding:1.2rem; margin-bottom:1rem; box-shadow: var(--shadow); }
+    .highlight{ background: linear-gradient(135deg, var(--gold), var(--gold-2)); color:#121212; text-align:center; }
+    .label{ font-size:.9rem; color:#E0C16A; font-weight:700; margin-bottom:.4rem; display:block }
+    .field{ width:100%; padding:1rem; background:#1E1E1E; border:1px solid #444; border-radius:10px; color:#fff; font-size:1rem; transition: border-color .2s, box-shadow .2s }
+    .field:focus{ outline:none; border-color:var(--gold-2); box-shadow: var(--ring); background:#191919 }
+    .muted{ color:var(--muted); font-size:.9rem }
+
+    .upload{ border:2px dashed var(--gold); border-radius:12px; padding:1.25rem; text-align:center; cursor:pointer; transition:.2s; margin-top:.5rem }
+    .upload:hover{ background: rgba(212,175,55,.08) }
+    .upload.has-file{ border-style:solid; background: rgba(76,175,80,.1); border-color: var(--success) }
+
+    .btn{ width:100%; padding:1rem; background: linear-gradient(135deg, var(--gold), var(--gold-2)); color:#121212; border:none; border-radius:12px; font-size:1.05rem; font-weight:900; cursor:pointer; margin-top:1rem; letter-spacing:.06em; box-shadow: 0 8px 20px rgba(212,175,55,.25); transition: transform .15s ease; }
+    .btn:hover{ transform: translateY(-2px) }
+    .row{ display:flex; align-items:center; justify-content:center; gap:.5rem; flex-wrap:wrap }
+
+    /* Toast */
+    .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:24px; background:#1b1b1b; border:1px solid rgba(212,175,55,.35); color:var(--gold-2); padding:.7rem 1rem; border-radius:10px; box-shadow: var(--shadow); display:none; z-index:1200; min-width:220px; text-align:center; }
+    .toast.show{ display:block; animation: toast-in .2s ease }
+    @keyframes toast-in{ from{ opacity:0; transform: translate(-50%, 12px);} to{ opacity:1; transform: translate(-50%, 0);} }
+  </style>
+</head>
+<body>
+  <div class="app-bar">
+    <a href="wallet.html" class="back-btn">←</a>
+    <div class="brand">
+      <div class="logo-wrap"><div class="logo">CRYPT-X</div></div>
+      <div style="color:#e7d59b; font-weight:800; letter-spacing:.06rem;">Deposit Funds</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="deposit-tabs">
+      <button class="tab active" onclick="switchTab('mobile', this)">Mobile Money</button>
+      <button class="tab" onclick="switchTab('crypto', this)">Crypto (USDT)</button>
+    </div>
+        <!-- Mobile Money Deposit -->
+    <div id="mobileDeposit">
+      <div class="info-card highlight">
+        <div class="muted" style="opacity:.9;">Send payment to</div>
+        <div id="payNumber" style="font-size:1.6rem; font-weight:900; letter-spacing:.04em;">0881234567</div>
+        <div class="row" style="margin-top:.5rem;">
+          <button type="button" class="btn" style="width:auto; padding:.6rem .9rem;" onclick="copyText('0881234567')">📋 Copy Number</button>
+          <div class="muted" style="font-weight:700;">Business: CRYPTEX MALAWI LTD</div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="label">Steps</div>
+        <ol class="muted" style="padding-left:1.25rem;">
+          <li>Send money via Airtel Money or TNM Mpamba to the number above</li>
+          <li>Take a screenshot of your payment confirmation</li>
+          <li>Fill in the details below and upload the screenshot</li>
+          <li>We’ll verify and credit you within 5–10 minutes</li>
+        </ol>
+      </div>
+
+      <div class="info-card">
+        <div class="label">Amount Sent (MWK)</div>
+        <input id="mobileAmount" type="number" inputmode="decimal" class="field" placeholder="Enter amount" />
+
+        <div class="label" style="margin-top:.8rem;">Provider</div>
+        <div class="row">
+          <button type="button" class="btn" style="width:auto; padding:.6rem .9rem;" onclick="setProvider('airtel', this)">📱 Airtel</button>
+          <button type="button" class="btn" style="width:auto; padding:.6rem .9rem; background:linear-gradient(135deg,#E0C16A,#D4AF37);" onclick="setProvider('mpamba', this)">📲 TNM</button>
+        </div>
+
+        <div class="label" style="margin-top:.8rem;">Transaction Reference</div>
+        <input id="mobileRef" type="text" class="field" placeholder="e.g., PP240101234567" />
+
+        <div class="label" style="margin-top:.8rem;">Upload Screenshot</div>
+        <div id="mobileUpload" class="upload" onclick="document.getElementById('mobileFile').click()">
+          <div style="font-size:2.2rem; margin-bottom:.25rem;">📸</div>
+          <div style="font-weight:900; color:var(--gold)">Click to upload screenshot</div>
+          <div class="muted" style="margin-top:.35rem;">PNG, JPG up to 5MB</div>
+        </div>
+        <input id="mobileFile" type="file" accept="image/*" style="display:none" />
+        <div id="mobileFilename" class="muted" style="margin-top:.4rem; display:none;"></div>
+
+        <button type="button" class="btn" onclick="submitMobile()">Submit Deposit Request</button>
+      </div>
+    </div>
+
+    <!-- Crypto (USDT TRC20) Deposit -->
+    <div id="cryptoDeposit" style="display:none;">
+      <div class="info-card highlight">
+        <div class="muted" style="opacity:.9;">USDT (TRC20) Deposit Address</div>
+        <div id="usdtAddress" style="font-size:1rem; word-break:break-all; padding:.75rem; background:#121212; border-radius:10px; margin:.5rem 0;">TN8RX7RDuWgDFcGWY2xbqPPp1nCqN5TcZH</div>
+        <div class="row">
+          <button type="button" class="btn" style="width:auto; padding:.6rem .9rem;" onclick="copyText(document.getElementById('usdtAddress').textContent)">📋 Copy Address</button>
+          <button type="button" class="btn" style="width:auto; padding:.6rem .9rem;" onclick="showQR()">🧾 Show QR</button>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="label">Amount (USDT)</div>
+        <input id="usdtAmount" type="number" inputmode="decimal" class="field" placeholder="Enter USDT amount" min="10" step="0.01" />
+
+        <div class="label" style="margin-top:.8rem;">TX Hash</div>
+        <input id="txHash" type="text" class="field" placeholder="Paste blockchain TX hash" />
+
+        <div class="info-card" style="background:rgba(33,150,243,.1); border-color:#2196F3;">
+          <div class="label" style="color:#8ec9ff;">Important</div>
+          <ul class="muted" style="padding-left:1.25rem; margin-top:.25rem;">
+            <li>Only send USDT on the TRON (TRC20) network</li>
+            <li>Minimum deposit: 10 USDT</li>
+            <li>Deposits typically credit within 10–30 minutes</li>
+          </ul>
+        </div>
+
+        <button type="button" class="btn" onclick="submitCrypto()">I’ve Sent the USDT</button>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">Saved</div>
+      <script>
+    'use strict';
+
+    // ===== Config =====
+    const DEMO_AUTO_APPROVE = true;  // Auto-complete for demo; set false for manual review
+    const MAX_FILE_MB = 5;
+
+    // ===== Toast =====
+    function toast(msg){ const t=document.getElementById('toast'); if(!t){ alert(msg); return; } t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2000); }
+    function copyText(txt){ navigator.clipboard.writeText(String(txt||'').trim()); toast('Copied'); }
+
+    // ===== Tabs =====
+    function switchTab(type, el){
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      el?.classList.add('active');
+      const m = document.getElementById('mobileDeposit');
+      const c = document.getElementById('cryptoDeposit');
+      if(type==='mobile'){ m.style.display='block'; c.style.display='none'; }
+      else { m.style.display='none'; c.style.display='block'; }
+    }
+
+    // ===== Provider state =====
+    let provider = 'airtel';
+    function setProvider(p, btn){
+      provider = p;
+      toast(p==='airtel' ? 'Airtel selected' : 'TNM selected');
+    }
+
+    // ===== File handling (mobile) =====
+    const mobileFileEl = document.getElementById('mobileFile');
+    const mobileUpload = document.getElementById('mobileUpload');
+    const mobileFilename = document.getElementById('mobileFilename');
+    mobileFileEl.addEventListener('change', ()=>{
+      const f = mobileFileEl.files[0]; if(!f) return;
+      if (f.size > MAX_FILE_MB * 1024 * 1024) { toast('File must be under 5MB'); mobileFileEl.value=''; return; }
+      if (!f.type.startsWith('image/')) { toast('Upload an image'); mobileFileEl.value=''; return; }
+      mobileUpload.classList.add('has-file');
+      mobileFilename.style.display='block';
+      mobileFilename.textContent = '✅ ' + f.name;
+    });
+
+    // ===== Transactions & Wallet helpers =====
+    function getTxns(){ let tx = JSON.parse(localStorage.getItem('transactions')||'[]'); if(!Array.isArray(tx)) tx=[]; return tx; }
+    function saveTxns(tx){ localStorage.setItem('transactions', JSON.stringify(tx)); }
+    function generateTxnId(){ return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2,9).toUpperCase(); }
+    function persistWallet(w){ localStorage.setItem('wallet', JSON.stringify({ usdt: +w.usdt || 0, mwk: +w.mwk || 0 })); }
+    function recomputeWalletFromHistory(){
+      let tx = getTxns().sort((a,b)=> new Date(a.date||a.timestamp) - new Date(b.date||b.timestamp));
+      const fx = parseFloat(localStorage.getItem('fxRateMWK')||'1750') || 1750;
+      let w = { usdt:0, mwk:0 };
+      tx.forEach(t=>{
+        if((t.status||'').toLowerCase()!=='completed') return;
+        const typ=(t.type||'').toLowerCase();
+        if(typ==='deposit')       w.mwk += +t.amount || +t.totalMWK || 0;
+        else if(typ==='withdraw') w.mwk -= +t.amount || +t.totalMWK || 0;
+        else if(typ==='buy'){ const usdt=+t.amount||0; const mwk=+t.totalMWK||0; w.usdt += usdt; w.mwk -= mwk; }
+        else if(typ==='sell'){ const usdt=+t.amount||0; const mwk=+t.totalMWK||0; w.usdt -= usdt; w.mwk += mwk; }
+      });
+      w.usdt = Math.max(0, +w.usdt.toFixed(6)); w.mwk = Math.max(0, Math.round(w.mwk));
+      return w;
+    }
+
+    // ===== Mobile deposit submit =====
+    function submitMobile(){
+      const amount = parseFloat((document.getElementById('mobileAmount').value||'0').trim());
+      const ref = (document.getElementById('mobileRef').value||'').trim();
+      const fileOk = !!mobileFileEl.files[0];
+
+      if (!amount || amount <= 0) return toast('Enter amount');
+      if (!ref) return toast('Enter transaction reference');
+      if (!fileOk) return toast('Upload payment screenshot');
+
+      const id = generateTxnId();
+      const tx = {
+        id, type:'deposit', amount:+amount, method: provider,
+        reference: ref, status:'pending', direction:'in',
+        date: new Date().toISOString(), channel:'mobile'
+      };
+      const all = getTxns(); all.unshift(tx); saveTxns(all);
+      toast('Deposit submitted — verifying');
+
+      if (DEMO_AUTO_APPROVE){
+        setTimeout(()=>{
+          const arr = getTxns(); const i = arr.findIndex(t=>t.id===id);
+          if(i>-1){ arr[i].status='completed'; saveTxns(arr); persistWallet(recomputeWalletFromHistory()); toast('Deposit credited'); }
+          setTimeout(()=> window.location.href='wallet.html', 600);
+        }, 2500);
+      } else {
+        setTimeout(()=> window.location.href='wallet.html', 600);
+      }
+    }
+
+    // ===== Crypto deposit submit =====
+    function submitCrypto(){
+      const usdt = parseFloat((document.getElementById('usdtAmount').value||'0').trim());
+      const hash = (document.getElementById('txHash').value||'').trim();
+      if (!usdt || usdt < 10) return toast('Minimum deposit is 10 USDT');
+      if (!hash) return toast('Enter TX hash');
+
+      const id = generateTxnId();
+      // Record as a 'buy' with zero MWK cost so wallet credits USDT without changing MWK
+      const tx = {
+        id, type:'buy', amount:+usdt, totalMWK:0, reference: hash,
+        status:'pending', direction:'in', date:new Date().toISOString(), channel:'crypto', network:'TRC20'
+      };
+      const all = getTxns(); all.unshift(tx); saveTxns(all);
+      toast('USDT deposit noticed — awaiting confirms');
+
+      if (DEMO_AUTO_APPROVE){
+        setTimeout(()=>{
+          const arr = getTxns(); const i = arr.findIndex(t=>t.id===id);
+          if(i>-1){ arr[i].status='completed'; saveTxns(arr); persistWallet(recomputeWalletFromHistory()); toast('USDT credited'); }
+          setTimeout(()=> window.location.href='wallet.html', 600);
+        }, 4000);
+      } else {
+        setTimeout(()=> window.location.href='wallet.html', 600);
+      }
+    }
+
+    // ===== QR (optional tool; removable) =====
+    function showQR(){
+      const addr = document.getElementById('usdtAddress').textContent.trim();
+      if (!addr) return;
+      // Lazy load QRCode lib from CDN
+      const present = document.getElementById('qrcode-lib');
+      const doShow = ()=>{
+        const w = window.open('', '_blank', 'width=360,height=420');
+        if(!w){ toast('Popup blocked'); return; }
+        w.document.write('<html><head><title>USDT Address QR</title></head><body style="background:#121212; color:#fff; display:flex; align-items:center; justify-content:center; height:100vh; margin:0;"><div id="qr"></div><p style="position:fixed; bottom:12px; font-family:sans-serif;">TRC20: '+addr+'</p></body></html>');
+        const inject = w.document.createElement('script');
+        inject.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+        inject.onload = ()=> new w.QRCode(w.document.getElementById('qr'), { text: addr, width: 260, height: 260, colorDark: "#ffffff", colorLight: "#121212" });
+        w.document.body.appendChild(inject);
+      };
+      doShow();
+    }
+
+    // ===== Init =====
+    window.addEventListener('DOMContentLoaded', ()=>{
+      // Optional auth (if app.js exists)
+      if (typeof checkAuth === 'function') { try{ checkAuth(); }catch(_){} }
+    });
+  </script>
+
+  <!-- Optional app helpers -->
+  <script src="app.js"></script>
+</body>
+</html>

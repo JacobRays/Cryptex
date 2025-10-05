@@ -1,0 +1,3194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CRYPT-X Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <style>
+    /* Phoenix Theme (polished) */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg:#121212; --surface:#1E1E1E; --card:#2C2C2C; --gold:#D4AF37; --gold2:#E0C16A;
+      --text:#DADADA; --muted:#9E9E9E; --border:#3A3A3A; --green:#4CAF50; --red:#F44336; --orange:#FF9800;
+      --shadow: 0 10px 30px rgba(0,0,0,.45);
+    }
+    body { background:var(--bg); color:var(--text); font-family: "Segoe UI",system-ui,Roboto,Arial; min-height:100vh; padding-bottom: 24px; }
+    a { color:inherit; text-decoration:none; }
+    button { font-family:inherit; }
+
+    /* Topbar */
+    .topbar {
+      position:sticky; top:0; z-index:10;
+      background:rgba(30,30,30,.9); padding:.85rem 1.1rem; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between; backdrop-filter: blur(8px);
+      box-shadow: 0 2px 12px rgba(0,0,0,.35);
+    }
+    .left-head{ display:flex; align-items:center; gap:.6rem; }
+    .back-thumb{
+      width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+      background:#151515; border:1px solid rgba(212,175,55,.35); color:var(--gold2); font-weight:900; font-size:1.1rem;
+      box-shadow: 0 6px 18px rgba(212,175,55,.18);
+    }
+    .back-thumb:hover{ transform: translateY(-1px); box-shadow: 0 10px 24px rgba(212,175,55,.28); }
+    .brand { display:flex; align-items:center; gap:.6rem; font-weight:800; letter-spacing:.5px; }
+    .brand-logo {
+      width:34px; height:34px; border-radius:8px;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      display:flex; justify-content:center; align-items:center; color:#121212; font-weight:900;
+      box-shadow: 0 6px 22px rgba(212,175,55,.35);
+    }
+    .brand-name { color:var(--gold); }
+    .admin-info { color:var(--muted); font-size:.9rem; }
+    .admin-info strong { color:var(--gold2); }
+
+    /* Layout */
+    .layout { display:flex; min-height:calc(100vh - 60px); }
+    .sidebar {
+      width:260px; background:var(--surface); border-right:1px solid var(--border); padding:1rem .8rem;
+      position:sticky; top:60px; height:calc(100vh - 60px); overflow:auto;
+    }
+    .nav-title { color:var(--muted); font-size:.8rem; margin:.25rem .5rem .5rem; }
+    .nav { display:grid; gap:.35rem; }
+    .nav-btn {
+      display:flex; align-items:center; gap:.6rem; padding:.65rem .75rem; border-radius:10px; color:var(--text); cursor:pointer; border:1px solid transparent;
+    }
+    .nav-btn:hover { background:#252525; border-color:#2d2d2d; }
+    .nav-btn.active { background:#25221a; border-color:var(--gold); box-shadow: inset 0 0 0 1px rgba(212,175,55,.35); }
+    .nav-btn .icon { width:22px; text-align:center; }
+    .version { color:var(--muted); font-size:.78rem; margin-top:.75rem; text-align:center; }
+
+    .content { flex:1; padding:1rem; }
+    .panel { display:none; animation: fade .2s ease; }
+    .panel.active { display:block; }
+    @keyframes fade { from {opacity:0; transform:translateY(6px);} to {opacity:1; transform:translateY(0);} }
+
+    .section { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1rem; margin-bottom:1rem; box-shadow: var(--shadow); }
+    .section-title { color:var(--gold2); font-weight:800; margin-bottom:.6rem; display:flex; align-items:center; gap:.5rem; }
+
+    .grid { display:grid; gap:.75rem; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr; }
+    @media(min-width:900px){ .grid-2 { grid-template-columns:1fr 1fr; } .grid-3 { grid-template-columns:1fr 1fr 1fr; } }
+
+    .stat { background:#232323; border:1px solid var(--border); border-radius:10px; padding:.85rem; }
+    .stat-label { color:var(--muted); font-size:.9rem; }
+    .stat-value { font-weight:800; font-size:1.3rem; margin-top:.2rem; color:var(--gold); }
+
+    .btn { padding:.6rem .9rem; border-radius:10px; border:1px solid var(--gold); background:#2C2C2C; color:var(--gold); cursor:pointer; font-weight:700; }
+    .btn.primary { background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#121212; border:none; box-shadow:0 4px 18px rgba(212,175,55,.28); }
+    .btn.small { padding:.45rem .7rem; font-weight:600; }
+    .btn.ghost { background:#1e1e1e; border-color:#3a3a3a; color:#e8e8e8; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(212,175,55,.35), 0 0 0 1px rgba(212,175,55,.25); }
+
+    .field { display:flex; flex-direction:column; gap:.3rem; }
+    .label { color:var(--gold2); font-size:.9rem; }
+    .input, .select, textarea { background:#1E1E1E; border:1px solid #444; color:#fff; padding:.6rem .7rem; border-radius:8px; font-size:.95rem; }
+
+    .toolbar { display:flex; gap:.5rem; align-items:center; justify-content:space-between; flex-wrap:wrap; margin-bottom:.6rem; }
+    .muted { color:var(--muted); }
+    .row { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+
+    .badge { padding:.2rem .5rem; border-radius:999px; font-weight:800; font-size:.75rem; border:1px solid #3a3a3a; }
+    .bad-ok{ background:rgba(76,175,80,.12); color:#aaf3b0; border-color:rgba(76,175,80,.3); }
+    .bad-warn{ background:rgba(255,152,0,.12); color:#ffd37a; border-color:rgba(255,152,0,.3); }
+    .bad-err{ background:rgba(244,67,54,.12); color:#ff9d94; border-color:rgba(244,67,54,.3); }
+
+    /* Modals (used in later chunks) */
+    .modal { display:none; position:fixed; z-index:1000; inset:0; background:rgba(0,0,0,.85) }
+    .modal-content{ background:#1E1E1E; margin:4% auto; width:95%; max-width:900px; border:2px solid var(--gold); border-radius:12px; box-shadow:0 0 40px rgba(212,175,55,.4); max-height:90vh; overflow:auto; }
+    .modal-header{ padding:1rem 1.25rem; border-bottom:1px solid #444; display:flex; align-items:center; justify-content:space-between; position: sticky; top:0; background:#1E1E1E; }
+    .modal-title{ color:var(--gold); font-weight:800; }
+    .close { border:1px solid var(--gold); color:var(--gold); padding:.25rem .6rem; border-radius:8px; cursor:pointer; background:#2c2c2c; }
+
+    /* Toast */
+    .toast { position:fixed; bottom:22px; right:18px; background:#1E1E1E; border:1px solid var(--gold); color:var(--gold); padding:.6rem .85rem; border-radius:8px; box-shadow:0 8px 22px rgba(0,0,0,.35); display:none; z-index:1200; }
+
+    /* Tables/Lists (later chunks) */
+    .list { display:grid; gap:.6rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="left-head">
+      <a href="dashboard.html" class="back-thumb" title="Back to App">←</a>
+      <div class="brand">
+        <div class="brand-logo">CX</div>
+        <div class="brand-name">CRYPT-X Admin</div>
+      </div>
+    </div>
+    <div class="admin-info">Signed in as <strong id="adminEmail">admin@cryptex.mw</strong></div>
+  </div>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="nav-title">Manage</div>
+      <nav class="nav">
+        <div class="nav-btn active" data-panel="overview"  onclick="showPanel('overview',  this)"><span class="icon">📊</span>Overview</div>
+        <div class="nav-btn"        data-panel="users"     onclick="showPanel('users',     this)"><span class="icon">👥</span>Users</div>
+        <div class="nav-btn"        data-panel="merchants" onclick="showPanel('merchants', this)"><span class="icon">🏪</span>Merchants</div>
+        <div class="nav-btn" data-panel="merchants" onclick="showPanel('merchants', this)"><span class="icon">🏪</span>Merchants</div>
+        <div class="nav-btn" data-panel="merchant-apps" onclick="showPanel('merchant-apps', this)"><span class="icon">📝</span>Merchant Apps</div> <!-- ADD THIS LINE -->
+        <div class="nav-btn"        data-panel="recharges" onclick="showPanel('recharges', this)"><span class="icon">📥</span>Recharges</div>
+        <div class="nav-btn"        data-panel="rates"     onclick="showPanel('rates',     this)"><span class="icon">💱</span>Rates</div>
+        <div class="nav-btn"        data-panel="fees"      onclick="showPanel('fees',      this)"><span class="icon">💸</span>Fees</div>
+      </nav>
+
+      <div class="nav-title" style="margin-top:.9rem;">System</div>
+      <nav class="nav">
+        <div class="nav-btn" data-panel="security" onclick="showPanel('security', this)"><span class="icon">🔐</span>Security Logs</div>
+        <div class="nav-btn" data-panel="settings" onclick="showPanel('settings', this)"><span class="icon">⚙️</span>Settings</div>
+      </nav>
+
+      <div class="version">v1.0 • Phoenix</div>
+    </aside>
+
+    <!-- Content -->
+    <main class="content">
+      <!-- Overview -->
+      <section id="panel-overview" class="panel active">
+        <div class="section">
+          <div class="section-title">📈 Overview</div>
+          <div class="grid grid-3">
+            <div class="stat"><div class="stat-label">Total Users</div>         <div class="stat-value" id="statUsers">—</div></div>
+            <div class="stat"><div class="stat-label">Verified Merchants</div>  <div class="stat-value" id="statMerchants">—</div></div>
+            <div class="stat"><div class="stat-label">Pending Recharges</div>   <div class="stat-value" id="statRecharges">—</div></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">🪙 Today’s Volume</div>
+          <div class="grid grid-3">
+            <div class="stat"><div class="stat-label">Buy USDT</div>      <div class="stat-value" id="volBuy">—</div></div>
+            <div class="stat"><div class="stat-label">Sell USDT</div>     <div class="stat-value" id="volSell">—</div></div>
+            <div class="stat"><div class="stat-label">MWK Recharges</div> <div class="stat-value" id="volRecharge">—</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recharges -->
+      <section id="panel-recharges" class="panel">
+        <div class="section">
+          <div class="section-title">📥 Recharges</div>
+          <div class="toolbar">
+            <div class="row">
+              <select id="rechargeFilter" class="select">
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="processed">Processed</option>
+              </select>
+              <input id="rechargeSearch" class="input" type="search" placeholder="Search user, ref, method...">
+            </div>
+            <div class="row">
+              <span class="badge bad-warn">Pending: <span id="sumPending">0</span></span>
+              <span class="badge">Pending MWK: <span id="sumPendingMwk">MK 0</span></span>
+              <span class="badge bad-ok">Approved Today: <span id="sumApprovedToday">MK 0</span></span>
+              <button class="btn small" onclick="openNewRecharge()">New Manual Recharge</button>
+              <button class="btn small" onclick="renderRecharges()">Reload</button>
+            </div>
+          </div>
+          <div id="rechargeList" class="list"></div>
+        </div>
+      </section>
+
+      <!-- Users -->
+      <section id="panel-users" class="panel">
+        <div class="section">
+          <div class="section-title">👥 Users</div>
+          <div class="toolbar">
+            <div class="row">
+              <input id="userSearch" class="input" type="search" placeholder="Search email, name, phone">
+              <select id="userRoleFilter" class="select">
+                <option value="all">All roles</option><option value="user">User</option><option value="merchant">Merchant</option><option value="admin">Admin</option>
+              </select>
+              <select id="userStateFilter" class="select">
+                <option value="all">All states</option><option value="active">Active</option><option value="banned">Banned</option>
+              </select>
+              <select id="userKycFilter" class="select">
+                <option value="all">KYC: Any</option><option value="pending">Pending</option><option value="verified">Verified</option><option value="rejected">Rejected</option>
+              </select>
+            </div>
+            <div class="row">
+              <button id="btnReloadUsers" class="btn small">Reload</button>
+              <button id="btnNewUser" class="btn small">New User</button>
+            </div>
+          </div>
+          <div id="userList" class="list"></div>
+        </div>
+      </section>
+
+      <!-- Merchants -->
+      <section id="panel-merchants" class="panel">
+        <div class="section">
+          <div class="section-title">🏪 Merchants</div>
+          <div class="toolbar">
+            <div class="row">
+              <input id="merchSearch" class="input" type="search" placeholder="Search name, phone, location, email">
+              <select id="merchStateFilter" class="select">
+                <option value="all">All states</option><option value="online">Online</option><option value="offline">Offline</option><option value="suspended">Suspended</option>
+              </select>
+              <select id="merchVerifyFilter" class="select">
+                <option value="all">Any verify</option><option value="verified">Verified</option><option value="unverified">Unverified</option>
+              </select>
+              <select id="merchSort" class="select">
+                <option value="rating">Sort: Rating</option><option value="trades">Trades</option><option value="completion">Completion</option><option value="release">Fast release</option><option value="buyRate">Buy Rate</option><option value="sellRate">Sell Rate</option>
+              </select>
+            </div>
+            <div class="row">
+              <button id="btnReloadMerchants" class="btn small">Reload</button>
+              <button id="btnNewMerchant" class="btn small">New Merchant</button>
+            </div>
+          </div>
+          <div id="merchantList" class="list"></div>
+        </div>
+      </section>
+<!-- Merchants Panel -->
+<section id="panel-merchants" class="panel">
+    <!-- ... your existing merchants panel content ... -->
+</section>
+
+<!-- Merchant Applications Panel (ADD THIS) -->
+<section id="panel-merchant-apps" class="panel">
+    <div class="section">
+        <div class="section-title">📝 Merchant Applications</div>
+        <div class="grid" style="gap:.6rem;">
+            <div class="stat" style="display:flex; align-items:center; justify-content:space-between; gap:.6rem; flex-wrap:wrap;">
+              <div class="row" style="gap:.6rem; flex-wrap:wrap;">
+                <select id="merchantAppFilter" class="select">
+                  <option value="pending" selected>Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="all">All</option>
+                </select>
+              </div>
+              <div class="row" style="gap:.5rem;">
+                <button id="btnReloadMerchantApps" class="btn small">Reload</button>
+              </div>
+            </div>
+            <div id="merchantAppList" class="grid"></div>
+        </div>
+    </div>
+</section>
+      <!-- Rates -->
+      <section id="panel-rates" class="panel">
+        <div class="section">
+          <div class="section-title">💱 Exchange Rates</div>
+          <div class="grid grid-2">
+            <div class="stat">
+              <div class="label">Buy Rate (Users buy USDT)</div>
+              <div class="row" style="gap:.5rem; align-items:center; margin:.5rem 0;">
+                <span class="muted">1 USDT =</span>
+                <input id="rateBuy" class="input" type="number" step="1" min="500" style="max-width:160px;" placeholder="MWK">
+                <span class="muted">MWK</span>
+              </div>
+              <div class="muted" id="rateBuyUpdated">Last updated: —</div>
+            </div>
+            <div class="stat">
+              <div class="label">Sell Rate (Users sell USDT)</div>
+              <div class="row" style="gap:.5rem; align-items:center; margin:.5rem 0;">
+                <span class="muted">1 USDT =</span>
+                <input id="rateSell" class="input" type="number" step="1" min="500" style="max-width:160px;" placeholder="MWK">
+                <span class="muted">MWK</span>
+              </div>
+              <div class="muted" id="rateSellUpdated">Last updated: —</div>
+            </div>
+          </div>
+          <div class="row" style="gap:.5rem; margin-top:.75rem;">
+            <button class="btn primary" id="btnSaveRates">Save Rates</button>
+            <button class="btn" id="btnResetRates">Reset Defaults</button>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">📜 Rate History</div>
+          <div class="muted" style="margin-bottom:.5rem;">Last 20 updates</div>
+          <div id="rateHistoryTable" class="grid"></div>
+        </div>
+      </section>
+
+      <!-- Fees -->
+      <section id="panel-fees" class="panel">
+        <div class="section">
+          <div class="section-title">💸 Platform Fees</div>
+          <div class="grid grid-3">
+            <div class="stat">
+              <div class="label">Buy Fee (%)</div>
+              <input id="feeBuy" class="input" type="number" step="0.1" min="0" max="10" placeholder="%" value="2.0">
+              <div class="muted">Applied when user buys USDT</div>
+            </div>
+            <div class="stat">
+              <div class="label">Sell Fee (%)</div>
+              <input id="feeSell" class="input" type="number" step="0.1" min="0" max="10" placeholder="%" value="1.5">
+              <div class="muted">Applied when user sells USDT</div>
+            </div>
+            <div class="stat">
+              <div class="label">Recharge Fee (%)</div>
+              <input id="feeRecharge" class="input" type="number" step="0.1" min="0" max="10" placeholder="%" value="0">
+              <div class="muted">For MWK deposits</div>
+            </div>
+            <div class="stat">
+              <div class="label">Withdraw Fee (MWK %)</div>
+              <input id="feeWithdrawMwk" class="input" type="number" step="0.1" min="0" max="10" placeholder="%" value="1.0">
+              <div class="muted">Applied to MWK withdrawals</div>
+            </div>
+            <div class="stat">
+              <div class="label">Withdraw Fee (USDT flat)</div>
+              <input id="feeWithdrawUsdt" class="input" type="number" step="0.1" min="0" max="50" placeholder="USDT" value="2">
+              <div class="muted">Applied to USDT withdrawals</div>
+            </div>
+            <div class="stat">
+              <div class="label">Merchant Commission (%)</div>
+              <input id="feeMerchantCommission" class="input" type="number" step="0.1" min="0" max="10" placeholder="%" value="0.5">
+              <div class="muted">Share taken from merchant spreads</div>
+            </div>
+          </div>
+          <div class="row" style="gap:.5rem; margin-top:.75rem;">
+            <button class="btn primary" id="btnSaveFees">Save Fees</button>
+            <button class="btn" id="btnResetFees">Reset Defaults</button>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">🧮 Preview Calculator</div>
+          <div class="grid grid-3">
+            <div class="stat">
+              <div class="label">Simulate Buy (USDT)</div>
+              <input id="simBuyUsdt" class="input" type="number" step="0.01" min="0" placeholder="e.g. 100">
+              <div class="muted" id="simBuyResult">Total MWK: —</div>
+            </div>
+            <div class="stat">
+              <div class="label">Simulate Sell (USDT)</div>
+              <input id="simSellUsdt" class="input" type="number" step="0.01" min="0" placeholder="e.g. 100">
+              <div class="muted" id="simSellResult">Receive MWK: —</div>
+            </div>
+            <div class="stat">
+              <div class="label">Simulate Withdraw</div>
+              <input id="simWithdrawMwk"  class="input" type="number" step="1"    min="0" placeholder="MWK e.g. 100000" style="margin-bottom:.4rem;">
+              <div class="muted" id="simWithdrawMwkResult">MWK fee: —</div>
+              <input id="simWithdrawUsdt" class="input" type="number" step="0.01" min="0" placeholder="USDT e.g. 50" style="margin:.4rem 0;">
+              <div class="muted" id="simWithdrawUsdtResult">USDT fee: —</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Security Logs -->
+      <section id="panel-security" class="panel">
+        <div class="section">
+          <div class="section-title">🔐 Security Logs</div>
+          <div class="toolbar">
+            <div class="row">
+              <select id="logTypeFilter" class="select">
+                <option value="all">Type: Any</option><option value="login">Login</option><option value="admin">Admin</option><option value="rate">Rate</option><option value="recharge">Recharge</option><option value="user">User</option><option value="merchant">Merchant</option><option value="failed">Failed</option>
+              </select>
+              <select id="logStatusFilter" class="select">
+                <option value="all">Status: Any</option><option value="success">Success</option><option value="warning">Warning</option><option value="error">Error</option>
+              </select>
+              <input id="logSearch" class="input" type="search" placeholder="Search actor, ip, UA, details">
+            </div>
+            <div class="row">
+              <span class="badge">24h: <span id="sumLogs24h">0</span></span>
+              <span class="badge bad-err">Failed: <span id="sumFailed">0</span></span>
+              <span class="badge bad-ok">Admin: <span id="sumAdmin">0</span></span>
+              <button id="btnReloadLogs" class="btn small">Reload</button>
+              <button id="btnGenerateLogs" class="btn small">Generate Test</button>
+              <button id="btnExportLogs" class="btn small">Export CSV</button>
+              <button id="btnClearLogs" class="btn small">Clear</button>
+            </div>
+          </div>
+          <div id="logList" class="list"></div>
+        </div>
+      </section>
+
+      <!-- System Settings -->
+      <section id="panel-settings" class="panel">
+        <div class="section">
+          <div class="section-title">⚙️ System Settings</div>
+          <div class="grid grid-2">
+            <div class="stat">
+              <div class="label">Platform Flags</div>
+              <div class="row" style="margin:.4rem 0;">
+                <label class="row"><input id="setMaintenance" type="checkbox" style="accent-color:#D4AF37;"> <span class="muted">Maintenance mode</span></label>
+              </div>
+              <div class="row" style="margin:.4rem 0;">
+                <label class="row"><input id="setReadonly" type="checkbox" style="accent-color:#D4AF37;"> <span class="muted">Read-only mode</span></label>
+              </div>
+              <div class="row" style="margin:.4rem 0;">
+                <label class="row"><input id="setAllowSignup" type="checkbox" style="accent-color:#D4AF37;"> <span class="muted">Allow signup</span></label>
+              </div>
+              <div class="row" style="margin:.4rem 0;">
+                <label class="row"><input id="setAllowMerchant" type="checkbox" style="accent-color:#D4AF37;"> <span class="muted">Allow merchant applications</span></label>
+              </div>
+              <div class="row" style="gap:.5rem; margin-top:.5rem;">
+                <button id="btnSavePlatform" class="btn primary">Save</button>
+                <button id="btnResetPlatform" class="btn">Reset</button>
+              </div>
+            </div>
+            <div class="stat">
+              <div class="label">Announcement</div>
+              <div class="field"><input id="annTitle" class="input" placeholder="Title"></div>
+              <div class="field"><textarea id="annMsg" class="input" rows="4" placeholder="Message"></textarea></div>
+              <div class="row"><select id="annStyle" class="select"><option value="info">Info</option><option value="success">Success</option><option value="warn">Warning</option><option value="error">Error</option></select></div>
+              <div class="row" style="gap:.5rem; margin-top:.5rem;">
+                <button id="btnPreviewAnn" class="btn">Preview</button>
+                <button id="btnSaveAnn" class="btn primary">Save</button>
+                <button id="btnClearAnn" class="btn">Clear</button>
+              </div>
+              <div id="annPreview" class="stat" style="margin-top:.6rem;">Preview area</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">🧰 Backup & Tools</div>
+          <div class="row" style="gap:.5rem; flex-wrap:wrap;">
+            <button id="btnExportConfig" class="btn">Export Backup (JSON)</button>
+            <label class="btn" style="cursor:pointer;">
+              Import JSON <input id="importFile" type="file" accept="application/json" style="display:none;">
+            </label>
+            <button id="btnFactoryReset" class="btn" style="border-color:#F44336; color:#ff9d94;">Factory Reset</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">Saved</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    // Storage keys
+    const RATE_KEY = 'platform.rates';
+    const RATE_HISTORY_KEY = 'platform.rateHistory';
+    const FEES_KEY = 'platform.fees';
+
+    // Helpers
+    const byId = id => document.getElementById(id);
+    const safeParse = (str, fallback) => {
+      try { const v = JSON.parse(str); return (v === null || v === undefined) ? fallback : v; }
+      catch { return fallback; }
+    };
+    const nowISO = () => new Date().toISOString();
+    const adminEmail = () => localStorage.getItem('user') || 'admin@cryptex.mw';
+    const toast = msg => { const t = byId('toast'); if(!t){ alert(msg); return; } t.textContent = msg; t.style.display='block'; setTimeout(()=> t.style.display='none', 1600); };
+
+    // Defaults
+    function defaultRates(){
+      return { buy: 1750, sell: 1745, updatedAt: nowISO(), updatedBy: adminEmail() };
+    }
+    function defaultFees(){
+      return {
+        buy: 2.0, sell: 1.5, recharge: 0.0,
+        withdrawMwk: 1.0, withdrawUsdt: 2.0,
+        merchantCommission: 0.5,
+        updatedAt: nowISO(), updatedBy: adminEmail()
+      };
+    }
+
+    // Getters/Setters
+    function getRates(){ return safeParse(localStorage.getItem(RATE_KEY), null) || defaultRates(); }
+    function setRates(val){ localStorage.setItem(RATE_KEY, JSON.stringify(val)); }
+
+    function getRateHistory(){ return safeParse(localStorage.getItem(RATE_HISTORY_KEY), []); }
+    function setRateHistory(list){ localStorage.setItem(RATE_HISTORY_KEY, JSON.stringify(list)); }
+
+    function getFees(){ return safeParse(localStorage.getItem(FEES_KEY), null) || defaultFees(); }
+    function setFees(val){ localStorage.setItem(FEES_KEY, JSON.stringify(val)); }
+
+    // Renderers
+    function renderRates(){
+      const r = getRates();
+      if (byId('rateBuy')) byId('rateBuy').value = r.buy;
+      if (byId('rateSell')) byId('rateSell').value = r.sell;
+      if (byId('rateBuyUpdated')) byId('rateBuyUpdated').textContent  = 'Last updated: ' + new Date(r.updatedAt).toLocaleString();
+      if (byId('rateSellUpdated')) byId('rateSellUpdated').textContent = 'Last updated: ' + new Date(r.updatedAt).toLocaleString();
+
+      const history = getRateHistory();
+      const tbl = byId('rateHistoryTable');
+      if (!tbl) return;
+
+      tbl.innerHTML = '';
+      if (!history.length){
+        tbl.innerHTML = '<div class="muted">No history yet.</div>';
+        return;
+      }
+      history.slice(0, 30).forEach(row=>{
+        const div = document.createElement('div');
+        div.className = 'stat';
+        div.innerHTML = `
+          <div class="row" style="justify-content:space-between;">
+            <div class="muted">${new Date(row.ts).toLocaleString()}</div>
+            <div class="muted">by ${row.by}</div>
+          </div>
+          <div class="row" style="gap:.75rem; margin-top:.35rem;">
+            <div>Buy: <strong>MWK ${Number(row.buy).toLocaleString()}</strong></div>
+            <div>Sell: <strong>MWK ${Number(row.sell).toLocaleString()}</strong></div>
+          </div>
+        `;
+        tbl.appendChild(div);
+      });
+    }
+
+    function renderFees(){
+      const f = getFees();
+      if (!byId('feeBuy')) return; // panel not visible
+      byId('feeBuy').value = f.buy;
+      byId('feeSell').value = f.sell;
+      byId('feeRecharge').value = f.recharge;
+      byId('feeWithdrawMwk').value = f.withdrawMwk;
+      byId('feeWithdrawUsdt').value = f.withdrawUsdt;
+      byId('feeMerchantCommission').value = f.merchantCommission;
+      runPreview();
+    }
+
+    // Save operations
+    function saveRates(payload){
+      const current = getRates();
+      const newRates = {
+        buy: Number(payload.buy),
+        sell: Number(payload.sell),
+        updatedAt: nowISO(),
+        updatedBy: adminEmail()
+      };
+      setRates(newRates);
+
+      // History
+      const history = getRateHistory();
+      history.unshift({ ts: newRates.updatedAt, by: newRates.updatedBy, buy: newRates.buy, sell: newRates.sell });
+      setRateHistory(history.slice(0, 50));
+
+      toast('Rates saved');
+      renderRates();
+      // Live update to other tabs occurs automatically via storage
+    }
+
+    function saveFees(payload){
+      const newFees = {
+        buy: Number(payload.buy),
+        sell: Number(payload.sell),
+        recharge: Number(payload.recharge),
+        withdrawMwk: Number(payload.withdrawMwk),
+        withdrawUsdt: Number(payload.withdrawUsdt),
+        merchantCommission: Number(payload.merchantCommission),
+        updatedAt: nowISO(),
+        updatedBy: adminEmail()
+      };
+      setFees(newFees);
+      toast('Fees saved');
+      renderFees();
+    }
+
+    // Preview calculator
+    function runPreview(){
+      const r = getRates();
+      const f = getFees();
+
+      const buyUsdt = parseFloat(byId('simBuyUsdt')?.value || 0);
+      if (byId('simBuyResult')){
+        if (buyUsdt > 0){
+          const subtotal = buyUsdt * r.buy;
+          const fee = subtotal * (f.buy/100);
+          const total = subtotal + fee;
+          byId('simBuyResult').textContent = `Total MWK: ${Math.round(total).toLocaleString()} (incl. fee MWK ${Math.round(fee).toLocaleString()})`;
+        } else {
+          byId('simBuyResult').textContent = 'Total MWK: —';
+        }
+      }
+
+      const sellUsdt = parseFloat(byId('simSellUsdt')?.value || 0);
+      if (byId('simSellResult')){
+        if (sellUsdt > 0){
+          const gross = sellUsdt * r.sell;
+          const fee = gross * (f.sell/100);
+          const receive = gross - fee;
+          byId('simSellResult').textContent = `Receive MWK: ${Math.round(receive).toLocaleString()} (fee MWK ${Math.round(fee).toLocaleString()})`;
+        } else {
+          byId('simSellResult').textContent = 'Receive MWK: —';
+        }
+      }
+
+      const wMwk = parseFloat(byId('simWithdrawMwk')?.value || 0);
+      if (byId('simWithdrawMwkResult')){
+        if (wMwk > 0){
+          const feeMwk = wMwk * (f.withdrawMwk/100);
+          byId('simWithdrawMwkResult').textContent = `MWK fee: ${Math.round(feeMwk).toLocaleString()}`;
+        } else {
+          byId('simWithdrawMwkResult').textContent = 'MWK fee: —';
+        }
+      }
+
+      const wUsdt = parseFloat(byId('simWithdrawUsdt')?.value || 0);
+      if (byId('simWithdrawUsdtResult')){
+        if (wUsdt > 0){
+          byId('simWithdrawUsdtResult').textContent = `USDT fee: ${Number(f.withdrawUsdt||0).toFixed(2)} USDT`;
+        } else {
+          byId('simWithdrawUsdtResult').textContent = 'USDT fee: —';
+        }
+      }
+    }
+
+    // Validation
+    function sanitizeNumberInput(el, min, max){
+      if (!el) return;
+      el.addEventListener('input', ()=>{
+        let v = el.value.replace(/[^\d.]/g,'');
+        if (v === '') return;
+        const n = Number(v);
+        if (!isFinite(n)) return;
+        if (min !== undefined && n < min) v = String(min);
+        if (max !== undefined && n > max) v = String(max);
+        el.value = v;
+      });
+    }
+
+    // Bind events
+    function bindRatesFeesEvents(){
+      // Sanitize fields
+      ['rateBuy','rateSell'].forEach(id=> sanitizeNumberInput(byId(id), 500, 100000));
+      ['feeBuy','feeSell','feeRecharge','feeWithdrawMwk','feeWithdrawUsdt','feeMerchantCommission']
+        .forEach(id=> sanitizeNumberInput(byId(id), 0, 100));
+
+      // Save Rates
+      byId('btnSaveRates')?.addEventListener('click', ()=>{
+        const buy = parseFloat(byId('rateBuy')?.value || 0);
+        const sell = parseFloat(byId('rateSell')?.value || 0);
+        if (!buy || !sell || buy < 500 || sell < 500) return toast('Enter valid rates (>= 500 MWK)');
+        saveRates({ buy, sell });
+      });
+      // Reset Rates
+      byId('btnResetRates')?.addEventListener('click', ()=>{
+        const d = defaultRates();
+        setRates(d);
+        const history = getRateHistory();
+        history.unshift({ ts: d.updatedAt, by: d.updatedBy, buy: d.buy, sell: d.sell });
+        setRateHistory(history.slice(0,50));
+        renderRates();
+        toast('Rates reset to defaults');
+      });
+
+      // Save Fees
+      byId('btnSaveFees')?.addEventListener('click', ()=>{
+        const payload = {
+          buy: parseFloat(byId('feeBuy')?.value || 0),
+          sell: parseFloat(byId('feeSell')?.value || 0),
+          recharge: parseFloat(byId('feeRecharge')?.value || 0),
+          withdrawMwk: parseFloat(byId('feeWithdrawMwk')?.value || 0),
+          withdrawUsdt: parseFloat(byId('feeWithdrawUsdt')?.value || 0),
+          merchantCommission: parseFloat(byId('feeMerchantCommission')?.value || 0)
+        };
+        if (payload.buy < 0 || payload.sell < 0) return toast('Fees cannot be negative');
+        saveFees(payload);
+        runPreview();
+      });
+      // Reset Fees
+      byId('btnResetFees')?.addEventListener('click', ()=>{
+        const d = defaultFees();
+        setFees(d);
+        renderFees();
+        toast('Fees reset to defaults');
+      });
+
+      // Live preview on input
+      ['simBuyUsdt','simSellUsdt','simWithdrawMwk','simWithdrawUsdt']
+        .forEach(id => byId(id)?.addEventListener('input', runPreview));
+    }
+
+    // Live cross-tab updates
+    window.addEventListener('storage', (e)=>{
+      if (e.key === RATE_KEY || e.key === RATE_HISTORY_KEY){
+        renderRates();
+        runPreview(); // preview uses rates too
+      }
+      if (e.key === FEES_KEY){
+        renderFees();
+      }
+    });
+
+    // INIT
+    function initChunk2(){
+      renderRates();
+      renderFees();
+      bindRatesFeesEvents();
+      runPreview();
+    }
+
+    // Kick off when admin dashboard loads
+    initChunk2();
+
+  })();
+</script>
+<!-- CHUNK 3 — Recharges panel UI + live engine (paste after Chunk 2). 
+     Builds the Recharges section, modals, and wires cross‑tab updates. -->
+<script>
+  (function(){
+    'use strict';
+
+    // Keys
+    const RECHARGES_KEY = 'platform.recharges';
+    const WALLETS_KEY   = 'wallets';
+
+    // Helpers
+    const $ = id => document.getElementById(id);
+    const safeParse = (s, f=[]) => { try{ const v = JSON.parse(s); return (v===null||v===undefined)?f:v; }catch{ return f; } };
+    const toast = msg => { const t=$('toast'); if(!t){ alert(msg); return; } t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',1600); };
+    const nowISO = () => new Date().toISOString();
+
+    // Ensure minimal modal styles (if not present)
+    (function ensureModalStyles(){
+      if (document.getElementById('admin-modal-style')) return;
+      const s = document.createElement('style');
+      s.id = 'admin-modal-style';
+      s.textContent = `
+        .modal{ display:none; position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,.85); }
+        .modal-content{ background:#1E1E1E; margin:4% auto; width:95%; max-width:900px; border:2px solid var(--gold); border-radius:12px; box-shadow:0 0 40px rgba(212,175,55,.4); max-height:90vh; overflow:auto; }
+        .modal-header{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; padding: .9rem 1rem; border-bottom:1px solid #444; position:sticky; top:0; background:#1E1E1E; border-radius:12px 12px 0 0; }
+        .modal-title{ color:var(--gold); font-weight:800; }
+        .close{ cursor:pointer; font-size:1.2rem; border:1px solid var(--gold); border-radius:8px; padding:.2rem .55rem; color:var(--gold); background:#2C2C2C; }
+      `;
+      document.head.appendChild(s);
+    })();
+
+    // Data accessors
+    function mkRecharge(user, amountMwk, method, ref, shot){
+      return {
+        id:'RC-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),
+        user, amountMwk:Number(amountMwk||0), method, reference:ref,
+        screenshot:shot||'',
+        status:'pending', createdAt:nowISO(), processedAt:null, processedBy:null
+      };
+    }
+    function getRecharges(){ return safeParse(localStorage.getItem(RECHARGES_KEY), []); }
+    function setRecharges(list){ localStorage.setItem(RECHARGES_KEY, JSON.stringify(list)); }
+    function getWallet(email){
+      const all = safeParse(localStorage.getItem(WALLETS_KEY), {});
+      return all[email] || { mwk:0, usdt:0 };
+    }
+    function setWallet(email, data){
+      const all = safeParse(localStorage.getItem(WALLETS_KEY), {});
+      all[email] = { mwk:Number(data.mwk||0), usdt:Number(data.usdt||0) };
+      localStorage.setItem(WALLETS_KEY, JSON.stringify(all));
+    }
+    function upsertTransactionByRef(ref, user, amountMwk, method, status){
+      let tx = safeParse(localStorage.getItem('transactions'), []);
+      const idx = tx.findIndex(t => t.reference === ref);
+      const entry = {
+        id:'TXN-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),
+        type:'deposit',
+        amount:Number(amountMwk||0),
+        paymentMethod:method,
+        reference:ref,
+        status:String(status||'pending'),
+        direction:'in',
+        date: nowISO(),
+        merchant: null,
+        user: user
+      };
+      if (idx >= 0){
+        tx[idx] = { ...tx[idx], status: entry.status, date: entry.date };
+      } else {
+        tx.unshift(entry);
+      }
+      localStorage.setItem('transactions', JSON.stringify(tx));
+    }
+    const methodLabel = m => m==='airtel'?'Airtel Money' : m==='mpamba' ? 'TNM Mpamba' : 'Bank Transfer';
+
+    // Build panel UI if not present
+    function ensureRechargesPanel(){
+      const panel = $('panel-recharges');
+      if (!panel) return;
+      if (panel.dataset.built === '1') return;
+
+      panel.innerHTML = `
+        <div class="section">
+          <div class="section-title">📥 Recharges</div>
+
+          <div class="grid" style="gap:.6rem;">
+            <div class="grid grid-3">
+              <div class="stat"><div class="stat-label">Pending</div><div class="stat-value" id="sumPending">0</div></div>
+              <div class="stat"><div class="stat-label">Pending Total (MWK)</div><div class="stat-value" id="sumPendingMwk">MK 0</div></div>
+              <div class="stat"><div class="stat-label">Approved Today</div><div class="stat-value" id="sumApprovedToday">MK 0</div></div>
+            </div>
+
+            <div class="stat" style="display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; justify-content:space-between;">
+              <div class="row" style="gap:.6rem; flex-wrap:wrap;">
+                <select id="rechargeFilter" class="select">
+                  <option value="all">All</option>
+                  <option value="pending" selected>Pending</option>
+                  <option value="processed">Processed</option>
+                </select>
+                <input id="rechargeSearch" class="input" type="search" placeholder="Search email/ref/method" style="min-width:220px;">
+              </div>
+              <div class="row" style="gap:.5rem;">
+                <button id="btnReloadRecharges" class="btn small">Reload</button>
+                <button id="btnNewRecharge" class="btn primary small">➕ New Recharge</button>
+                <button id="btnExportRecharges" class="btn small">Export CSV</button>
+              </div>
+            </div>
+
+            <div id="rechargeList" class="grid"></div>
+          </div>
+        </div>
+      `;
+      panel.dataset.built = '1';
+    }
+
+    // Ensure modals exist
+    function ensureRechargesModals(){
+      // Screenshot modal
+      if (!$('shotModal')){
+        const wrap = document.createElement('div');
+        wrap.id = 'shotModal';
+        wrap.className = 'modal';
+        wrap.innerHTML = `
+          <div class="modal-content">
+            <div class="modal-header"><div class="modal-title">📷 Payment Screenshot</div><button class="close" onclick="(function(){document.getElementById('shotModal').style.display='none';})()">×</button></div>
+            <div class="modal-body" id="shotBody" style="padding:1rem;"></div>
+          </div>
+        `;
+        document.body.appendChild(wrap);
+      }
+      // New recharge modal
+      if (!$('newRechargeModal')){
+        const wrap = document.createElement('div');
+        wrap.id = 'newRechargeModal';
+        wrap.className = 'modal';
+        wrap.innerHTML = `
+          <div class="modal-content" style="max-width:680px;">
+            <div class="modal-header"><div class="modal-title">➕ New Manual Recharge</div><button class="close" onclick="(function(){document.getElementById('newRechargeModal').style.display='none';})()">×</button></div>
+            <div class="modal-body" style="padding:1rem;">
+              <div class="grid grid-2">
+                <div class="field"><div class="label">User Email</div><input id="nrEmail" class="input" placeholder="user@cryptex.mw"></div>
+                <div class="field"><div class="label">Amount (MWK)</div><input id="nrAmount" class="input" type="number" step="1" min="0" placeholder="e.g. 150000"></div>
+                <div class="field"><div class="label">Method</div>
+                  <select id="nrMethod" class="select"><option value="airtel">Airtel Money</option><option value="mpamba">TNM Mpamba</option><option value="bank">Bank Transfer</option></select>
+                </div>
+                <div class="field"><div class="label">Reference</div><input id="nrRef" class="input" placeholder="e.g. PP240101234567"></div>
+                <div class="field" style="grid-column:1 / -1;"><div class="label">Screenshot URL (optional)</div><input id="nrShot" class="input" placeholder="https://... or leave blank"></div>
+              </div>
+              <div class="row" style="gap:.5rem; margin-top:.75rem;">
+                <button class="btn" id="nrCreate">Create</button>
+                <button class="btn" id="nrCancel">Cancel</button>
+              </div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(wrap);
+      }
+
+      // ESC closes modals
+      window.addEventListener('keydown', e=>{
+        if(e.key==='Escape'){
+          if ($('shotModal')) $('shotModal').style.display='none';
+          if ($('newRechargeModal')) $('newRechargeModal').style.display='none';
+        }
+      });
+      // Click outside closes
+      window.addEventListener('click', e=>{
+        if (e.target === $('shotModal')) $('shotModal').style.display='none';
+        if (e.target === $('newRechargeModal')) $('newRechargeModal').style.display='none';
+      });
+    }
+
+    // Render list + summary
+    function renderRecharges(){
+      const listEl = $('rechargeList');
+      if(!listEl) return;
+
+      const filter = $('rechargeFilter')?.value || 'pending';
+      const q = ( $('rechargeSearch')?.value || '' ).trim().toLowerCase();
+
+      let list = getRecharges().sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
+      if (filter === 'pending') list = list.filter(r => r.status === 'pending');
+      if (filter === 'processed') list = list.filter(r => r.status !== 'pending');
+      if (q){
+        list = list.filter(r => [r.user, r.reference, r.method].some(v => String(v||'').toLowerCase().includes(q)));
+      }
+
+      listEl.innerHTML = '';
+      if (!list.length){
+        listEl.innerHTML = '<div class="muted" style="padding:.6rem 0;">No records match your filters.</div>';
+      } else {
+        list.forEach(r=>{
+          const created = new Date(r.createdAt).toLocaleString();
+          const processed = r.processedAt ? new Date(r.processedAt).toLocaleString() : '—';
+          const statusColor = r.status === 'pending' ? 'var(--orange)' : (r.status === 'approved' ? 'var(--green)' : 'var(--red)');
+          const card = document.createElement('div'); card.className='stat';
+          card.innerHTML = `
+            <div class="row" style="justify-content:space-between; gap:.75rem; align-items:flex-start;">
+              <div>
+                <div class="row" style="gap:.5rem; align-items:center;">
+                  <div class="label">User</div><div><strong>${r.user}</strong></div>
+                  <div class="label" style="margin-left:.75rem;">Ref</div><div>${r.reference}</div>
+                </div>
+                <div class="muted" style="margin-top:.2rem;">Method: <strong>${methodLabel(r.method)}</strong> • Created: ${created} • Status: <strong style="color:${statusColor}">${r.status.toUpperCase()}</strong></div>
+                ${r.status!=='pending' ? `<div class="muted">Processed: ${processed} by ${r.processedBy || '—'}</div>` : ''}
+              </div>
+              <div style="text-align:right;">
+                <div class="label">Amount</div>
+                <div class="stat-value">MK ${Number(r.amountMwk).toLocaleString()}</div>
+              </div>
+            </div>
+            <div class="row" style="gap:.5rem; margin-top:.6rem; flex-wrap:wrap;">
+              <button class="btn small" data-shot="${encodeURIComponent(r.screenshot||'')}" data-ref="${r.reference}" data-action="view">View Screenshot</button>
+              ${r.status==='pending'
+                ? `<button class="btn small primary" data-id="${r.id}" data-action="approve">Approve</button>
+                   <button class="btn small" data-id="${r.id}" data-action="reject">Reject</button>`
+                : `<button class="btn small" data-id="${r.id}" data-action="reopen">Reopen</button>`
+              }
+            </div>
+          `;
+          listEl.appendChild(card);
+        });
+      }
+
+      // Summary
+      const full = getRecharges();
+      const pend = full.filter(r=>r.status==='pending');
+      const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+      const approvedToday = full.filter(r=> r.status==='approved' && new Date(r.processedAt)>=todayStart);
+
+      $('sumPending') && ($('sumPending').textContent = pend.length);
+      $('sumPendingMwk') && ($('sumPendingMwk').textContent = 'MK ' + pend.reduce((a,b)=>a+Number(b.amountMwk||0),0).toLocaleString());
+      $('sumApprovedToday') && ($('sumApprovedToday').textContent = 'MK ' + approvedToday.reduce((a,b)=>a+Number(b.amountMwk||0),0).toLocaleString());
+      // Also update Overview card if present
+      $('statRecharges') && ($('statRecharges').textContent = pend.length);
+
+      // Bind row buttons
+      listEl.querySelectorAll('button').forEach(btn=>{
+        const action = btn.dataset.action;
+        if (action === 'view'){
+          btn.addEventListener('click', ()=> viewScreenshot(btn.dataset.shot, btn.dataset.ref));
+        } else if (action === 'approve'){
+          btn.addEventListener('click', ()=> approveRecharge(btn.dataset.id));
+        } else if (action === 'reject'){
+          btn.addEventListener('click', ()=> rejectRecharge(btn.dataset.id));
+        } else if (action === 'reopen'){
+          btn.addEventListener('click', ()=> reopenRecharge(btn.dataset.id));
+        }
+      });
+    }
+
+    // Actions
+    function viewScreenshot(urlEnc, ref){
+      const body = $('shotBody');
+      if (!body) return;
+      const url = decodeURIComponent(urlEnc||'');
+      body.innerHTML = url
+        ? `<img src="${url}" alt="Receipt for ${ref}" style="max-width:100%; border-radius:10px; border:1px solid var(--border);">`
+        : `<div class="muted">No screenshot provided.</div>`;
+      $('shotModal').style.display='block';
+    }
+
+    function approveRecharge(id){
+      let list = getRecharges();
+      const idx = list.findIndex(r=>r.id===id);
+      if (idx === -1) return toast('Not found');
+      const r = list[idx];
+      if (r.status !== 'pending') return toast('Already processed');
+
+      // Credit wallet + mark approved
+      const w = getWallet(r.user);
+      w.mwk = Number(w.mwk||0) + Number(r.amountMwk||0);
+      setWallet(r.user, w);
+
+      r.status = 'approved';
+      r.processedAt = nowISO();
+      r.processedBy = (localStorage.getItem('user')||'admin@cryptex.mw');
+      setRecharges(list);
+
+      // Transactions
+      upsertTransactionByRef(r.reference, r.user, r.amountMwk, r.method, 'approved');
+
+      toast('Recharge approved');
+      renderRecharges();
+    }
+
+    function rejectRecharge(id){
+      let list = getRecharges();
+      const idx = list.findIndex(r=>r.id===id);
+      if (idx === -1) return toast('Not found');
+      const r = list[idx];
+      if (r.status !== 'pending') return toast('Already processed');
+
+      r.status = 'rejected';
+      r.processedAt = nowISO();
+      r.processedBy = (localStorage.getItem('user')||'admin@cryptex.mw');
+      setRecharges(list);
+
+      upsertTransactionByRef(r.reference, r.user, r.amountMwk, r.method, 'rejected');
+
+      toast('Recharge rejected');
+      renderRecharges();
+    }
+
+    function reopenRecharge(id){
+      let list = getRecharges();
+      const idx = list.findIndex(r=>r.id===id);
+      if (idx === -1) return;
+      list[idx].status = 'pending';
+      list[idx].processedAt = null;
+      list[idx].processedBy = null;
+      setRecharges(list);
+      toast('Moved back to pending');
+      renderRecharges();
+    }
+
+    function openNewRecharge(){ $('newRechargeModal').style.display='block'; }
+    function closeNewRecharge(){ $('newRechargeModal').style.display='none'; }
+    function createManualRecharge(){
+      const email = ($('nrEmail').value||'').trim();
+      const amount = parseFloat($('nrAmount').value||'0');
+      const method = $('nrMethod').value;
+      const ref    = ($('nrRef').value||'').trim();
+      const shot   = ($('nrShot').value||'').trim();
+      if (!email || !amount || !ref) return toast('Email, amount and reference are required');
+
+      const list = getRecharges();
+      list.unshift(mkRecharge(email, amount, method, ref, shot || `https://via.placeholder.com/900x1400?text=Receipt+${encodeURIComponent(ref)}`));
+      setRecharges(list);
+      toast('Recharge created');
+      closeNewRecharge();
+      renderRecharges();
+    }
+
+    function exportRechargesCSV(){
+      const list = getRecharges();
+      const rows = [['ID','User','Amount MWK','Method','Reference','Status','Created','Processed At','Processed By','Screenshot']];
+      list.forEach(r=>{
+        rows.push([r.id, r.user, r.amountMwk, r.method, r.reference, r.status, r.createdAt, r.processedAt||'', r.processedBy||'', r.screenshot||'']);
+      });
+      const csv = rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv],{type:'text/csv'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `recharges_${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // Seed demo if empty (only first time)
+    function seedRechargesIfEmpty(){
+      if (getRecharges().length) return;
+      setRecharges([
+        mkRecharge('user@cryptex.mw',150000,'airtel','PP2343XAA','https://via.placeholder.com/900x1400?text=Receipt+PP2343XAA'),
+        mkRecharge('sarah@cryptex.mw', 75000,'mpamba','TM8881ZB','https://via.placeholder.com/900x1400?text=Receipt+TM8881ZB')
+      ]);
+    }
+
+    // Storage listeners for live updates
+    window.addEventListener('storage', (e)=>{
+      if ([RECHARGES_KEY,'transactions',WALLETS_KEY].includes(e.key)){
+        renderRecharges();
+      }
+    });
+
+    // Bind panel controls
+    function bindRechargesEvents(){
+      $('btnReloadRecharges')?.addEventListener('click', renderRecharges);
+      $('btnNewRecharge')?.addEventListener('click', openNewRecharge);
+      $('nrCreate')?.addEventListener('click', createManualRecharge);
+      $('nrCancel')?.addEventListener('click', closeNewRecharge);
+      $('btnExportRecharges')?.addEventListener('click', exportRechargesCSV);
+
+      let sTimer=null;
+      $('rechargeSearch')?.addEventListener('input', ()=>{ clearTimeout(sTimer); sTimer=setTimeout(renderRecharges,200); });
+      $('rechargeFilter')?.addEventListener('change', renderRecharges);
+    }
+
+    // INIT chunk 3
+    function initRecharges(){
+      ensureRechargesPanel();
+      ensureRechargesModals();
+      seedRechargesIfEmpty();
+      bindRechargesEvents();
+      renderRecharges();
+    }
+
+    // Make some functions accessible if needed by inline handlers
+    window.approveRecharge = approveRecharge;
+    window.rejectRecharge  = rejectRecharge;
+    window.reopenRecharge  = reopenRecharge;
+
+    // Kick off
+    initRecharges();
+
+  })();
+</script>
+<!-- CHUNK 4 — Users & Merchants panels (paste after Chunk 3).
+     Builds full panels, wires modals, exports, and live cross‑tab updates. -->
+<script>
+  (function(){
+    'use strict';
+
+    // Keys
+    const USERS_KEY = 'platform.users';
+    const MERCHANTS_KEY = 'platform.merchants';
+
+    // Helpers
+    const $ = id => document.getElementById(id);
+    const safeParse = (s, f) => { try{ const v=JSON.parse(s); return (v===null||v===undefined)?f:v; }catch{ return f; } };
+    const toast = msg => { const t=$('toast'); if(!t){ alert(msg); return; } t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',1600); };
+    const nowISO = () => new Date().toISOString();
+
+    // Data accessors
+    function getUsers(){ return safeParse(localStorage.getItem(USERS_KEY), []); }
+    function setUsers(list){ localStorage.setItem(USERS_KEY, JSON.stringify(list)); }
+    function mkUser(email,name,phone,role,kyc,banned){
+      return { id:'U-'+btoa(email).slice(0,8), email,name,phone,role,kycStatus:kyc, banned:!!banned, createdAt: nowISO() };
+    }
+
+    function getMerchants(){ return safeParse(localStorage.getItem(MERCHANTS_KEY), []); }
+    function setMerchants(list){ localStorage.setItem(MERCHANTS_KEY, JSON.stringify(list)); }
+
+    // Seed demo if empty (one-time for UX)
+    function seedUsersIfEmpty(){
+      if (getUsers().length) return;
+      setUsers([
+        mkUser('admin@cryptex.mw','Admin User','+265 88 000 0000','admin','verified',false),
+        mkUser('merchant@cryptex.mw','Gold Exchange','+265 88 111 2222','merchant','verified',false),
+        mkUser('user@cryptex.mw','John Doe','+265 88 333 4444','user','pending',false)
+      ]);
+    }
+    function seedMerchantsIfEmpty(){
+      if (getMerchants().length) return;
+      setMerchants([
+        { id:1, name:'Gold Exchanger', email:'merchant@cryptex.mw', phone:'0888123456', verified:true, kycLevel:2, online:true, suspended:false,
+          rating:4.9, trades:842, completion:98, dispute:0.6, avgReleaseMin:7, years:4,
+          methods:['airtel','mpamba'], buyRate:1750, sellRate:1745, limits:{min:5000,max:200000},
+          location:'Lilongwe', languages:['EN','NY'], liquidityUSDT:3500, badges:['Top Rated','Fast Payout']
+        },
+        { id:2, name:'QuickTrade MW', email:'quick@cryptex.mw', phone:'0999123456', verified:true, kycLevel:2, online:false, suspended:false,
+          rating:4.7, trades:610, completion:95, dispute:1.2, avgReleaseMin:10, years:3,
+          methods:['mpamba','airtel'], buyRate:1747, sellRate:1742, limits:{min:10000,max:150000},
+          location:'Blantyre', languages:['EN'], liquidityUSDT:1200, badges:['Trusted']
+        }
+      ]);
+    }
+
+    // Build Users panel UI
+    function ensureUsersPanel(){
+      const panel = $('panel-users');
+      if (!panel || panel.dataset.built === '1') return;
+
+      panel.innerHTML = `
+        <div class="section">
+          <div class="section-title">👥 Users</div>
+
+          <div class="grid" style="gap:.6rem;">
+            <div class="stat" style="display:flex; align-items:center; justify-content:space-between; gap:.6rem; flex-wrap:wrap;">
+              <div class="row" style="gap:.6rem; flex-wrap:wrap;">
+                <input id="userSearch" class="input" type="search" placeholder="Search name/email/phone" style="min-width:220px;">
+                <select id="userRoleFilter" class="select">
+                  <option value="all" selected>All roles</option>
+                  <option value="user">User</option>
+                  <option value="merchant">Merchant</option>
+                  <option value="admin">Admin</option>
+                </select>
+                <select id="userStateFilter" class="select">
+                  <option value="all" selected>All states</option>
+                  <option value="active">Active</option>
+                  <option value="banned">Banned</option>
+                </select>
+                <select id="userKycFilter" class="select">
+                  <option value="all" selected>KYC: All</option>
+                  <option value="pending">Pending</option>
+                  <option value="verified">Verified</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+              <div class="row" style="gap:.5rem;">
+                <button id="btnReloadUsers" class="btn small">Reload</button>
+                <button id="btnNewUser" class="btn primary small">➕ New User</button>
+                <button id="btnExportUsers" class="btn small">Export CSV</button>
+              </div>
+            </div>
+
+            <div id="userList" class="grid"></div>
+          </div>
+        </div>
+      `;
+      panel.dataset.built = '1';
+    }
+
+    // Build Merchants panel UI
+    function ensureMerchantsPanel(){
+      const panel = $('panel-merchants');
+      if (!panel || panel.dataset.built === '1') return;
+
+      panel.innerHTML = `
+        <div class="section">
+          <div class="section-title">🏪 Merchants</div>
+
+          <div class="grid" style="gap:.6rem;">
+            <div class="stat" style="display:flex; align-items:center; justify-content:space-between; gap:.6rem; flex-wrap:wrap;">
+              <div class="row" style="gap:.6rem; flex-wrap:wrap;">
+                <input id="merchSearch" class="input" type="search" placeholder="Search name/phone/location/email" style="min-width:260px;">
+                <select id="merchStateFilter" class="select">
+                  <option value="all" selected>All states</option>
+                  <option value="online">Online</option>
+                  <option value="offline">Offline</option>
+                  <option value="suspended">Suspended</option>
+                </select>
+                <select id="merchVerifyFilter" class="select">
+                  <option value="all" selected>All verification</option>
+                  <option value="verified">Verified</option>
+                  <option value="unverified">Unverified</option>
+                </select>
+                <select id="merchSort" class="select">
+                  <option value="rating" selected>Sort: Rating</option>
+                  <option value="trades">Sort: Trades</option>
+                  <option value="completion">Sort: Completion</option>
+                  <option value="release">Sort: Fastest release</option>
+                  <option value="buyRate">Sort: Best buy rate</option>
+                  <option value="sellRate">Sort: Best sell rate</option>
+                </select>
+              </div>
+              <div class="row" style="gap:.5rem;">
+                <button id="btnReloadMerchants" class="btn small">Reload</button>
+                <button id="btnNewMerchant" class="btn primary small">➕ New Merchant</button>
+                <button id="btnExportMerchants" class="btn small">Export CSV</button>
+              </div>
+            </div>
+
+            <div id="merchantList" class="grid"></div>
+          </div>
+        </div>
+      `;
+      panel.dataset.built = '1';
+    }
+
+    // Render Users
+    function renderUsers(){
+      const listEl = $('userList'); if(!listEl) return;
+      let list = getUsers().slice().sort((a,b)=> a.email.localeCompare(b.email));
+
+      const q  = ($('userSearch')?.value||'').trim().toLowerCase();
+      const rf = $('userRoleFilter')?.value || 'all';
+      const sf = $('userStateFilter')?.value || 'all';
+      const kf = $('userKycFilter')?.value || 'all';
+
+      if (q)  list = list.filter(u=> [u.email,u.name,u.phone].some(v => String(v||'').toLowerCase().includes(q)));
+      if (rf !== 'all') list = list.filter(u=> (u.role||'user') === rf);
+      if (sf !== 'all') list = list.filter(u=> sf==='active' ? !u.banned : !!u.banned);
+      if (kf !== 'all') list = list.filter(u=> (u.kycStatus||'pending') === kf);
+
+      listEl.innerHTML = '';
+      if (!list.length){
+        listEl.innerHTML = '<div class="muted" style="padding:.6rem 0;">No users match filters.</div>';
+        return;
+      }
+      list.forEach(u=>{
+        const stateColor = u.banned ? 'var(--red)' : 'var(--green)';
+        const card = document.createElement('div');
+        card.className = 'stat';
+        card.innerHTML = `
+          <div class="row" style="justify-content:space-between; gap:.75rem;">
+            <div>
+              <div><strong>${u.name||'—'}</strong> <span class="muted">(${u.email})</span></div>
+              <div class="muted">Phone: ${u.phone||'—'} • Role: <strong>${u.role||'user'}</strong> • KYC: <strong>${(u.kycStatus||'pending').toUpperCase()}</strong></div>
+              <div class="muted">State: <strong style="color:${stateColor}">${u.banned?'BANNED':'ACTIVE'}</strong> • Created: ${new Date(u.createdAt).toLocaleString()}</div>
+            </div>
+            <div style="text-align:right;">
+              <button class="btn small" data-id="${u.id}" data-action="edit">Edit</button>
+              <button class="btn small" data-id="${u.id}" data-action="ban">${u.banned?'Unban':'Ban'}</button>
+              <button class="btn small" data-email="${u.email}" data-action="wallet">Wallet</button>
+              <button class="btn small" data-id="${u.id}" data-action="delete">Delete</button>
+            </div>
+          </div>
+        `;
+        listEl.appendChild(card);
+      });
+
+      // Bind row buttons
+      listEl.querySelectorAll('button').forEach(btn=>{
+        const action = btn.dataset.action;
+        if (action === 'edit')    btn.addEventListener('click', ()=> openEditUser(btn.dataset.id));
+        if (action === 'ban')     btn.addEventListener('click', ()=> toggleUserBan(btn.dataset.id));
+        if (action === 'wallet')  btn.addEventListener('click', ()=> openWalletAdjust(btn.dataset.email));
+        if (action === 'delete')  btn.addEventListener('click', ()=> deleteUser(btn.dataset.id));
+      });
+    }
+
+    // Render Merchants
+    function renderMerchants(){
+      const listEl = $('merchantList'); if(!listEl) return;
+      let list = getMerchants().slice();
+
+      const q   = ($('merchSearch')?.value||'').trim().toLowerCase();
+      const sf  = $('merchStateFilter')?.value || 'all';
+      const vf  = $('merchVerifyFilter')?.value || 'all';
+      const sort= $('merchSort')?.value || 'rating';
+
+      if (q) list = list.filter(m => [m.name,m.phone,m.location,m.email].some(v=> String(v||'').toLowerCase().includes(q)));
+
+      if (sf !== 'all'){
+        if (sf === 'suspended') list = list.filter(m=> !!m.suspended);
+        if (sf === 'online')    list = list.filter(m=> !!m.online && !m.suspended);
+        if (sf === 'offline')   list = list.filter(m=> !m.online && !m.suspended);
+      }
+      if (vf !== 'all'){
+        list = list.filter(m=> vf==='verified' ? !!m.verified : !m.verified);
+      }
+
+      list.sort((a,b)=>{
+        switch(sort){
+          case 'rating':     return (b.rating||0) - (a.rating||0);
+          case 'trades':     return (b.trades||0) - (a.trades||0);
+          case 'completion': return (b.completion||0) - (a.completion||0);
+          case 'release':    return (a.avgReleaseMin||0) - (b.avgReleaseMin||0);
+          case 'buyRate':    return (b.buyRate||0) - (a.buyRate||0);
+          case 'sellRate':   return (b.sellRate||0) - (a.sellRate||0);
+          default:           return (b.rating||0) - (a.rating||0);
+        }
+      });
+
+      listEl.innerHTML = '';
+      if (!list.length){
+        listEl.innerHTML = '<div class="muted" style="padding:.6rem 0;">No merchants match filters.</div>';
+        return;
+      }
+
+      list.forEach(m=>{
+        const state = m.suspended
+          ? '<span style="color:var(--red);font-weight:700;">SUSPENDED</span>'
+          : (m.online ? '<span style="color:var(--green);font-weight:700;">ONLINE</span>' : '<span style="color:var(--orange);font-weight:700;">OFFLINE</span>');
+        const verified = m.verified ? `<span class="badge">Verified</span>` : `<span class="chip">Unverified</span>`;
+        const card = document.createElement('div');
+        card.className = 'stat';
+        card.innerHTML = `
+          <div class="row" style="justify-content:space-between; gap:.75rem;">
+            <div>
+              <div><strong>${m.name}</strong> ${verified} <span class="muted">(${m.email||'—'})</span></div>
+              <div class="muted">Phone: ${m.phone||'—'} • ${m.location||'—'} • KYC L${m.kycLevel||1}</div>
+              <div class="muted">Rating: ${m.rating||0} • Trades: ${m.trades||0} • Completion: ${m.completion||0}% • Avg release: ${m.avgReleaseMin||0} min</div>
+              <div class="muted">Rates: Buy <strong>MWK ${m.buyRate||0}</strong> • Sell <strong>MWK ${m.sellRate||0}</strong> • Limits: ${(m.limits?.min||0)} - ${(m.limits?.max||0)} MWK</div>
+              <div class="muted">State: ${state}</div>
+            </div>
+            <div style="text-align:right;">
+              <button class="btn small" data-id="${m.id}" data-action="edit">Edit</button>
+              <button class="btn small" data-id="${m.id}" data-action="rates">Rates</button>
+              <button class="btn small" data-id="${m.id}" data-action="verify">${m.verified?'Unverify':'Verify'}</button>
+              <button class="btn small" data-id="${m.id}" data-action="suspend">${m.suspended?'Unsuspend':'Suspend'}</button>
+              <button class="btn small" data-id="${m.id}" data-action="online">${m.online?'Go Offline':'Go Online'}</button>
+              <button class="btn small" data-id="${m.id}" data-action="delete">Delete</button>
+            </div>
+          </div>
+        `;
+        listEl.appendChild(card);
+      });
+
+      // Bind row buttons
+      listEl.querySelectorAll('button').forEach(btn=>{
+        const id = parseInt(btn.dataset.id,10);
+        const action = btn.dataset.action;
+        if (action === 'edit')     btn.addEventListener('click', ()=> openEditMerchant(id));
+        if (action === 'rates')    btn.addEventListener('click', ()=> openMerchantRates(id));
+        if (action === 'verify')   btn.addEventListener('click', ()=> toggleMerchantVerify(id));
+        if (action === 'suspend')  btn.addEventListener('click', ()=> toggleMerchantSuspend(id));
+        if (action === 'online')   btn.addEventListener('click', ()=> toggleMerchantOnline(id));
+        if (action === 'delete')   btn.addEventListener('click', ()=> deleteMerchant(id));
+      });
+    }
+
+    // User actions (modals wired from Chunk 1)
+    function openEditUser(id){
+      const u = getUsers().find(x=>x.id===id); if(!u) return;
+      $('euId').value = u.id;
+      $('euEmail').value = u.email;
+      $('euName').value  = u.name || '';
+      $('euPhone').value = u.phone || '';
+      $('euRole').value  = u.role || 'user';
+      $('euKyc').value   = u.kycStatus || 'pending';
+      $('euState').value = u.banned ? 'banned' : 'active';
+      $('editUserModal').style.display='block';
+    }
+    function closeEditUser(){ $('editUserModal').style.display='none'; }
+    function saveEditUser(){
+      const id = $('euId').value;
+      let list = getUsers();
+      const idx = list.findIndex(u=>u.id===id);
+      if (idx < 0) return;
+      list[idx] = {
+        ...list[idx],
+        name:  $('euName').value.trim(),
+        phone: $('euPhone').value.trim(),
+        role:  $('euRole').value,
+        kycStatus: $('euKyc').value,
+        banned: $('euState').value === 'banned'
+      };
+      setUsers(list);
+      toast('User updated');
+      closeEditUser();
+      renderUsers();
+      // update overview stat
+      $('statUsers') && ($('statUsers').textContent = getUsers().length);
+    }
+    function toggleUserBan(id){
+      let list = getUsers();
+      const idx = list.findIndex(u=>u.id===id); if(idx<0) return;
+      list[idx].banned = !list[idx].banned;
+      setUsers(list);
+      toast(list[idx].banned ? 'User banned' : 'User unbanned');
+      renderUsers();
+    }
+    function deleteUser(id){
+      if(!confirm('Delete this user?')) return;
+      setUsers(getUsers().filter(u=>u.id!==id));
+      toast('User deleted');
+      renderUsers();
+      $('statUsers') && ($('statUsers').textContent = getUsers().length);
+    }
+
+    // Wallet adjust (modal in Chunk 1)
+    function openWalletAdjust(email){
+      $('waEmail').value = email || '';
+      $('waMwk').value = '';
+      $('waUsdt').value = '';
+      $('waReason').value = '';
+      $('walletAdjustModal').style.display='block';
+    }
+    function closeWalletAdjust(){ $('walletAdjustModal').style.display='none'; }
+    function applyWalletAdjust(){
+      const email = $('waEmail').value;
+      const dMwk  = parseFloat($('waMwk').value||0);
+      const dUsdt = parseFloat($('waUsdt').value||0);
+      const wallets = safeParse(localStorage.getItem('wallets'), {});
+      const current = wallets[email] || { mwk:0, usdt:0 };
+      wallets[email] = { mwk: Number(current.mwk||0) + dMwk, usdt: Number(current.usdt||0) + dUsdt };
+      localStorage.setItem('wallets', JSON.stringify(wallets));
+      toast('Wallet adjusted');
+      closeWalletAdjust();
+    }
+
+    // Merchant actions (modals in Chunk 1)
+    function openEditMerchant(id){
+      const m = getMerchants().find(x=>x.id===id); if(!m) return;
+      $('emId').value = m.id;
+      $('emTitle').textContent = `Edit Merchant • ${m.name}`;
+      $('emName').value = m.name || '';
+      $('emPhone').value = m.phone || '';
+      $('emLocation').value = m.location || '';
+      $('emLang').value = (m.languages||[]).join(', ');
+      $('mAir').checked = (m.methods||[]).includes('airtel');
+      $('mMpa').checked = (m.methods||[]).includes('mpamba');
+      $('mBank').checked = (m.methods||[]).includes('bank');
+      $('emMin').value = m.limits?.min || 0;
+      $('emMax').value = m.limits?.max || 0;
+      $('emBadges').value = (m.badges||[]).join(', ');
+      $('editMerchantModal').style.display='block';
+    }
+    function closeEditMerchant(){ $('editMerchantModal').style.display='none'; }
+    function saveEditMerchant(){
+      const id = parseInt($('emId').value,10);
+      let list = getMerchants();
+      const idx = list.findIndex(m=>m.id===id); if(idx<0) return;
+      const methods = [];
+      if ($('mAir').checked) methods.push('airtel');
+      if ($('mMpa').checked) methods.push('mpamba');
+      if ($('mBank').checked) methods.push('bank');
+      list[idx] = {
+        ...list[idx],
+        name: $('emName').value.trim(),
+        phone: $('emPhone').value.trim(),
+        location: $('emLocation').value.trim(),
+        languages: $('emLang').value.split(',').map(x=>x.trim()).filter(Boolean),
+        methods,
+        limits: {
+          min: parseInt($('emMin').value||0,10),
+          max: parseInt($('emMax').value||0,10)
+        },
+        badges: $('emBadges').value.split(',').map(x=>x.trim()).filter(Boolean)
+      };
+      setMerchants(list);
+      toast('Merchant updated');
+      closeEditMerchant();
+      renderMerchants();
+      // update overview merchants stat
+      const verifiedCount = getMerchants().filter(m=>m.verified).length;
+      $('statMerchants') && ($('statMerchants').textContent = verifiedCount);
+    }
+
+    function openMerchantRates(id){
+      const m = getMerchants().find(x=>x.id===id); if(!m) return;
+      $('mrId').value = m.id;
+      $('mrBuy').value = m.buyRate||0;
+      $('mrSell').value = m.sellRate||0;
+      $('merchantRatesModal').style.display='block';
+    }
+    function closeMerchantRates(){ $('merchantRatesModal').style.display='none'; }
+    function saveMerchantRates(){
+      const id = parseInt($('mrId').value,10);
+      let list = getMerchants();
+      const idx = list.findIndex(m=>m.id===id); if(idx<0) return;
+      list[idx].buyRate  = parseFloat($('mrBuy').value||0);
+      list[idx].sellRate = parseFloat($('mrSell').value||0);
+      setMerchants(list);
+      toast('Rates updated');
+      closeMerchantRates();
+      renderMerchants();
+    }
+
+    function toggleMerchantVerify(id){
+      let list = getMerchants();
+      const idx = list.findIndex(m=>m.id===id); if(idx<0)return;
+      list[idx].verified = !list[idx].verified;
+      setMerchants(list);
+      toast(list[idx].verified ? 'Merchant verified' : 'Merchant unverified');
+      renderMerchants();
+      const verifiedCount = getMerchants().filter(m=>m.verified).length;
+      $('statMerchants') && ($('statMerchants').textContent = verifiedCount);
+    }
+    function toggleMerchantSuspend(id){
+      let list = getMerchants();
+      const idx = list.findIndex(m=>m.id===id); if(idx<0)return;
+      list[idx].suspended = !list[idx].suspended;
+      setMerchants(list);
+      toast(list[idx].suspended ? 'Merchant suspended' : 'Merchant unsuspended');
+      renderMerchants();
+    }
+    function toggleMerchantOnline(id){
+      let list = getMerchants();
+      const idx = list.findIndex(m=>m.id===id); if(idx<0)return;
+      list[idx].online = !list[idx].online;
+      setMerchants(list);
+      toast(list[idx].online ? 'Merchant online' : 'Merchant offline');
+      renderMerchants();
+    }
+    function deleteMerchant(id){
+      if(!confirm('Delete this merchant?')) return;
+      setMerchants(getMerchants().filter(m=>m.id!==id));
+      toast('Merchant deleted');
+      renderMerchants();
+      const verifiedCount = getMerchants().filter(m=>m.verified).length;
+      $('statMerchants') && ($('statMerchants').textContent = verifiedCount);
+    }
+
+    // New user/merchant modals (Chunk 1 provides structure)
+    function openNewUser(){ $('newUserModal').style.display='block'; }
+    function closeNewUser(){ $('newUserModal').style.display='none'; }
+    function createUser(){
+      const email = $('nuEmail').value.trim();
+      const name  = $('nuName').value.trim();
+      const phone = $('nuPhone').value.trim();
+      const role  = $('nuRole').value;
+      const kyc   = $('nuKyc').value;
+      if (!email || !name) return toast('Email and Name required');
+      let list = getUsers();
+      if (list.some(u=>u.email===email)) return toast('Email already exists');
+      list.unshift(mkUser(email,name,phone,role,kyc,false));
+      setUsers(list);
+      toast('User created');
+      closeNewUser();
+      renderUsers();
+      $('statUsers') && ($('statUsers').textContent = getUsers().length);
+    }
+
+    function openNewMerchant(){ $('newMerchantModal').style.display='block'; }
+    function closeNewMerchant(){ $('newMerchantModal').style.display='none'; }
+    function createMerchant(){
+      const name = $('nmName').value.trim();
+      const phone= $('nmPhone').value.trim();
+      const email= $('nmEmail').value.trim();
+      const location = $('nmLocation').value.trim();
+      const methods = [];
+      $('nmAir')?.checked && methods.push('airtel');
+      $('nmMpa')?.checked && methods.push('mpamba');
+      $('nmBank')?.checked && methods.push('bank');
+
+      const limits = { min: parseInt($('nmMin').value||0,10), max: parseInt($('nmMax').value||0,10) };
+      const buy = parseFloat($('nmBuy').value||0);
+      const sell= parseFloat($('nmSell').value||0);
+      if (!name || !phone || !email) return toast('Name, phone, email required');
+
+      let list = getMerchants();
+      const newId = Math.max(0, ...list.map(m=>m.id||0)) + 1;
+      list.unshift({
+        id:newId, name, email, phone, verified:false, kycLevel:1, online:false, suspended:false, rating:4.6,
+        trades:0, completion:100, dispute:0, avgReleaseMin:15, years:0, methods,
+        buyRate:buy||1750, sellRate:sell||1745, limits, location, languages:['EN'], liquidityUSDT:0, badges:[]
+      });
+      setMerchants(list);
+      toast('Merchant created');
+      closeNewMerchant();
+      renderMerchants();
+    }
+
+    // Exports
+    function exportUsersCSV(){
+      const list = getUsers();
+      const rows = [['ID','Email','Name','Phone','Role','KYC','State','Created']];
+      list.forEach(u=> rows.push([u.id,u.email,u.name||'',u.phone||'',u.role||'user',u.kycStatus||'pending',u.banned?'banned':'active',u.createdAt||'']));
+      const csv = rows.map(r=> r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv],{type:'text/csv'}); const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob); a.download=`users_${Date.now()}.csv`; a.click();
+      URL.revokeObjectURL(a.href);
+    }
+    function exportMerchantsCSV(){
+      const list = getMerchants();
+      const rows = [['ID','Name','Email','Phone','Verified','Online','Suspended','Rating','Trades','Completion','AvgReleaseMin','BuyRate','SellRate','MinLimit','MaxLimit','Location','Languages','Methods','Badges']];
+      list.forEach(m=>{
+        rows.push([
+          m.id, m.name, m.email||'', m.phone||'', !!m.verified, !!m.online, !!m.suspended, m.rating||0, m.trades||0, m.completion||0, m.avgReleaseMin||0,
+          m.buyRate||0, m.sellRate||0, m.limits?.min||0, m.limits?.max||0, m.location||'',
+          (m.languages||[]).join('|'), (m.methods||[]).join('|'), (m.badges||[]).join('|')
+        ]);
+      });
+      const csv = rows.map(r=> r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv],{type:'text/csv'}); const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob); a.download=`merchants_${Date.now()}.csv`; a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // Bind panel controls
+    function bindUsersMerchantsEvents(){
+      // Users
+      $('btnReloadUsers')?.addEventListener('click', renderUsers);
+      $('btnNewUser')?.addEventListener('click', openNewUser);
+      $('btnExportUsers')?.addEventListener('click', exportUsersCSV);
+      let uTimer=null;
+      $('userSearch')?.addEventListener('input', ()=>{ clearTimeout(uTimer); uTimer=setTimeout(renderUsers,200); });
+      $('userRoleFilter')?.addEventListener('change', renderUsers);
+      $('userStateFilter')?.addEventListener('change', renderUsers);
+      $('userKycFilter')?.addEventListener('change', renderUsers);
+
+      // Merchants
+      $('btnReloadMerchants')?.addEventListener('click', renderMerchants);
+      $('btnNewMerchant')?.addEventListener('click', openNewMerchant);
+      $('btnExportMerchants')?.addEventListener('click', exportMerchantsCSV);
+      let mTimer=null;
+      $('merchSearch')?.addEventListener('input', ()=>{ clearTimeout(mTimer); mTimer=setTimeout(renderMerchants,200); });
+      $('merchStateFilter')?.addEventListener('change', renderMerchants);
+      $('merchVerifyFilter')?.addEventListener('change', renderMerchants);
+      $('merchSort')?.addEventListener('change', renderMerchants);
+    }
+
+    // Cross-tab live updates
+    window.addEventListener('storage', (e)=>{
+      if (e.key === USERS_KEY) renderUsers();
+      if (e.key === MERCHANTS_KEY) renderMerchants();
+    });
+
+    // INIT chunk 4
+    function initUsersMerchants(){
+      ensureUsersPanel();
+      ensureMerchantsPanel();
+      seedUsersIfEmpty();
+      seedMerchantsIfEmpty();
+      bindUsersMerchantsEvents();
+      renderUsers();
+      renderMerchants();
+    }
+
+    // Expose needed functions for inline handlers
+    window.openEditUser = openEditUser;
+    window.closeEditUser = closeEditUser;
+    window.saveEditUser = saveEditUser;
+    window.toggleUserBan = toggleUserBan;
+    window.deleteUser = deleteUser;
+    window.openWalletAdjust = openWalletAdjust;
+    window.closeWalletAdjust = closeWalletAdjust;
+    window.applyWalletAdjust = applyWalletAdjust;
+
+    window.openEditMerchant = openEditMerchant;
+    window.closeEditMerchant = closeEditMerchant;
+    window.saveEditMerchant = saveEditMerchant;
+    window.openMerchantRates = openMerchantRates;
+    window.closeMerchantRates = closeMerchantRates;
+    window.saveMerchantRates = saveMerchantRates;
+    window.toggleMerchantVerify = toggleMerchantVerify;
+    window.toggleMerchantSuspend = toggleMerchantSuspend;
+    window.toggleMerchantOnline = toggleMerchantOnline;
+    window.deleteMerchant = deleteMerchant;
+
+    window.openNewUser = openNewUser;
+    window.closeNewUser = closeNewUser;
+    window.createUser = createUser;
+
+    window.openNewMerchant = openNewMerchant;
+    window.closeNewMerchant = closeNewMerchant;
+    window.createMerchant = createMerchant;
+
+    // Kick off
+    initUsersMerchants();
+
+  })();
+</script>
+<!-- CHUNK 5 — Security Logs + System Settings (paste after Chunk 4).
+     Builds both panels, wires events, and keeps everything live across tabs. -->
+<script>
+  (function(){
+    'use strict';
+
+    // Keys
+    const SETTINGS_KEY = 'platform.settings';
+    const LOGS_KEY     = 'platform.logs';
+
+    // Helpers
+    const $ = id => document.getElementById(id);
+    const safeParse = (s, f) => { try{ const v=JSON.parse(s); return (v===null||v===undefined)?f:v; }catch{ return f; } };
+    const nowISO = () => new Date().toISOString();
+    const adminEmail = () => localStorage.getItem('user') || 'admin@cryptex.mw';
+    const toast = msg => { const t=$('toast'); if(!t){ alert(msg); return; } t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',1600); };
+
+    // Defaults + Accessors
+    function defaultPlatform(){
+      return {
+        maintenance:false, readonly:false, allowSignup:true, allowMerchant:true,
+        announcement:null, updatedAt: nowISO(), updatedBy: adminEmail()
+      };
+    }
+    function getPlatform(){ return safeParse(localStorage.getItem(SETTINGS_KEY), null) || defaultPlatform(); }
+    function setPlatform(obj){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(obj)); }
+
+    function mkLog(type,status,details,actor=adminEmail(),ip='—',ua=navigator.userAgent||'—'){
+      return { id:'LG-'+Date.now()+'-'+Math.random().toString(36).slice(2,6), ts: nowISO(), type, status, details, actor, ip, ua };
+    }
+    function getLogs(){ return safeParse(localStorage.getItem(LOGS_KEY), []); }
+    function setLogs(list){ localStorage.setItem(LOGS_KEY, JSON.stringify(list)); }
+    function addLog(type,status,details,actor){ const list=getLogs(); list.unshift(mkLog(type,status,details,actor)); setLogs(list.slice(0,500)); }
+
+    // Ensure panels UI
+    function ensureSettingsPanel(){
+      const panel = $('panel-settings');
+      if (!panel || panel.dataset.built==='1') return;
+      panel.innerHTML = `
+        <div class="section">
+          <div class="section-title">⚙️ System Settings</div>
+          <div class="grid grid-2">
+            <!-- Platform Flags -->
+            <div class="stat">
+              <div class="label" style="margin-bottom:.5rem;">Platform Flags</div>
+              <label class="row" style="justify-content:space-between; margin:.35rem 0;">
+                <span class="muted">Maintenance mode</span>
+                <input id="setMaintenance" type="checkbox" style="accent-color:#D4AF37;">
+              </label>
+              <label class="row" style="justify-content:space-between; margin:.35rem 0;">
+                <span class="muted">Readonly mode (disable trading)</span>
+                <input id="setReadonly" type="checkbox" style="accent-color:#D4AF37;">
+              </label>
+              <label class="row" style="justify-content:space-between; margin:.35rem 0;">
+                <span class="muted">Allow new user signups</span>
+                <input id="setAllowSignup" type="checkbox" style="accent-color:#D4AF37;">
+              </label>
+              <label class="row" style="justify-content:space-between; margin:.35rem 0;">
+                <span class="muted">Allow new merchants</span>
+                <input id="setAllowMerchant" type="checkbox" style="accent-color:#D4AF37;">
+              </label>
+              <div class="row" style="gap:.5rem; margin-top:.6rem;">
+                <button id="btnSavePlatform" class="btn primary">Save Settings</button>
+                <button id="btnResetPlatform" class="btn">Reset Defaults</button>
+              </div>
+              <div id="platformMeta" class="muted" style="margin-top:.45rem; font-size:.85rem;">—</div>
+            </div>
+
+            <!-- Announcement -->
+            <div class="stat">
+              <div class="label" style="margin-bottom:.5rem;">Announcement</div>
+              <div class="field"><div class="label">Title</div><input id="annTitle" class="input" placeholder="e.g. Scheduled maintenance"></div>
+              <div class="field"><div class="label">Message</div><textarea id="annMsg" class="input" rows="3" placeholder="Short message shown on user pages"></textarea></div>
+              <div class="field"><div class="label">Style</div>
+                <select id="annStyle" class="select">
+                  <option value="info">Info</option>
+                  <option value="success">Success</option>
+                  <option value="warn">Warning</option>
+                  <option value="error">Error</option>
+                </select>
+              </div>
+              <div class="label" style="margin-top:.5rem;">Preview</div>
+              <div id="annPreview" class="stat" style="border:1px dashed #3a3a3a; background:#1b1b1b; color:#e0e0e0;">Preview area</div>
+              <div class="row" style="gap:.5rem; margin-top:.6rem; flex-wrap:wrap;">
+                <button id="btnPreviewAnn" class="btn">Preview</button>
+                <button id="btnSaveAnn" class="btn primary">Save Announcement</button>
+                <button id="btnClearAnn" class="btn">Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">🧰 Backup & Tools</div>
+          <div class="grid grid-3">
+            <div class="stat">
+              <div class="label">Export Configuration</div>
+              <div class="muted" style="margin:.35rem 0;">Rates, fees, settings, logs, users, merchants, recharges, wallets</div>
+              <button id="btnExportConfig" class="btn">Export JSON</button>
+            </div>
+            <div class="stat">
+              <div class="label">Import Configuration</div>
+              <div class="muted" style="margin:.35rem 0;">Careful: this overwrites existing local data</div>
+              <input id="importFile" type="file" accept="application/json" style="display:none;">
+              <button id="btnImportConfig" class="btn">Choose File</button>
+            </div>
+            <div class="stat">
+              <div class="label">Factory Reset</div>
+              <div class="muted" style="margin:.35rem 0;">Clear all local data and start fresh</div>
+              <button id="btnFactoryReset" class="btn">Factory Reset</button>
+            </div>
+          </div>
+        </div>
+      `;
+      panel.dataset.built = '1';
+    }
+
+    function ensureSecurityPanel(){
+      const panel = $('panel-security');
+      if (!panel || panel.dataset.built==='1') return;
+      panel.innerHTML = `
+        <div class="section">
+          <div class="section-title">🔐 Security Logs</div>
+
+          <div class="grid" style="gap:.6rem;">
+            <div class="grid grid-3">
+              <div class="stat"><div class="stat-label">Logs (24h)</div><div class="stat-value" id="sumLogs24h">0</div></div>
+              <div class="stat"><div class="stat-label">Failed / Errors</div><div class="stat-value" id="sumFailed">0</div></div>
+              <div class="stat"><div class="stat-label">Admin Actions</div><div class="stat-value" id="sumAdmin">0</div></div>
+            </div>
+
+            <div class="stat" style="display:flex; align-items:center; justify-content:space-between; gap:.6rem; flex-wrap:wrap;">
+              <div class="row" style="gap:.6rem; flex-wrap:wrap;">
+                <select id="logTypeFilter" class="select">
+                  <option value="all" selected>All types</option>
+                  <option value="login">Login</option>
+                  <option value="admin">Admin</option>
+                  <option value="rate">Rate</option>
+                  <option value="recharge">Recharge</option>
+                  <option value="merchant">Merchant</option>
+                  <option value="user">User</option>
+                  <option value="failed">Failed</option>
+                </select>
+                <select id="logStatusFilter" class="select">
+                  <option value="all" selected>All status</option>
+                  <option value="success">Success</option>
+                  <option value="warning">Warning</option>
+                  <option value="error">Error</option>
+                </select>
+                <input id="logSearch" class="input" type="search" placeholder="Search actor/ip/ua/details" style="min-width:260px;">
+              </div>
+              <div class="row" style="gap:.5rem;">
+                <button id="btnReloadLogs" class="btn small">Reload</button>
+                <button id="btnGenerateLogs" class="btn small">Generate Test</button>
+                <button id="btnExportLogs" class="btn small">Export CSV</button>
+                <button id="btnClearLogs" class="btn small">Clear</button>
+              </div>
+            </div>
+
+            <div id="logList" class="grid"></div>
+          </div>
+        </div>
+      `;
+      panel.dataset.built = '1';
+    }
+
+    // SETTINGS: Render + Actions
+    function renderPlatform(){
+      const s = getPlatform();
+      if ($('setMaintenance')){
+        $('setMaintenance').checked = !!s.maintenance;
+        $('setReadonly').checked   = !!s.readonly;
+        $('setAllowSignup').checked= !!s.allowSignup;
+        $('setAllowMerchant').checked = !!s.allowMerchant;
+        $('platformMeta').textContent = `Last updated: ${new Date(s.updatedAt).toLocaleString()} by ${s.updatedBy || adminEmail()}`;
+      }
+      // Announcement form
+      if ($('annTitle')){
+        const a = s.announcement || {};
+        $('annTitle').value = a.title || '';
+        $('annMsg').value   = a.msg   || '';
+        $('annStyle').value = a.style || 'info';
+        renderAnnPreview();
+      }
+    }
+
+    function savePlatform(){
+      const p = getPlatform();
+      if (!$('setMaintenance')) return;
+      p.maintenance   = $('setMaintenance').checked;
+      p.readonly      = $('setReadonly').checked;
+      p.allowSignup   = $('setAllowSignup').checked;
+      p.allowMerchant = $('setAllowMerchant').checked;
+      p.updatedAt     = nowISO();
+      p.updatedBy     = adminEmail();
+      setPlatform(p);
+      addLog('settings','success','Platform flags updated', adminEmail());
+      toast('Platform settings saved');
+      renderPlatform();
+    }
+
+    function resetPlatform(){
+      const d = defaultPlatform();
+      setPlatform(d);
+      addLog('settings','warning','Platform flags reset', adminEmail());
+      toast('Platform settings reset');
+      renderPlatform();
+    }
+
+    function renderAnnPreview(){
+      const title = $('annTitle')?.value.trim() || '';
+      const msg   = $('annMsg')?.value.trim()   || '';
+      const style = $('annStyle')?.value        || 'info';
+      const box   = $('annPreview');
+      if (!box) return;
+      if (!title && !msg){
+        box.className = 'stat';
+        box.style.border = '1px dashed #3a3a3a';
+        box.style.background = '#1b1b1b';
+        box.style.color = '#e0e0e0';
+        box.innerHTML = 'Preview area';
+        return;
+      }
+      // Style tokens
+      const styles = {
+        info: { bg:'#182022', bd:'#2b464d', color:'#9fd3e6' },
+        success: { bg:'#162318', bd:'#1a5a22', color:'#a4f3b2' },
+        warn: { bg:'#231f14', bd:'#5a4a1a', color:'#e8d69a' },
+        error: { bg:'#2b1616', bd:'#5a1d1d', color:'#ffb0b0' }
+      };
+      const s = styles[style] || styles.info;
+      box.className = 'stat';
+      box.style.background = s.bg;
+      box.style.border = `1px solid ${s.bd}`;
+      box.style.color = s.color;
+      box.innerHTML = `<strong>${title}</strong>${msg?`<div style="margin-top:.35rem;">${msg}</div>`:''}`;
+    }
+
+    function saveAnnouncement(){
+      const p = getPlatform();
+      const title = $('annTitle').value.trim();
+      const msg   = $('annMsg').value.trim();
+      const style = $('annStyle').value;
+      p.announcement = (title || msg) ? { title, msg, style } : null;
+      p.updatedAt = nowISO();
+      p.updatedBy = adminEmail();
+      setPlatform(p);
+      addLog('settings','success','Announcement updated', adminEmail());
+      toast('Announcement saved');
+    }
+
+    function clearAnnouncement(){
+      const p = getPlatform();
+      p.announcement = null;
+      p.updatedAt = nowISO();
+      p.updatedBy = adminEmail();
+      setPlatform(p);
+      $('annTitle').value = '';
+      $('annMsg').value   = '';
+      renderAnnPreview();
+      addLog('settings','warning','Announcement cleared', adminEmail());
+      toast('Announcement cleared');
+    }
+
+    // SECURITY LOGS: Render + Actions
+    function iconForType(t){
+      switch(String(t||'').toLowerCase()){
+        case 'login': return '🔑';
+        case 'failed': return '⛔';
+        case 'admin': return '🛠️';
+        case 'rate': return '💱';
+        case 'recharge': return '📥';
+        case 'merchant': return '🏪';
+        case 'user': return '👤';
+        default: return '🔐';
+      }
+    }
+    function renderLogs(){
+      const listEl = $('logList'); if(!listEl) return;
+      let list = getLogs().slice();
+
+      const type = $('logTypeFilter')?.value || 'all';
+      const st   = $('logStatusFilter')?.value || 'all';
+      const q    = ($('logSearch')?.value || '').trim().toLowerCase();
+
+      if (type !== 'all') list = list.filter(l => String(l.type||'') === type);
+      if (st !== 'all')   list = list.filter(l => String(l.status||'') === st);
+      if (q) list = list.filter(l => [l.actor,l.ip,l.ua,l.details].some(v => String(v||'').toLowerCase().includes(q)));
+
+      listEl.innerHTML = '';
+      if (!list.length){
+        listEl.innerHTML = '<div class="muted" style="padding:.6rem 0;">No logs match filters.</div>';
+      } else {
+        list.forEach(l=>{
+          const badge = l.status==='success' ? '<span class="badge" style="background:rgba(76,175,80,.15); color:#aaf3b0; border:1px solid rgba(76,175,80,.3);">SUCCESS</span>'
+                      : l.status==='warning' ? '<span class="badge" style="background:rgba(255,152,0,.15); color:#ffd37a; border:1px solid rgba(255,152,0,.3);">WARNING</span>'
+                                              : '<span class="badge" style="background:rgba(244,67,54,.15); color:#ff9d94; border:1px solid rgba(244,67,54,.3);">ERROR</span>';
+          const row = document.createElement('div');
+          row.className = 'stat';
+          row.innerHTML = `
+            <div class="row" style="justify-content:space-between; gap:.5rem;">
+              <div class="row" style="gap:.5rem;">
+                <strong>${iconForType(l.type)} ${(l.type||'').toUpperCase()}</strong> ${badge}
+              </div>
+              <div class="muted" style="font-size:.85rem;">${new Date(l.ts).toLocaleString()}</div>
+            </div>
+            <div class="muted" style="margin:.35rem 0;">${l.details||'—'}</div>
+            <div class="muted" style="font-size:.85rem;">Actor: <strong>${l.actor||'system'}</strong> • IP: ${l.ip||'—'} • UA: ${l.ua||'—'}</div>
+          `;
+          listEl.appendChild(row);
+        });
+      }
+
+      // Summary
+      const all = getLogs();
+      const now = Date.now(), dayAgo = now - 24*3600*1000;
+      $('sumLogs24h') && ($('sumLogs24h').textContent = all.filter(l=> new Date(l.ts).getTime() >= dayAgo).length);
+      $('sumFailed')  && ($('sumFailed').textContent  = all.filter(l=> (l.status==='error') || (l.type==='failed')).length);
+      $('sumAdmin')   && ($('sumAdmin').textContent   = all.filter(l=> l.type==='admin').length);
+    }
+
+    function exportLogsCSV(){
+      const logs = getLogs();
+      const rows = [['Time','Type','Status','Actor','IP','UA','Details']];
+      logs.forEach(l=> rows.push([new Date(l.ts).toLocaleString(), l.type, l.status, l.actor, l.ip, l.ua, l.details]));
+      const csv = rows.map(r=> r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv],{type:'text/csv'}); const a=document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = `logs_${Date.now()}.csv`; a.click();
+      URL.revokeObjectURL(a.href);
+    }
+    function clearLogs(){ if(!confirm('Clear all logs?')) return; setLogs([]); renderLogs(); toast('Logs cleared'); }
+    function generateTestLogs(){
+      addLog('login','success','Admin login', adminEmail());
+      addLog('admin','success','Edited merchant rates (Gold Exchanger)', adminEmail());
+      addLog('failed','error','Invalid token attempt', 'unknown@hack.com');
+      renderLogs(); toast('Test logs generated');
+    }
+
+    // Backup & Tools
+    function exportConfig(){
+      // Get from chunks 2/3/4 if functions exist; fallback to keys
+      const rates       = (typeof getRates === 'function') ? getRates() : safeParse(localStorage.getItem('platform.rates'), {});
+      const rateHistory = (typeof getRateHistory === 'function') ? getRateHistory() : safeParse(localStorage.getItem('platform.rateHistory'), []);
+      const fees        = (typeof getFees === 'function') ? getFees() : safeParse(localStorage.getItem('platform.fees'), {});
+      const settings    = getPlatform();
+      const logs        = getLogs();
+      const users       = safeParse(localStorage.getItem('platform.users'), []);
+      const merchants   = safeParse(localStorage.getItem('platform.merchants'), []);
+      const recharges   = safeParse(localStorage.getItem('platform.recharges'), []);
+      const wallets     = safeParse(localStorage.getItem('wallets'), {});
+      const payload = { exportedAt: nowISO(), rates, rateHistory, fees, settings, logs, users, merchants, recharges, wallets };
+      const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'cryptex_backup.json'; a.click();
+      URL.revokeObjectURL(a.href);
+      toast('Export started');
+    }
+    function importConfig(file){
+      const reader = new FileReader();
+      reader.onload = () => {
+        try{
+          const data = JSON.parse(reader.result);
+          if (!confirm('Overwrite existing local data with imported configuration?')) return;
+          if(data.rates)       localStorage.setItem('platform.rates', JSON.stringify(data.rates));
+          if(data.rateHistory) localStorage.setItem('platform.rateHistory', JSON.stringify(data.rateHistory));
+          if(data.fees)        localStorage.setItem('platform.fees', JSON.stringify(data.fees));
+          if(data.settings)    localStorage.setItem('platform.settings', JSON.stringify(data.settings));
+          if(data.logs)        localStorage.setItem('platform.logs', JSON.stringify(data.logs));
+          if(data.users)       localStorage.setItem('platform.users', JSON.stringify(data.users));
+          if(data.merchants)   localStorage.setItem('platform.merchants', JSON.stringify(data.merchants));
+          if(data.recharges)   localStorage.setItem('platform.recharges', JSON.stringify(data.recharges));
+          if(data.wallets)     localStorage.setItem('wallets', JSON.stringify(data.wallets));
+          toast('Config imported');
+          renderPlatform(); renderLogs();
+        }catch(e){ alert('Invalid file'); }
+      };
+      reader.readAsText(file);
+    }
+    function factoryReset(){
+      if(!confirm('Factory reset will clear all local data. Continue?')) return;
+      ['platform.rates','platform.rateHistory','platform.fees','platform.settings','platform.logs','platform.users','platform.merchants','platform.recharges','wallets','transactions']
+        .forEach(k=> localStorage.removeItem(k));
+      toast('Factory reset complete. Reload recommended.');
+    }
+
+    // Bind events
+    function bindSettingsEvents(){
+      $('btnSavePlatform')?.addEventListener('click', savePlatform);
+      $('btnResetPlatform')?.addEventListener('click', resetPlatform);
+
+      $('btnPreviewAnn')?.addEventListener('click', renderAnnPreview);
+      $('btnSaveAnn')?.addEventListener('click', saveAnnouncement);
+      $('btnClearAnn')?.addEventListener('click', clearAnnouncement);
+
+      $('btnExportConfig')?.addEventListener('click', exportConfig);
+      $('btnImportConfig')?.addEventListener('click', ()=> $('importFile')?.click());
+      $('importFile')?.addEventListener('change', e=> e.target.files[0] && importConfig(e.target.files[0]));
+      $('btnFactoryReset')?.addEventListener('click', factoryReset);
+    }
+
+    function bindSecurityEvents(){
+      $('btnReloadLogs')?.addEventListener('click', renderLogs);
+      $('btnGenerateLogs')?.addEventListener('click', generateTestLogs);
+      $('btnExportLogs')?.addEventListener('click', exportLogsCSV);
+      $('btnClearLogs')?.addEventListener('click', clearLogs);
+
+      let sTimer=null;
+      $('logSearch')?.addEventListener('input', ()=>{ clearTimeout(sTimer); sTimer=setTimeout(renderLogs,200); });
+      $('logTypeFilter')?.addEventListener('change', renderLogs);
+      $('logStatusFilter')?.addEventListener('change', renderLogs);
+    }
+
+    // Live cross‑tab updates
+    window.addEventListener('storage', (e)=>{
+      if (e.key === SETTINGS_KEY){ renderPlatform(); }
+      if (e.key === LOGS_KEY){ renderLogs(); }
+    });
+
+    // INIT chunk 5
+    function initSecuritySettings(){
+      ensureSettingsPanel();
+      ensureSecurityPanel();
+
+      // Seed a few logs if empty (first load UX)
+      if (!getLogs().length){
+        setLogs([
+          mkLog('login','success','Admin login', adminEmail()),
+          mkLog('rate','success','Rates changed', adminEmail()),
+          mkLog('failed','error','Failed access attempt','unknown@hack.com')
+        ]);
+      }
+
+      bindSettingsEvents();
+      bindSecurityEvents();
+
+      renderPlatform();
+      renderAnnPreview();
+      renderLogs();
+    }
+
+    // Kick off
+    initSecuritySettings();
+
+  })();
+</script>
+<!-- CHUNK 6 — Glue, Live Overview, Hash-nav, Back-to-App thumbnail, favicon, and UX polish.
+     Paste after Chunk 5. Safe, non-destructive, no overrides of prior functions. -->
+<script>
+  (function(){
+    'use strict';
+
+    // Helpers
+    const $ = id => document.getElementById(id);
+    const safeParse = (s, f) => { try{ const v=JSON.parse(s); return (v===null||v===undefined)?f:v; }catch{ return f; } };
+    const toast = msg => { const t=$('toast'); if(!t){ alert(msg); return; } t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',1600); };
+
+    // ===== Back-to-App thumbnail + Favicon =====
+    function ensureBackThumb(){
+      const topbar = document.querySelector('.topbar .brand');
+      if (!topbar || document.getElementById('backThumb')) return;
+      const link = document.createElement('a');
+      link.id = 'backThumb';
+      link.href = 'dashboard.html';
+      link.title = 'Back to App';
+      link.style.display = 'inline-flex';
+      link.style.alignItems = 'center';
+      link.style.gap = '.4rem';
+
+      const thumb = document.createElement('div');
+      thumb.className = 'brand-logo';
+      thumb.style.width = '28px';
+      thumb.style.height = '28px';
+      thumb.textContent = '↩';
+
+      const label = document.createElement('span');
+      label.style.color = 'var(--gold2)';
+      label.style.fontWeight = '800';
+      label.style.fontSize = '.85rem';
+      label.textContent = 'Back to App';
+
+      link.appendChild(thumb);
+      link.appendChild(label);
+
+      // insert on the right side of brand, before admin-info space
+      topbar.appendChild(link);
+    }
+
+    function ensureFavicon(){
+      // Draw a small gradient favicon "CX"
+      try{
+        const canvas = document.createElement('canvas');
+        canvas.width = 64; canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        const grad = ctx.createLinearGradient(0,0,64,64);
+        grad.addColorStop(0,'#D4AF37'); grad.addColorStop(1,'#E0C16A');
+        ctx.fillStyle = '#121212'; ctx.fillRect(0,0,64,64);
+        ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(32,32,28,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#121212'; ctx.font = 'bold 26px Segoe UI, Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText('CX', 32, 35);
+        const url = canvas.toDataURL('image/png');
+        let link = document.querySelector('link[rel="icon"]');
+        if (!link){
+          link = document.createElement('link');
+          link.rel = 'icon';
+          document.head.appendChild(link);
+        }
+        link.href = url;
+      }catch(_) {}
+    }
+
+    // ===== Live Overview (stats + today volume) =====
+    function getTxns(){ let tx = safeParse(localStorage.getItem('transactions'), []); return Array.isArray(tx)?tx:[]; }
+    function getUsers(){ return safeParse(localStorage.getItem('platform.users'), []); }
+    function getMerchants(){ return safeParse(localStorage.getItem('platform.merchants'), []); }
+    function getRecharges(){ return safeParse(localStorage.getItem('platform.recharges'), []); }
+
+    function renderOverviewLive(){
+      // Counts
+      const users = getUsers();
+      const merchants = getMerchants();
+      const tx = getTxns();
+
+      if ($('statUsers')) $('statUsers').textContent = users.length || 0;
+      if ($('statMerchants')) $('statMerchants').textContent = merchants.filter(m=>m.verified!==false).length || 0;
+      if ($('statRecharges')){
+        const pendRecharge = getRecharges().filter(r=>String(r.status||'').toLowerCase()==='pending').length;
+        $('statRecharges').textContent = pendRecharge || 0;
+      }
+
+      // Today's volume
+      const start = new Date(); start.setHours(0,0,0,0);
+      const today = tx.filter(t => new Date(t.date || t.timestamp || new Date()) >= start);
+      const sum = (arr, sel, field) => arr.filter(sel).reduce((a,b)=> a + Number(b[field] || 0), 0);
+
+      const volBuyUsdt  = sum(today, t=>String(t.type).toLowerCase()==='buy', 'amount');
+      const volSellUsdt = sum(today, t=>String(t.type).toLowerCase()==='sell', 'amount');
+      const volDepositMwk = sum(today, t=>{
+        const typ = String(t.type||'').toLowerCase();
+        return (typ==='deposit' || typ==='recharge');
+      }, 'amount') + sum(today, t=>String(t.type||'').toLowerCase()==='deposit' || String(t.type||'').toLowerCase()==='recharge', 'totalMWK');
+
+      if ($('volBuy')) $('volBuy').textContent = (volBuyUsdt || 0).toFixed(2) + ' USDT';
+      if ($('volSell')) $('volSell').textContent = (volSellUsdt || 0).toFixed(2) + ' USDT';
+      if ($('volRecharge')) $('volRecharge').textContent = 'MK ' + Math.round(volDepositMwk || 0).toLocaleString();
+    }
+
+    // ===== Hash-based navigation (panel deep link) =====
+    function setPanelFromHash(){
+      const hash = (location.hash || '').replace(/^#/, '');
+      if (!hash) return;
+      const btn = document.querySelector(`.nav-btn[data-panel="${hash}"]`);
+      if (btn){
+        // simulate click to reuse showPanel logic (defined in Chunk 1)
+        btn.click();
+      }
+    }
+    function bindHashNav(){
+      // Update hash when clicking left menu
+      document.addEventListener('click', (e)=>{
+        const nav = e.target.closest('.nav-btn');
+        if (!nav) return;
+        const panel = nav.getAttribute('data-panel');
+        if (panel){
+          if (location.hash !== '#'+panel) history.replaceState(null, '', '#'+panel);
+        }
+      });
+      window.addEventListener('hashchange', setPanelFromHash);
+      setPanelFromHash();
+    }
+
+    // ===== Keyboard shortcuts (panel-aware) =====
+    function bindShortcuts(){
+      document.addEventListener('keydown', (e)=>{
+        // Focus search with "/" (ignore if typing in input/textarea)
+        if (e.key === '/' && !e.metaKey && !e.ctrlKey){
+          const tag = (document.activeElement && document.activeElement.tagName) || '';
+          if (['INPUT','TEXTAREA','SELECT'].includes(tag)) return;
+          e.preventDefault();
+          // find search in active panel
+          const active = document.querySelector('.panel.active');
+          if (!active) return;
+          const input = active.querySelector('input[type="search"], input[type="text"].input, .input[type="search"]');
+          if (input){ input.focus(); input.select?.(); }
+        }
+        // Ctrl/Cmd+S to save rates/fees if those panels active
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='s'){
+          e.preventDefault();
+          const active = document.querySelector('.panel.active');
+          if (!active) return;
+          if (active.id === 'panel-rates'){
+            document.getElementById('btnSaveRates')?.click();
+            return;
+          }
+          if (active.id === 'panel-fees'){
+            document.getElementById('btnSaveFees')?.click();
+            return;
+          }
+        }
+        // Escape closes any visible modal
+        if (e.key === 'Escape'){
+          document.querySelectorAll('.modal').forEach(m=> m.style.display='none');
+        }
+      });
+    }
+
+    // ===== Online/Offline indicator =====
+    function bindNetworkToasts(){
+      window.addEventListener('online',  ()=> toast('You are back online'));
+      window.addEventListener('offline', ()=> toast('You are offline — changes will persist locally'));
+    }
+
+    // ===== Live cross-tab updates for Overview =====
+    window.addEventListener('storage', (e)=>{
+      if (['transactions','platform.users','platform.merchants','platform.recharges'].includes(e.key||'')){
+        renderOverviewLive();
+      }
+    });
+
+    // ===== Initialize Chunk 6 =====
+    function initGlue(){
+      ensureBackThumb();
+      ensureFavicon();
+      renderOverviewLive();
+      bindHashNav();
+      bindShortcuts();
+      bindNetworkToasts();
+    }
+
+    // Kick off
+    document.addEventListener('DOMContentLoaded', initGlue);
+  })();
+</script>
+<!-- CHUNK 7 — Admin Access Guard + Session Health (paste after Chunk 6).
+     Ensures only authorized admins can open the dashboard. 
+     Allows dev override with ?dev=1 in the URL for quick local testing. -->
+<script>
+  (function(){
+    'use strict';
+
+    // Allowlist — edit as needed
+    const ADMIN_ALLOW = ['admin@cryptex.mw', 'jacob@cryptex.mw'];
+    const DEV_OVERRIDE = new URLSearchParams(location.search).get('dev') === '1';
+
+    // Keys
+    const TOKEN_KEY = 'adminToken';
+    const TOKEN_TIME = 'tokenTime';
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+
+    // Helpers
+    const $ = id => document.getElementById(id);
+    const toast = msg => { const t=$('toast'); if(!t){ alert(msg); return; } t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',1600); };
+
+    function isValidToken(t){ return /^ADM-\d{13}-[a-z0-9]{9}$/.test(t||''); }
+
+    function showBlock(title,msg){
+      let blk = $('adminBlock');
+      if(!blk){
+        blk = document.createElement('div'); blk.id='adminBlock';
+        blk.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.9);color:#fff;display:flex;align-items:center;justify-content:center;z-index:99999;';
+        blk.innerHTML = `
+          <div style="background:#1E1E1E;border:2px solid var(--gold);border-radius:12px;padding:1rem 1.25rem;max-width:520px;text-align:center;box-shadow:0 0 40px rgba(212,175,55,.4);">
+            <div style="font-size:1.2rem;font-weight:900;color:var(--gold);margin-bottom:.35rem;">${title}</div>
+            <div class="muted" style="margin-bottom:.6rem;">${msg}</div>
+            <div class="muted" style="font-size:.85rem;">You’ll be redirected to sign in.</div>
+          </div>`;
+        document.body.appendChild(blk);
+      }
+      blk.style.display='flex';
+    }
+
+    function guard(){
+      if (DEV_OVERRIDE){ console.warn('Admin guard bypassed with ?dev=1'); return true; }
+
+      const email = localStorage.getItem('user') || '';
+      const role  = localStorage.getItem('role') || '';
+      const token = localStorage.getItem(TOKEN_KEY) || '';
+      const time  = parseInt(localStorage.getItem(TOKEN_TIME)||'0',10);
+
+      const okEmail = ADMIN_ALLOW.includes(email);
+      const okRole  = role === 'admin';
+      const okTok   = isValidToken(token) && (Date.now() - time < ONE_DAY);
+
+      if (!okEmail || !okRole || !okTok){
+        showBlock('Access denied', 'Admin authorization required.');
+        setTimeout(()=>{ window.location.href = 'index.html'; }, 1800);
+        return false;
+      }
+
+      // Reflect signed-in admin
+      const el = $('adminEmail'); if (el) el.textContent = email;
+
+      // Refresh "last activity" stamp for future use
+      localStorage.setItem('admin.lastActive', Date.now().toString());
+      return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', guard);
+  })();
+</script>
+<!-- CHUNK 8 — Floating Quick Actions + Minor UX polish (paste after Chunk 7).
+     One-tap access to New User, New Merchant, New Recharge, and Export Config. -->
+<script>
+  (function(){
+    'use strict';
+
+    // Create FAB styles if missing
+    (function ensureFabStyles(){
+      if (document.getElementById('admin-fab-style')) return;
+      const s = document.createElement('style');
+      s.id = 'admin-fab-style';
+      s.textContent = `
+        .fab-wrap{ position:fixed; right:18px; bottom:90px; z-index:40; display:flex; flex-direction:column; gap:.5rem; align-items:flex-end; }
+        .fab-main{ width:52px; height:52px; border-radius:999px; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#121212; border:none;
+                   display:flex; align-items:center; justify-content:center; font-size:1.35rem; font-weight:900; cursor:pointer; box-shadow:0 12px 28px rgba(212,175,55,.35); }
+        .fab-list{ display:none; flex-direction:column; gap:.45rem; }
+        .fab-btn{ background:#2c2c2c; color:var(--gold); border:1px solid var(--gold); border-radius:999px; padding:.4rem .65rem; font-weight:800; cursor:pointer; }
+        .fab-wrap.open .fab-list{ display:flex; }
+        .fab-btn:hover{ transform:translateY(-1px); box-shadow: 0 10px 20px rgba(212,175,55,.35), 0 0 0 1px rgba(212,175,55,.25); }
+      `;
+      document.head.appendChild(s);
+    })();
+
+    function makeFab(){
+      if (document.getElementById('adminFab')) return;
+      const wrap = document.createElement('div');
+      wrap.id = 'adminFab'; wrap.className = 'fab-wrap';
+      wrap.innerHTML = `
+        <button class="fab-main" title="Quick actions" aria-label="Quick actions">＋</button>
+        <div class="fab-list">
+          <button class="fab-btn" id="fabNewRecharge">➕ Recharge</button>
+          <button class="fab-btn" id="fabNewUser">➕ User</button>
+          <button class="fab-btn" id="fabNewMerchant">➕ Merchant</button>
+          <button class="fab-btn" id="fabExportCfg">⭳ Export</button>
+        </div>
+      `;
+      document.body.appendChild(wrap);
+
+      const main = wrap.querySelector('.fab-main');
+      main.addEventListener('click', ()=> wrap.classList.toggle('open'));
+
+      // Wire actions (functions provided by previous chunks)
+      wrap.querySelector('#fabNewRecharge')?.addEventListener('click', ()=>{
+        document.getElementById('newRechargeModal').style.display='block';
+        wrap.classList.remove('open');
+      });
+      wrap.querySelector('#fabNewUser')?.addEventListener('click', ()=>{
+        document.getElementById('newUserModal').style.display='block';
+        wrap.classList.remove('open');
+      });
+      wrap.querySelector('#fabNewMerchant')?.addEventListener('click', ()=>{
+        document.getElementById('newMerchantModal').style.display='block';
+        wrap.classList.remove('open');
+      });
+      wrap.querySelector('#fabExportCfg')?.addEventListener('click', ()=>{
+        if (typeof exportConfig === 'function') exportConfig();
+        wrap.classList.remove('open');
+      });
+    }
+
+    // Minor UX: Remember last active panel in hash on first load if none
+    function ensureHashDeepLink(){
+      if (!location.hash){
+        const last = localStorage.getItem('admin.lastPanel') || 'overview';
+        history.replaceState(null, '', '#'+last);
+      }
+    }
+
+    // Kick off
+    document.addEventListener('DOMContentLoaded', ()=>{
+      makeFab();
+      ensureHashDeepLink();
+    });
+
+  })();
+</script>
+<!-- CHUNK 9 — Final polish: audit logging wrappers, idle auto‑lock, overview auto-refresh,
+     smooth panel UX. Paste after Chunk 8. Safe and non‑destructive. -->
+<script>
+  (function(){
+    'use strict';
+
+    // ===== Helpers =====
+    const $ = id => document.getElementById(id);
+    const safeParse = (s, f) => { try{ const v=JSON.parse(s); return (v===null||v===undefined)?f:v; }catch{ return f; } };
+    const nowISO = () => new Date().toISOString();
+    const adminEmail = () => localStorage.getItem('user') || 'admin@cryptex.mw';
+    const toast = msg => { const t=$('toast'); if(!t){ alert(msg); return; } t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',1600); };
+
+    // Detect if addLog exists (Chunk 5)
+    function log(type,status,details){
+      if (typeof addLog === 'function') addLog(type,status,details,adminEmail());
+    }
+
+    // ===== 1) Idle auto‑lock for admin =====
+    (function idleGuard(){
+      const DEV_OVERRIDE = new URLSearchParams(location.search).get('dev') === '1';
+      if (DEV_OVERRIDE) return; // allow dev bypass
+      const MAX_IDLE = 30*60*1000; // 30 minutes
+      let last = Date.now();
+      const bump = () => { last = Date.now(); localStorage.setItem('admin.lastActive', String(last)); };
+      ['click','mousemove','keydown','scroll','touchstart'].forEach(ev => document.addEventListener(ev, bump, {passive:true}));
+      setInterval(()=>{
+        if (Date.now() - last > MAX_IDLE){
+          try{ log('login','warning','Admin idle auto-lock'); }catch(_){}
+          const blk = document.createElement('div');
+          blk.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.9);color:#fff;display:flex;align-items:center;justify-content:center;z-index:99999;';
+          blk.innerHTML = `<div style="background:#1E1E1E;border:2px solid var(--gold);border-radius:12px;padding:1rem 1.25rem;max-width:520px;text-align:center;box-shadow:0 0 40px rgba(212,175,55,.4);">
+            <div style="font-size:1.2rem;font-weight:900;color:var(--gold);margin-bottom:.35rem;">Session locked</div>
+            <div class="muted" style="margin-bottom:.6rem;">No activity detected. Sign in again to continue.</div>
+          </div>`;
+          document.body.appendChild(blk);
+          setTimeout(()=> location.href='index.html', 1400);
+        }
+      }, 15*1000);
+    })();
+
+    // ===== 2) Smooth panel UX (scroll to top on nav) =====
+    (function smoothPanels(){
+      document.addEventListener('click', e=>{
+        const nav = e.target.closest('.nav-btn');
+        if (!nav) return;
+        const content = document.querySelector('.content');
+        if (content) content.scrollTo({top:0, behavior:'smooth'});
+      });
+    })();
+
+    // ===== 3) Overview live refresh (every 10s) =====
+    (function overviewAutoRefresh(){
+      function renderOverviewLive(){
+        try{
+          const tx  = safeParse(localStorage.getItem('transactions'), []);
+          const us  = safeParse(localStorage.getItem('platform.users'), []);
+          const ms  = safeParse(localStorage.getItem('platform.merchants'), []);
+          const rgs = safeParse(localStorage.getItem('platform.recharges'), []);
+          if ($('statUsers')) $('statUsers').textContent = us.length || 0;
+          if ($('statMerchants')) $('statMerchants').textContent = ms.filter(m=>m.verified!==false).length || 0;
+          if ($('statRecharges')) $('statRecharges').textContent = rgs.filter(r=>String(r.status||'').toLowerCase()==='pending').length || 0;
+
+          const start = new Date(); start.setHours(0,0,0,0);
+          const today = tx.filter(t=> new Date(t.date||t.timestamp||Date.now()) >= start);
+          const sum = (arr, sel, field) => arr.filter(sel).reduce((a,b)=> a + Number(b[field] || 0), 0);
+          const volBuy = sum(today, t=>String(t.type).toLowerCase()==='buy', 'amount');
+          const volSell= sum(today, t=>String(t.type).toLowerCase()==='sell', 'amount');
+          const volRech= sum(today, t=>{
+            const typ=String(t.type||'').toLowerCase();
+            return typ==='deposit' || typ==='recharge';
+          }, 'amount') + sum(today, t=>{
+            const typ=String(t.type||'').toLowerCase();
+            return typ==='deposit' || typ==='recharge';
+          }, 'totalMWK');
+
+          if ($('volBuy')) $('volBuy').textContent = (volBuy||0).toFixed(2) + ' USDT';
+          if ($('volSell')) $('volSell').textContent = (volSell||0).toFixed(2) + ' USDT';
+          if ($('volRecharge')) $('volRecharge').textContent = 'MK ' + Math.round(volRech||0).toLocaleString();
+        }catch(_){}
+      }
+      renderOverviewLive();
+      setInterval(renderOverviewLive, 10*1000);
+
+      // also react to storage (already in chunk 6, but keep local)
+      window.addEventListener('storage', (e)=>{
+        if (['transactions','platform.users','platform.merchants','platform.recharges'].includes(e.key||'')){
+          renderOverviewLive();
+        }
+      });
+    })();
+
+    // ===== 4) Audit logging for key admin actions (wrappers + storage listeners) =====
+    (function auditWrap(){
+      // Wrap exposed functions from earlier chunks only if present
+      function wrap(name, type, detailFn){
+        const ref = window[name];
+        if (typeof ref !== 'function') return;
+        window[name] = function(...args){
+          const res = ref.apply(this, args);
+          try{
+            const details = (typeof detailFn === 'function') ? detailFn(args, res) : name;
+            log(type,'success',details);
+          }catch(_){}
+          return res;
+        };
+      }
+
+      // Recharges
+      wrap('approveRecharge','recharge', args => `Approved recharge ${args[0]}`);
+      wrap('rejectRecharge','recharge',  args => `Rejected recharge ${args[0]}`);
+      wrap('reopenRecharge','recharge',  args => `Reopened recharge ${args[0]}`);
+      wrap('createManualRecharge','recharge','Created manual recharge');
+
+      // Users
+      wrap('createUser','user','Created user');
+      wrap('saveEditUser','user','Updated user');
+      wrap('deleteUser','user','Deleted user');
+      wrap('toggleUserBan','user', args => `Toggled ban for ${args[0]}`);
+      wrap('applyWalletAdjust','admin','Adjusted wallet');
+
+      // Merchants
+      wrap('createMerchant','merchant','Created merchant');
+      wrap('saveEditMerchant','merchant','Updated merchant');
+      wrap('saveMerchantRates','merchant','Updated merchant rates');
+      wrap('toggleMerchantVerify','merchant', args => `Toggled verify for ${args[0]}`);
+      wrap('toggleMerchantSuspend','merchant', args => `Toggled suspend for ${args[0]}`);
+      wrap('toggleMerchantOnline','merchant', args => `Toggled online for ${args[0]}`);
+      wrap('deleteMerchant','merchant','Deleted merchant');
+
+      // Rates/Fees — detect via storage
+      let prevRates = safeParse(localStorage.getItem('platform.rates'), null);
+      let prevFees  = safeParse(localStorage.getItem('platform.fees'), null);
+
+      window.addEventListener('storage', (e)=>{
+        if (e.key === 'platform.rates'){
+          try{
+            const cur = safeParse(e.newValue, {});
+            if (prevRates && (prevRates.buy!==cur.buy || prevRates.sell!==cur.sell)){
+              log('rate','success',`Rates changed → Buy ${cur.buy}, Sell ${cur.sell}`);
+            }
+            prevRates = cur;
+          }catch(_){}
+        }
+        if (e.key === 'platform.fees'){
+          try{
+            const cur = safeParse(e.newValue, {});
+            if (prevFees){
+              const diff = [];
+              ['buy','sell','recharge','withdrawMwk','withdrawUsdt','merchantCommission'].forEach(k=>{
+                if (String(prevFees[k]) !== String(cur[k])) diff.push(`${k}: ${prevFees[k]} → ${cur[k]}`);
+              });
+              if (diff.length) log('admin','success',`Fees changed → ${diff.join(', ')}`);
+            }
+            prevFees = cur;
+          }catch(_){}
+        }
+      });
+    })();
+
+    // ===== 5) Micro UX polish: auto-focus search on panel change, keep last panel hash =====
+    (function focusSearchOnPanel(){
+      document.addEventListener('click', e=>{
+        const nav = e.target.closest('.nav-btn'); if (!nav) return;
+        setTimeout(()=>{
+          const active = document.querySelector('.panel.active');
+          if (!active) return;
+          const field = active.querySelector('input[type="search"]') || active.querySelector('input.input');
+          field?.focus();
+        }, 220);
+      });
+    })();
+
+    // ===== 6) Safety: prevent accidental unload when modals are open =====
+    (function blockUnloadWhenModalOpen(){
+      window.addEventListener('beforeunload', (e)=>{
+        const openModal = Array.from(document.querySelectorAll('.modal')).some(m=> m.style.display==='block');
+        if (openModal){
+          e.preventDefault();
+          e.returnValue = '';
+        }
+      });
+    })();
+
+    // Done
+    console.log('✅ Admin Dashboard: final polish (Chunk 9) initialized at', nowISO());
+  })();
+</script>
+<script>
+(function(){
+  'use strict';
+
+  // Robust showPanel + nav wiring (overrides older showPanel)
+  window.showPanel = function(id, el){
+    // Toggle active panel
+    document.querySelectorAll('.panel').forEach(p=> p.classList.remove('active'));
+    const panel = document.getElementById('panel-'+id);
+    if (panel){ panel.classList.add('active'); }
+    // Toggle active nav
+    document.querySelectorAll('.nav-btn').forEach(n=> n.classList.remove('active'));
+    if (el) el.classList.add('active');
+    localStorage.setItem('admin.lastPanel', id);
+
+    // Build/render panel content on demand
+    try{
+      if (id==='users'){
+        if (typeof ensureUsersPanel==='function') ensureUsersPanel();
+        if (typeof renderUsers==='function') renderUsers();
+      }
+      if (id==='merchants'){
+        if (typeof ensureMerchantsPanel==='function') ensureMerchantsPanel();
+        if (typeof renderMerchants==='function') renderMerchants();
+      }
+      if (id==='recharges'){
+        if (typeof ensureRechargesPanel==='function') ensureRechargesPanel();
+        if (typeof renderRecharges==='function') renderRecharges();
+      }
+      if (id==='rates'){
+        if (typeof renderRates==='function') renderRates();
+      }
+      if (id==='fees'){
+        if (typeof renderFees==='function') renderFees();
+      }
+      if (id==='settings'){
+        if (typeof ensureSettingsPanel==='function') ensureSettingsPanel();
+        if (typeof renderPlatform==='function') renderPlatform();
+      }
+      if (id==='security'){
+        if (typeof ensureSecurityPanel==='function') ensureSecurityPanel();
+        if (typeof renderLogs==='function') renderLogs();
+      }
+      if (id==='mail'){
+        if (typeof ensureMailPanel==='function') ensureMailPanel();
+      }
+    }catch(e){ console.warn('Panel init error:', e); }
+  };
+
+  // Wire nav buttons (in case inline onclick gets broken by DOM changes)
+  function wireNav(){
+    document.querySelectorAll('.nav-btn').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const id = btn.getAttribute('data-panel');
+        showPanel(id, btn);
+      });
+    });
+  }
+  wireNav();
+
+  // Restore last panel (hash wins)
+  function restore(){
+    const hash = (location.hash||'').replace('#','');
+    const last = hash || localStorage.getItem('admin.lastPanel') || 'overview';
+    const btn  = document.querySelector(`.nav-btn[data-panel="${last}"]`) || document.querySelector('.nav-btn[data-panel="overview"]');
+    if (btn) btn.click();
+  }
+  restore();
+
+  // Smooth scroll top when switching
+  document.addEventListener('click', e=>{
+    if (e.target.closest('.nav-btn')){
+      document.querySelector('.content')?.scrollTo({top:0, behavior:'smooth'});
+    }
+  });
+
+})();
+</script>
+<script>
+(function(){
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const safeParse = (s,f)=>{ try{ const v=JSON.parse(s); return (v===null||v===undefined)?f:v; }catch{ return f; } };
+  const SETTINGS_KEY = 'platform.settings';
+  const toast = msg => { const t=$('toast'); if(!t){ alert(msg); return; } t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',1600); };
+
+  function getPlatform(){ return safeParse(localStorage.getItem(SETTINGS_KEY), { maintenance:false, readonly:false }); }
+  function setPlatform(p){ localStorage.setItem(SETTINGS_KEY, JSON.stringify(p)); }
+
+  // Inject a "Support Contacts" card into the Settings panel if missing
+  function injectSupportFields(){
+    const panel = document.getElementById('panel-settings');
+    if (!panel) return;
+    if (document.getElementById('supportCard')) return;
+
+    // Find first section (system settings) and append
+    const sections = panel.querySelectorAll('.section');
+    const host = sections[0] || panel;
+
+    const card = document.createElement('div');
+    card.className = 'section';
+    card.id = 'supportCard';
+    card.innerHTML = `
+      <div class="section-title">🛟 Support Contacts</div>
+      <div class="grid grid-2">
+        <div class="stat">
+          <div class="label">WhatsApp Number</div>
+          <input id="supportWhatsApp" class="input" placeholder="+265 88 123 4567" />
+          <div class="muted" style="margin-top:.35rem;">Shown on Help & Support across the app (wa.me link)</div>
+        </div>
+        <div class="stat">
+          <div class="label">Support Email</div>
+          <input id="supportEmail" class="input" type="email" placeholder="support@cryptexmw.com" />
+          <div class="muted" style="margin-top:.35rem;">Used for mailto links and internal mail sender</div>
+        </div>
+      </div>
+      <div class="row" style="gap:.5rem; margin-top:.6rem;">
+        <button id="btnSaveSupport" class="btn primary" type="button">Save Support Contacts</button>
+      </div>
+    `;
+    host.appendChild(card);
+
+    // Populate existing values
+    const p = getPlatform();
+    const sup = p.support || {};
+    const wa  = sup.whatsapp || '';
+    const em  = sup.email || '';
+    if ($('supportWhatsApp')) $('supportWhatsApp').value = wa;
+    if ($('supportEmail'))   $('supportEmail').value   = em;
+
+    $('btnSaveSupport')?.addEventListener('click', ()=>{
+      const p = getPlatform();
+      const wa = $('supportWhatsApp')?.value.trim() || '';
+      const em = $('supportEmail')?.value.trim() || '';
+      p.support = { whatsapp: wa, email: em };
+      p.updatedAt = new Date().toISOString();
+      p.updatedBy = localStorage.getItem('user') || 'admin@cryptex.mw';
+      setPlatform(p);
+      toast('Support contacts saved');
+      // ping other tabs
+      localStorage.setItem('platform.settings', JSON.stringify(p));
+    });
+  }
+
+  // Extend existing render/save hooks so fields stay in sync
+  (function extendRenderSave(){
+    const oldRender = window.renderPlatform;
+    window.renderPlatform = function(){
+      oldRender && oldRender();
+      injectSupportFields();
+      const p = getPlatform(); const sup = p.support || {};
+      if (document.getElementById('supportWhatsApp')) document.getElementById('supportWhatsApp').value = sup.whatsapp || '';
+      if (document.getElementById('supportEmail'))   document.getElementById('supportEmail').value   = sup.email || '';
+    };
+
+    // If you click Save Settings (flags), support fields persist (we store on our own button),
+    // but for completeness, decorate savePlatform:
+    const oldSave = window.savePlatform;
+    window.savePlatform = function(){
+      oldSave && oldSave();
+      // do not overwrite support unless fields present
+      const waEl = document.getElementById('supportWhatsApp');
+      const emEl = document.getElementById('supportEmail');
+      if (waEl && emEl){
+        const p = getPlatform();
+        p.support = { whatsapp: waEl.value.trim(), email: emEl.value.trim() };
+        p.updatedAt = new Date().toISOString();
+        p.updatedBy = localStorage.getItem('user') || 'admin@cryptex.mw';
+        setPlatform(p);
+      }
+    };
+  })();
+
+  // Build now if Settings panel visible, or will be built on open
+  injectSupportFields();
+
+})();
+</script>
+<script>
+(function(){
+  'use strict';
+
+  // Build Mail panel + sidebar button
+  const sidebar = document.querySelector('.sidebar .nav');
+  if (sidebar && !document.querySelector('.nav-btn[data-panel="mail"]')){
+    const mailBtn = document.createElement('div');
+    mailBtn.className = 'nav-btn';
+    mailBtn.setAttribute('data-panel','mail');
+    mailBtn.innerHTML = `<span class="icon">✉️</span>Mail`;
+    sidebar.appendChild(mailBtn);
+    mailBtn.addEventListener('click', ()=> window.showPanel('mail', mailBtn));
+  }
+
+  // Panel container
+  if (!document.getElementById('panel-mail')){
+    const main = document.querySelector('main.content') || document.querySelector('main');
+    const section = document.createElement('section');
+    section.id = 'panel-mail';
+    section.className = 'panel';
+    section.innerHTML = `
+      <div class="section">
+        <div class="section-title">✉️ Internal Mail</div>
+        <div class="grid grid-2">
+          <div class="stat">
+            <div class="label">Compose</div>
+            <div class="field"><label>To (user email)</label><input id="mailTo" class="input" type="email" placeholder="user@cryptex.mw"></div>
+            <div class="field"><label>Subject</label><input id="mailSub" class="input" type="text" placeholder="Subject"></div>
+            <div class="field"><label>Message</label><textarea id="mailBody" class="input" rows="6" placeholder="Write your message..."></textarea></div>
+            <div class="row" style="gap:.5rem; margin-top:.4rem;">
+              <button id="btnSendMail" class="btn" type="button">Send</button>
+              <button id="btnClearMail" class="btn ghost" type="button">Clear</button>
+            </div>
+            <div class="muted" style="margin-top:.5rem;">Prototype stores messages locally in this browser. In production, connect to backend email service.</div>
+          </div>
+
+          <div class="stat">
+            <div class="row" style="justify-content:space-between;">
+              <div class="label">Inbox</div>
+              <div class="row" style="gap:.4rem;">
+                <button id="btnRefreshInbox" class="btn small ghost" type="button">Refresh</button>
+                <button id="btnClearInbox" class="btn small ghost" type="button">Clear</button>
+              </div>
+            </div>
+            <div id="mailInbox" class="grid" style="gap:.45rem; margin-top:.5rem;"></div>
+          </div>
+        </div>
+
+        <div class="stat" style="margin-top:.6rem;">
+          <div class="row" style="justify-content:space-between;">
+            <div class="label">Outbox</div>
+            <div class="row" style="gap:.4rem;">
+              <button id="btnRefreshOutbox" class="btn small ghost" type="button">Refresh</button>
+              <button id="btnClearOutbox" class="btn small ghost" type="button">Clear</button>
+            </div>
+          </div>
+          <div id="mailOutbox" class="grid" style="gap:.45rem; margin-top:.5rem;"></div>
+        </div>
+      </div>
+    `;
+    main.appendChild(section);
+  }
+
+  // Storage & helpers
+  const MAIL_KEY = 'platform.mail';
+  const toast = (m)=>{ const t=document.getElementById('toast'); if(!t){ alert(m); return;} t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none',1600); };
+  function mp(){ return (function(){ try{ return JSON.parse(localStorage.getItem(MAIL_KEY)||'{}'); }catch{ return {}; } })(); }
+  function setMail(obj){ localStorage.setItem(MAIL_KEY, JSON.stringify(obj)); }
+  function pushInbox(msg){ const box=mp(); box.inbox=box.inbox||[]; box.inbox.unshift(msg); setMail(box); }
+  function pushOutbox(msg){ const box=mp(); box.outbox=box.outbox||[]; box.outbox.unshift(msg); setMail(box); }
+
+  function renderInbox(){
+    const host = document.getElementById('mailInbox'); if(!host) return;
+    const box = mp(); const list = (box.inbox||[]).slice(0,50);
+    if (!list.length){ host.innerHTML='<div class="muted">No inbox messages</div>'; return; }
+    host.innerHTML = list.map(m=>`
+      <div class="row" style="justify-content:space-between; border:1px solid var(--border); border-radius:10px; padding:.55rem .7rem;">
+        <div>
+          <div><strong>${m.subject||'(no subject)'}</strong></div>
+          <div class="muted" style="font-size:.85rem;">From: ${m.from||'—'} • ${new Date(m.ts||Date.now()).toLocaleString()}</div>
+        </div>
+        <div class="muted" style="max-width:55%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.body||''}</div>
+      </div>
+    `).join('');
+  }
+  function renderOutbox(){
+    const host = document.getElementById('mailOutbox'); if(!host) return;
+    const box = mp(); const list = (box.outbox||[]).slice(0,50);
+    if (!list.length){ host.innerHTML='<div class="muted">No sent messages</div>'; return; }
+    host.innerHTML = list.map(m=>`
+      <div class="row" style="justify-content:space-between; border:1px solid var(--border); border-radius:10px; padding:.55rem .7rem;">
+        <div>
+          <div><strong>${m.subject||'(no subject)'}</strong></div>
+          <div class="muted" style="font-size:.85rem;">To: ${m.to||'—'} • ${new Date(m.ts||Date.now()).toLocaleString()}</div>
+        </div>
+        <div class="muted" style="max-width:55%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.body||''}</div>
+      </div>
+    `).join('');
+  }
+
+  // Compose/send
+  function sendMail(){
+    const to = (document.getElementById('mailTo')||{}).value?.trim();
+    const subject = (document.getElementById('mailSub')||{}).value?.trim();
+    const body = (document.getElementById('mailBody')||{}).value?.trim();
+    if (!to || !subject || !body) return toast('Please fill To, Subject, and Message');
+
+    const settings = (function(){ try{ return JSON.parse(localStorage.getItem('platform.settings')||'{}'); }catch{ return {}; } })();
+    const from = (settings.support && settings.support.email) || (localStorage.getItem('user')||'admin@cryptex.mw');
+
+    const msg = { id:'ML-'+Date.now()+'-'+Math.random().toString(36).slice(2,7), to, from, subject, body, ts:new Date().toISOString(), status:'sent' };
+    pushOutbox(msg);
+
+    // Deliver to user mailbox (prototype)
+    try{
+      const ukey = 'mailbox:'+to;
+      const ub  = (function(){ try{ return JSON.parse(localStorage.getItem(ukey)||'[]'); }catch{ return []; } })();
+      ub.unshift({ ...msg, status:'received' });
+      localStorage.setItem(ukey, JSON.stringify(ub.slice(0,200)));
+      // Notify potential user tab
+      localStorage.setItem('mailbox.ping', String(Date.now()));
+    }catch(_){}
+
+    toast('Message sent');
+    renderOutbox();
+  }
+  function clearCompose(){
+    const f = id => { const el=document.getElementById(id); if(el) el.value=''; };
+    f('mailTo'); f('mailSub'); f('mailBody');
+  }
+
+  // Bind
+  document.getElementById('btnSendMail')?.addEventListener('click', sendMail);
+  document.getElementById('btnClearMail')?.addEventListener('click', clearCompose);
+  document.getElementById('btnRefreshInbox')?.addEventListener('click', renderInbox);
+  document.getElementById('btnClearInbox')?.addEventListener('click', ()=>{
+    const box = mp(); box.inbox=[]; setMail(box); renderInbox();
+  });
+  document.getElementById('btnRefreshOutbox')?.addEventListener('click', renderOutbox);
+  document.getElementById('btnClearOutbox')?.addEventListener('click', ()=>{
+    const box = mp(); box.outbox=[]; setMail(box); renderOutbox();
+  });
+
+  // Live updates
+  window.addEventListener('storage', (e)=>{
+    if ([MAIL_KEY,'mailbox.ping'].includes(e.key||'')){
+      renderInbox(); renderOutbox();
+    }
+  });
+
+  // Initial render if Mail panel is opened by default via hash
+  if (location.hash==='#mail'){
+    const btn = document.querySelector('.nav-btn[data-panel="mail"]');
+    btn && btn.click();
+  }
+
+  // Lazy render on demand
+  window.ensureMailPanel = function(){
+    renderInbox(); renderOutbox();
+  };
+
+})();
+</script>
+<!-- Merchant Applications Logic -->
+<script>
+(function(){
+    'use strict';
+    const $ = id => document.getElementById(id);
+
+    function getMerchantApps() { return JSON.parse(localStorage.getItem('platform.merchantApps') || '[]'); }
+    function setMerchantApps(apps) { localStorage.setItem('platform.merchantApps', JSON.stringify(apps)); }
+
+    function renderMerchantApps() {
+        const listEl = $('merchantAppList');
+        if (!listEl) return;
+
+        const filter = $('merchantAppFilter')?.value || 'pending';
+        let apps = getMerchantApps();
+        if (filter !== 'all') {
+            apps = apps.filter(app => app.status === filter);
+        }
+
+        listEl.innerHTML = '';
+        if (!apps.length) {
+            listEl.innerHTML = '<div class="muted" style="padding:.6rem 0;">No applications match this filter.</div>';
+            return;
+        }
+
+        apps.forEach(app => {
+            const statusColor = app.status === 'pending' ? 'var(--orange)' : (app.status === 'approved' ? 'var(--green)' : 'var(--red)');
+            const card = document.createElement('div');
+            card.className = 'stat';
+            card.innerHTML = `
+                <div class="row" style="justify-content:space-between; gap:.75rem;">
+                    <div>
+                        <div><strong>${app.businessName}</strong> <span class="muted">by ${app.name} (${app.user})</span></div>
+                        <div class="muted">Phone: ${app.phone || '—'} • Applied: ${new Date(app.createdAt).toLocaleString()}</div>
+                        <div class="muted">Status: <strong style="color:${statusColor}">${app.status.toUpperCase()}</strong></div>
+                    </div>
+                    ${app.status === 'pending' ? `
+                    <div style="text-align:right;">
+                        <button class="btn small primary" data-id="${app.id}" data-action="approve">Approve</button>
+                        <button class="btn small" data-id="${app.id}" data-action="reject">Reject</button>
+                    </div>` : ''}
+                </div>
+            `;
+            listEl.appendChild(card);
+        });
+
+        // Bind buttons
+        listEl.querySelectorAll('button[data-action]').forEach(btn => {
+            const id = btn.dataset.id;
+            const action = btn.dataset.action;
+            if (action === 'approve') btn.addEventListener('click', () => approveMerchantApp(id));
+            if (action === 'reject') btn.addEventListener('click', () => rejectMerchantApp(id));
+        });
+    }
+
+    function approveMerchantApp(id) {
+        let apps = getMerchantApps();
+        const appIndex = apps.findIndex(app => app.id === id);
+        if (appIndex === -1) return;
+        apps[appIndex].status = 'approved';
+        setMerchantApps(apps);
+
+        // Promote user to 'merchant'
+        const userEmail = apps[appIndex].user;
+        let users = JSON.parse(localStorage.getItem('platform.users') || '[]');
+        const userIndex = users.findIndex(u => u.email === userEmail);
+        if (userIndex !== -1) {
+            users[userIndex].role = 'merchant';
+            localStorage.setItem('platform.users', JSON.stringify(users));
+        }
+        
+        // Optionally create a merchant profile
+        let merchants = JSON.parse(localStorage.getItem('platform.merchants') || '[]');
+        const newId = Math.max(0, ...merchants.map(m=>m.id||0))+1;
+        merchants.unshift({
+            id: newId, name: apps[appIndex].businessName, email: userEmail, phone: apps[appIndex].phone, verified: true,
+            // ... add other default merchant properties
+        });
+        localStorage.setItem('platform.merchants', JSON.stringify(merchants));
+
+        toast('Application Approved!');
+        renderMerchantApps();
+    }
+
+    function rejectMerchantApp(id) {
+        let apps = getMerchantApps();
+        const appIndex = apps.findIndex(app => app.id === id);
+        if (appIndex === -1) return;
+        apps[appIndex].status = 'rejected';
+        setMerchantApps(apps);
+        toast('Application Rejected.');
+        renderMerchantApps();
+    }
+
+    // Extend showPanel to render this new panel
+    const oldShowPanel = window.showPanel;
+    window.showPanel = function(id, el) {
+        oldShowPanel(id, el); // Call original
+        if (id === 'merchant-apps') {
+            renderMerchantApps();
+        }
+    };
+
+    // Bind filters
+    $('merchantAppFilter')?.addEventListener('change', renderMerchantApps);
+    $('btnReloadMerchantApps')?.addEventListener('click', renderMerchantApps);
+
+})();
+</script>
+<!-- FIX: Prevent bottom nav from overlapping content -->
+<style>
+  :root{ --navh: 80px; }
+  /* Always reserve space for the fixed bottom nav (plus safe-area on iOS) */
+  body{
+    padding-bottom: calc(var(--navh) + 24px + env(safe-area-inset-bottom));
+    min-height: 100dvh; /* modern dynamic viewport */
+    height: -webkit-fill-available; /* iOS fallback */
+  }
+  main.container{
+    padding-bottom: calc(var(--navh) + 24px);
+  }
+  /* Keep nav above content but below drawers/modals */
+  .nav-bar{ z-index: 100; }
+  /* Keep toast above nav; uses same --navh variable */
+  #toast{ bottom: calc(var(--navh) + 12px); }
+</style>
+
+<script>
+(function(){
+  'use strict';
+  const $ = s => document.querySelector(s);
+
+  // Read the nav height and push it to CSS var --navh
+  function setNavSafeSpace(){
+    const nav = $('.nav-bar');
+    // Use getBoundingClientRect to account for borders/padding + safe-area padding
+    const h = nav ? Math.ceil(nav.getBoundingClientRect().height) : 80;
+    document.documentElement.style.setProperty('--navh', h + 'px');
+  }
+
+  // Debounced updater to avoid layout thrash
+  let rafId = null;
+  function scheduleUpdate(){
+    if(rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(setNavSafeSpace);
+  }
+
+  // Run on load and viewport changes
+  window.addEventListener('DOMContentLoaded', scheduleUpdate);
+  window.addEventListener('load', scheduleUpdate);
+  window.addEventListener('resize', scheduleUpdate);
+  window.addEventListener('orientationchange', scheduleUpdate);
+
+  // Watch the nav in case it’s replaced or styles change
+  const mo = new MutationObserver(scheduleUpdate);
+  mo.observe(document.documentElement, { childList:true, subtree:true });
+
+  // If available, also react to nav resizing (fonts or dynamic labels)
+  const nav = document.querySelector('.nav-bar');
+  if('ResizeObserver' in window && nav){
+    const ro = new ResizeObserver(scheduleUpdate);
+    ro.observe(nav);
+  }
+
+  // In case your app changes the nav content async, re-evaluate a moment later
+  setTimeout(scheduleUpdate, 300);
+})();
+</script>
+</body>
+</html>

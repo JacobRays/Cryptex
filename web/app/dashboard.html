@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard - Cryptex Malawi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root{
+      --bg-0:#0f0f10; --bg-1:#121212; --surface:#1e1e1e; --card:#2c2c2c;
+      --gold:#D4AF37; --gold-2:#E0C16A; --muted:#9E9E9E; --text:#f5f5f5;
+      --danger:#F44336; --success:#4CAF50; --warn:#FF9800; --info:#2196F3;
+      --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.45); --ring:0 0 0 2px rgba(212,175,55,.35);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      min-height:100vh; color:var(--text);
+      background:
+        radial-gradient(60vw 60vw at 10% -10%, rgba(212,175,55,.08), transparent 60%),
+        radial-gradient(70vw 70vw at 110% -20%, rgba(224,193,106,.06), transparent 60%),
+        linear-gradient(135deg, var(--bg-0), var(--bg-1));
+      font-family: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+      padding-bottom: 84px;
+    }
+
+    /* Top bar */
+    .app-bar{
+      background:rgba(30,30,30,.8);
+      border-bottom:1px solid rgba(212,175,55,.18);
+      backdrop-filter: blur(8px);
+      padding:.85rem 1rem;
+      box-shadow:0 8px 24px rgba(0,0,0,.25);
+      position: sticky; top:0; z-index:10;
+    }
+    .brand{ max-width:1000px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+    .brand-left{ display:flex; align-items:center; gap:.6rem; }
+    .logo-wrap{ perspective:900px; }
+    .logo{
+      font-weight:900; letter-spacing:.18rem; font-size: clamp(1.4rem,4.5vw,2rem); line-height:1;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2) 70%);
+      background-clip:text; -webkit-background-clip:text;
+      color: transparent; -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      transform: rotateX(14deg) rotateY(-10deg);
+      text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 12px 24px rgba(212,175,55,.25);
+      transition: transform .4s ease, text-shadow .4s ease;
+    }
+    .logo:hover{ transform: rotateX(0) rotateY(0) translateY(-2px) scale(1.02); text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 20px 40px rgba(212,175,55,.35); }
+    .hello{ color:#e7d59b; font-weight:800; letter-spacing:.06em; }
+    .avatar{
+      width:36px; height:36px; border-radius:999px; background:#151515;
+      border:1px solid rgba(212,175,55,.4); color:#e7d59b; display:flex; align-items:center; justify-content:center; font-weight:900;
+    }
+
+    /* Announcement */
+    .ann-wrap{ max-width:1000px; margin:.6rem auto 0; padding:0 1rem; }
+    .ann{ border-radius:12px; padding:.7rem .9rem; border:1px solid #2f2f2f; }
+    .ann.info{ background:#182022; border-color:#2b464d; color:#9fd3e6; }
+    .ann.warn{ background:#231f14; border-color:#5a4a1a; color:#e8d69a; }
+    .ann.error{ background:#2b1616; border-color:#5a1d1d; color:#ffb0b0; }
+    .ann.success{ background:#162318; border-color:#1a5a22; color:#a4f3b2; }
+
+    .container{ padding:1rem; max-width:1000px; margin: 0 auto; }
+
+    .grid{ display:grid; gap:.75rem; }
+    .grid-2{ grid-template-columns: 1fr; }
+    @media(min-width:920px){ .grid-2{ grid-template-columns: 1.1fr .9fr; } }
+
+    .card{ background:var(--card); border:1px solid #333; border-radius:12px; box-shadow: var(--shadow); }
+
+    /* Wallet hero */
+    .hero{
+      background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      color:#121212; border-radius:16px; padding:1.2rem; border:1px solid rgba(0,0,0,.15);
+      box-shadow: 0 12px 32px rgba(212,175,55,.30);
+    }
+    .hero-title{ font-weight:900; opacity:.9; }
+    .hero-balance{ font-size:2.1rem; font-weight:900; letter-spacing:.02em; }
+    .hero-sub{ opacity:.9; }
+    .chips{ display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.6rem; align-items:center; }
+    .chip{ padding:.3rem .6rem; border-radius:999px; border:1px solid rgba(0,0,0,.18); background:#121212; color:var(--gold-2); font-weight:800; }
+    .sync{ display:inline-flex; align-items:center; gap:.4rem; background:#121212; color:#a1ffa8; border:1px solid rgba(0,0,0,.25); padding:.3rem .6rem; border-radius:999px; font-weight:800; }
+    .sync-dot{ width:8px; height:8px; border-radius:50%; background:#aaa; box-shadow: 0 0 0 0 rgba(76,175,80,.7); }
+    .sync.ok .sync-dot{ background: var(--success); animation: pulse 1.6s ease-out infinite; }
+    .sync.warn .sync-dot{ background: var(--warn); }
+    .sync.err .sync-dot{ background: var(--danger); }
+    @keyframes pulse{ 0%{ box-shadow:0 0 0 0 rgba(76,175,80,.7);} 70%{ box-shadow:0 0 0 10px rgba(76,175,80,0);} 100%{ box-shadow:0 0 0 0 rgba(76,175,80,0);} }
+
+    /* Quick actions */
+    .qa-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap:.75rem; margin-top:.75rem; }
+    .qa{ background:#1b1b1b; border:1px solid rgba(212,175,55,.35); color:var(--gold-2); border-radius:12px; padding:1rem; text-align:center; cursor:pointer; text-decoration:none; font-weight:900; box-shadow: var(--shadow); transition:.15s; }
+    .qa:hover{ transform: translateY(-2px); box-shadow: 0 12px 26px rgba(212,175,55,.3), 0 0 0 1px rgba(212,175,55,.25); }
+
+    /* Rates */
+    .rate-row{ display:flex; align-items:center; justify-content:space-between; padding: .8rem 1rem; border-bottom:1px solid #363636; }
+    .rate-row:last-child{ border-bottom:0; }
+    .rate-label{ color:#e7d59b; font-weight:800; }
+    .rate-value{ font-weight:900; }
+    .rate-upd{ color:var(--muted); font-size:.85rem; padding:.6rem 1rem; }
+
+    /* Pending banner */
+    .banner{
+      background:#1b1b1b; border:1px solid #3a3a3a; border-radius:12px; padding:.8rem 1rem; display:flex; align-items:center; justify-content:space-between; gap:.5rem;
+    }
+    .badge{ padding:.2rem .5rem; border-radius:999px; font-weight:800; font-size:.75rem; }
+    .bad-warn{ background:rgba(255,152,0,.15); color:#ffd37a; border:1px solid rgba(255,152,0,.3); }
+    .bad-ok{ background:rgba(76,175,80,.15); color:#aaf3b0; border:1px solid rgba(76,175,80,.3); }
+
+    /* Recent activity */
+    .tx-item{ display:flex; align-items:center; justify-content:space-between; padding:.75rem 1rem; border-bottom:1px solid #333; }
+    .tx-item:last-child{ border-bottom:0; }
+    .tx-left{ display:flex; align-items:center; gap:.7rem; }
+    .tx-ico{ font-size:1.25rem; }
+    .tx-meta{ color:var(--muted); font-size:.85rem; }
+    .tx-amt-in{ color: var(--success); font-weight:900; }
+    .tx-amt-out{ color: var(--danger); font-weight:900; }
+    .tx-status{ padding:.2rem .5rem; border-radius:999px; font-size:.75rem; font-weight:800; }
+    .st-p{ background:rgba(255,152,0,.15); color:#ffd37a; }
+    .st-c{ background:rgba(76,175,80,.15); color:#aaf3b0; }
+    .st-r{ background:rgba(244,67,54,.15); color:#ff9d94; }
+
+    /* Merchants spotlight */
+    .m-card{ background:#1e1e1e; border:1px solid #333; border-radius:12px; padding:.75rem 1rem; display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
+    .m-name{ font-weight:900; color:#e7d59b; }
+    .m-sub{ color:var(--muted); font-size:.85rem; }
+    .btn{ padding:.55rem .9rem; border:1px solid var(--gold); color:var(--gold); background:#2c2c2c; border-radius:10px; font-weight:800; cursor:pointer; }
+    .btn.primary{ background: linear-gradient(135deg,var(--gold),var(--gold-2)); color:#121212; border:none; box-shadow: 0 3px 14px rgba(212,175,55,.25); }
+    .btn:hover{ transform: translateY(-1px); box-shadow: 0 10px 20px rgba(212,175,55,.35), 0 0 0 1px rgba(212,175,55,.25); }
+
+    /* Security/Onboarding */
+    .row{ display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
+    .chip-soft{ padding:.25rem .55rem; border-radius:999px; background:#1a1a1a; border:1px solid #333; font-size:.8rem; }
+    .good{ color:#a1ffa8; } .mid{ color:#ffd37a; } .bad{ color:#ff9d94; }
+
+    /* Bottom nav */
+    .nav{ position:fixed; bottom:0; left:0; right:0; background:#1E1E1E; border-top:1px solid var(--gold); display:flex; justify-content:space-around; padding:.75rem; }
+    .nav-item{ color:#9E9E9E; text-decoration:none; text-align:center; }
+    .nav-item.active{ color:var(--gold-2); }
+    .nav-icon{ font-size:1.4rem; }
+    .nav-label{ font-size:.75rem; }
+
+    /* Toast */
+    .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:90px; background:#1b1b1b; border:1px solid rgba(212,175,55,.35); color:var(--gold-2); padding:.7rem 1rem; border-radius:10px; box-shadow: var(--shadow); display:none; z-index:1200; min-width:220px; text-align:center; }
+    .toast.show{ display:block; animation: t-in .2s ease; }
+    @keyframes t-in{ from{ opacity:0; transform: translate(-50%, 12px);} to{ opacity:1; transform: translate(-50%, 0);} }
+  </style>
+</head>
+<body>
+  <div class="app-bar">
+    <div class="brand">
+      <div class="brand-left">
+        <div class="logo-wrap"><div class="logo">CRYPT-X</div></div>
+        <div class="hello" id="helloText">Welcome</div>
+      </div>
+      <div class="avatar" id="avatar">U</div>
+    </div>
+  </div>
+
+  <!-- Announcement (from admin settings) -->
+  <div class="ann-wrap" id="annHost"></div>
+
+  <div class="container">
+    <div class="grid grid-2">
+      <!-- Left: Wallet + Quick Actions + Rates -->
+      <div class="grid" style="gap:.75rem;">
+        <!-- Wallet hero -->
+        <div class="hero">
+          <div class="hero-title">Portfolio Value</div>
+          <div id="balMWK" class="hero-balance">MK 0</div>
+          <div id="balUSD" class="hero-sub">≈ $0.00 USD</div>
+          <div class="chips">
+            <span id="chipUSDT" class="chip">USDT: 0.00</span>
+            <span id="chipMWK" class="chip">MWK: MK 0</span>
+            <span id="syncBadge" class="sync warn"><span class="sync-dot"></span> Syncing rate</span>
+          </div>
+          <div class="qa-grid">
+            <a class="qa" href="recharge.html">📥 Deposit</a>
+            <a class="qa" href="withdraw.html">📤 Withdraw</a>
+            <a class="qa" href="buy.html">💰 Buy USDT</a>
+            <a class="qa" href="sell.html">💸 Sell USDT</a>
+          </div>
+        </div>
+
+        <!-- Rates -->
+        <div class="card">
+          <div class="rate-row"><div class="rate-label">Buy Rate</div><div id="rateBuy" class="rate-value">—</div></div>
+          <div class="rate-row"><div class="rate-label">Sell Rate</div><div id="rateSell" class="rate-value">—</div></div>
+          <div id="rateUpd" class="rate-upd">Last updated: —</div>
+        </div>
+
+        <!-- If pending transactions -->
+        <div id="pendingBanner" class="banner" style="display:none;">
+          <div><span class="badge bad-warn">PENDING</span> <span class="muted">You have pending transactions awaiting verification.</span></div>
+          <a class="btn primary" href="wallet.html">View</a>
+        </div>
+      </div>
+
+      <!-- Right: Recent Activity + Merchants + Security -->
+      <div class="grid" style="gap:.75rem;">
+        <!-- Recent activity -->
+        <div class="card">
+          <div class="rate-row" style="border-bottom:1px solid #333; padding:.8rem 1rem;"><div class="rate-label">Recent Activity</div><a class="btn" href="wallet.html">Open Wallet</a></div>
+          <div id="recentList"></div>
+        </div>
+
+        <!-- Merchants Spotlight -->
+        <div class="card">
+          <div class="rate-row" style="border-bottom:1px solid #333; padding:.8rem 1rem;"><div class="rate-label">Merchants Spotlight</div><a class="btn" href="merchants.html">All Merchants</a></div>
+          <div id="merchList" class="grid" style="grid-template-columns:1fr; gap:.6rem; padding:.75rem;"></div>
+        </div>
+
+        <!-- Security/Onboarding -->
+        <div class="card" style="padding: .85rem 1rem;">
+          <div class="rate-label" style="margin-bottom:.4rem;">Account & Security</div>
+          <div class="row">
+            <span id="chipEmail" class="chip-soft">Email: —</span>
+            <span id="chipKyc" class="chip-soft">KYC: —</span>
+            <span id="chip2fa" class="chip-soft">2FA: —</span>
+          </div>
+          <div class="row" style="margin-top:.6rem;">
+            <a class="btn" href="settings.html">Open Settings</a>
+            <a class="btn" href="settings.html">Continue KYC</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom navigation -->
+  <nav class="nav">
+    <a href="dashboard.html" class="nav-item active">
+      <div class="nav-icon">🏠</div><div class="nav-label">Home</div>
+    </a>
+    <a href="wallet.html" class="nav-item">
+      <div class="nav-icon">💼</div><div class="nav-label">Wallet</div>
+    </a>
+    <a href="merchants.html" class="nav-item">
+      <div class="nav-icon">🏪</div><div class="nav-label">Merchants</div>
+    </a>
+    <a href="settings.html" class="nav-item">
+      <div class="nav-icon">⚙️</div><div class="nav-label">Settings</div>
+    </a>
+  </nav>
+
+  <div id="toast" class="toast">Saved</div>
+
+  <script>
+    'use strict';
+
+    // ===== Toast =====
+    function toast(msg){ const t=document.getElementById('toast'); if(!t){ alert(msg); return; } t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2000); }
+
+    // ===== User greeting =====
+    function renderGreeting(){
+      const name = localStorage.getItem('userName') || 'User';
+      const email = localStorage.getItem('user') || 'user@example.com';
+      const hello = document.getElementById('helloText');
+      const av = document.getElementById('avatar');
+      if (hello) hello.textContent = 'Welcome, ' + (name.split(' ')[0] || 'User');
+      if (av) av.textContent = (name || email).trim().slice(0,1).toUpperCase();
+    }
+
+    // ===== Rates & Settings =====
+    function getPlatformRates(){ return JSON.parse(localStorage.getItem('platform.rates')||'null') || { buy:1750, sell:1745, updatedAt:new Date().toISOString() }; }
+    function renderRates(){
+      const r = getPlatformRates();
+      const rb = document.getElementById('rateBuy');
+      const rs = document.getElementById('rateSell');
+      const ru = document.getElementById('rateUpd');
+      if (rb) rb.textContent = 'MWK ' + Number(r.buy||0).toLocaleString();
+      if (rs) rs.textContent = 'MWK ' + Number(r.sell||0).toLocaleString();
+      if (ru) ru.textContent = 'Last updated: ' + new Date(r.updatedAt || Date.now()).toLocaleString();
+    }
+
+    function renderAnnouncement(){
+      const host = document.getElementById('annHost');
+      if (!host) return;
+      const s = JSON.parse(localStorage.getItem('platform.settings')||'null');
+      if (!s || !s.announcement){ host.innerHTML = ''; return; }
+      const a = s.announcement;
+      const cls = a.style==='warn'?'ann warn':a.style==='error'?'ann error':a.style==='success'?'ann success':'ann info';
+      host.innerHTML = `<div class="${cls}"><strong>${a.title||''}</strong>${a.msg?` — ${a.msg}`:''}</div>`;
+    }
+
+    // ===== FX rate for portfolio USD view =====
+    let fxRateMWK = parseFloat(localStorage.getItem('fxRateMWK')||'1770') || 1770;
+    async function refreshFxRate(){
+      const badge = document.getElementById('syncBadge');
+      try{
+        badge?.classList.remove('ok','err'); badge?.classList.add('warn');
+        const ctrl = new AbortController(), t=setTimeout(()=>ctrl.abort(), 4000);
+        const r = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=MWK',{signal:ctrl.signal});
+        clearTimeout(t);
+        if(!r.ok) throw new Error('rate');
+        const data = await r.json(); const rate = data?.rates?.MWK;
+        if(!rate || rate<=0) throw new Error('invalid');
+        fxRateMWK = +rate; localStorage.setItem('fxRateMWK', String(fxRateMWK));
+        badge?.classList.remove('warn','err'); badge?.classList.add('ok');
+        badge && (badge.innerHTML = '<span class="sync-dot"></span> Live rate');
+        renderPortfolio();
+      }catch(e){
+        fxRateMWK = parseFloat(localStorage.getItem('fxRateMWK')||'1770') || 1770;
+        badge?.classList.remove('ok','warn'); badge?.classList.add('err');
+        badge && (badge.innerHTML = '<span class="sync-dot"></span> Offline');
+      }
+    }
+
+    // ===== Wallet / Transactions =====
+    function getTxns(){ let tx = JSON.parse(localStorage.getItem('transactions')||'[]'); return Array.isArray(tx)?tx:[]; }
+    function recomputeWallet(){
+      const tx = getTxns().sort((a,b)=> new Date(a.date||a.timestamp) - new Date(b.date||b.timestamp));
+      let w = { usdt:0, mwk:0 };
+      const fx = fxRateMWK || 1770;
+      tx.forEach(t=>{
+        const st=(t.status||'').toLowerCase(); if(st!=='completed') return;
+        const typ=(t.type||'').toLowerCase();
+        if(typ==='deposit')       w.mwk += +t.amount || +t.totalMWK || 0;
+        else if(typ==='withdraw') w.mwk -= +t.amount || +t.totalMWK || 0;
+        else if(typ==='buy'){ const u=+t.amount||0; const m=+t.totalMWK||Math.round(u*fx); w.usdt += u; w.mwk -= m; }
+        else if(typ==='sell'){ const u=+t.amount||0; const m=+t.totalMWK||Math.round(u*fx); w.usdt -= u; w.mwk += m; }
+      });
+      w.usdt = Math.max(0, +w.usdt.toFixed(6)); w.mwk = Math.max(0, Math.round(w.mwk));
+      return w;
+    }
+    function renderPortfolio(){
+      const w = recomputeWallet();
+      const portfolioMWK = Math.round((w.mwk||0) + (w.usdt||0) * fxRateMWK);
+      const portfolioUSD = (w.usdt||0) + (w.mwk||0)/fxRateMWK;
+      const balMWK = document.getElementById('balMWK');
+      const balUSD = document.getElementById('balUSD');
+      const cUSDT = document.getElementById('chipUSDT');
+      const cMWK  = document.getElementById('chipMWK');
+      if (balMWK) balMWK.textContent = 'MK ' + portfolioMWK.toLocaleString();
+      if (balUSD) balUSD.textContent = '≈ $' + portfolioUSD.toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2}) + ' USD';
+      if (cUSDT) cUSDT.textContent = 'USDT: ' + (w.usdt||0).toFixed(2);
+      if (cMWK)  cMWK.textContent  = 'MWK: MK ' + (w.mwk||0).toLocaleString();
+    }
+
+    function timeAgo(iso){ const s=Math.floor((Date.now()-new Date(iso))/1000); if(s<60) return 'just now'; const m=Math.floor(s/60); if(m<60) return `${m}m ago`; const h=Math.floor(m/60); if(h<24) return `${h}h ago`; const d=Math.floor(h/24); return `${d}d ago`; }
+    function statusClass(s){ s=(s||'').toLowerCase(); if(s==='completed'||s==='approved') return 'st-c'; if(s==='rejected'||s==='failed') return 'st-r'; return 'st-p'; }
+    function txIcon(t){ t=(t||'').toLowerCase(); return t==='buy'?'💰':t==='sell'?'💸':t==='deposit'?'📥':t==='withdraw'?'📤':'📄'; }
+    function renderRecent(){
+      const el = document.getElementById('recentList'); if(!el) return;
+      let tx = getTxns().sort((a,b)=> new Date(b.date||b.timestamp) - new Date(a.date||a.timestamp));
+      if(!tx.length){ el.innerHTML = `<div class="rate-upd">No recent activity.</div>`; return; }
+      const show = tx.slice(0,6).map(t=>{
+        const amt = (t.type==='buy'||t.type==='sell')
+          ? `${t.direction==='in'?'+':'-'}${(+t.amount||0).toFixed(2)} USDT`
+          : `${t.direction==='in'?'+':'-'}MK ${(+t.amount||+t.totalMWK||0).toLocaleString()}`;
+        const dirClass = t.direction==='in' ? 'tx-amt-in' : 'tx-amt-out';
+        return `<div class="tx-item">
+          <div class="tx-left">
+            <div class="tx-ico">${txIcon(t.type)}</div>
+            <div>
+              <div><strong>${(t.type||'').toUpperCase()}</strong> <span class="tx-meta">• ${timeAgo(t.date||new Date())}</span></div>
+              <div class="tx-meta">${t.reference ? 'Ref: '+t.reference : ''}</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div class="${dirClass}">${amt}</div>
+            <div class="tx-status ${statusClass(t.status)}">${(t.status||'PENDING').toUpperCase()}</div>
+          </div>
+        </div>`;
+      }).join('');
+      el.innerHTML = show;
+      // Pending banner
+      const pend = tx.filter(t=> (t.status||'').toLowerCase()==='pending');
+      const pb = document.getElementById('pendingBanner');
+      if (pb) pb.style.display = pend.length ? 'flex' : 'none';
+    }
+
+    // ===== Merchants Spotlight =====
+    function getRates(){ return JSON.parse(localStorage.getItem('platform.rates')||'null') || {buy:1750, sell:1745}; }
+    function loadMerchants(){
+      const adminList = JSON.parse(localStorage.getItem('platform.merchants')||'[]');
+      const rates = getRates();
+      if (Array.isArray(adminList) && adminList.length){
+        return adminList.filter(m=>m.verified!==false).slice(0,3).map(m=>({
+          id:m.id||Math.random(), name:m.name, phone:m.phone||'', online: !!m.online,
+          rating: m.rating||4.6, trades: m.trades||0, location: m.location||'—',
+          buyRate: m.buyRate || rates.buy, sellRate: m.sellRate || rates.sell
+        }));
+      }
+      // fallback demo
+      return [
+        {id:1,name:'Gold Exchanger', phone:'0888123456', online:true, rating:4.9, trades:842, location:'Lilongwe', buyRate:1750, sellRate:1745},
+        {id:2,name:'QuickTrade MW', phone:'0999123456', online:false, rating:4.7, trades:610, location:'Blantyre', buyRate:1747, sellRate:1742},
+        {id:3,name:'TrustedCrypt', phone:'0888654321', online:true, rating:4.95, trades:1054, location:'Mzuzu', buyRate:1752, sellRate:1748},
+      ];
+    }
+    function renderMerchants(){
+      const el = document.getElementById('merchList'); if(!el) return;
+      const list = loadMerchants();
+      el.innerHTML = list.map(m=>{
+        return `<div class="m-card">
+          <div>
+            <div class="m-name">${m.name} ${m.online?'<span class="badge bad-ok" style="border:none;">Online</span>':'<span class="badge bad-warn" style="border:none;">Offline</span>'}</div>
+            <div class="m-sub">⭐ ${m.rating} • ${m.trades.toLocaleString()} trades • ${m.location}</div>
+            <div class="m-sub">Rate: Buy <strong>MWK ${m.buyRate}</strong> • Sell <strong>MWK ${m.sellRate}</strong></div>
+          </div>
+          <button class="btn primary" onclick="startTrade(${JSON.stringify(m.id)})">Start Trade</button>
+        </div>`;
+      }).join('');
+    }
+    function startTrade(id){
+      const list = loadMerchants();
+      const m = list.find(x=>x.id===id);
+      if(!m){ toast('Merchant not found'); return; }
+      const rate = m.buyRate || getRates().buy || 1750;
+      localStorage.setItem('trade.pref', JSON.stringify({ merchant:m.name, rate:rate, phone:m.phone||'', method:'airtel' }));
+      const url = `buy.html?merchant=${encodeURIComponent(m.name)}&rate=${rate}&phone=${encodeURIComponent(m.phone||'')}`;
+      window.location.href = url;
+    }
+
+    // ===== Security / Onboarding =====
+    function renderSecurity(){
+      const email = localStorage.getItem('user') || 'user@example.com';
+      const emailVerified = localStorage.getItem('emailVerified') === 'true';
+      const kyc = (localStorage.getItem('kycStatus') || 'pending').toLowerCase();
+      const settings = JSON.parse(localStorage.getItem('settings')||'{}');
+      const twofa = !!settings['security.2fa'];
+
+      const chipEmail = document.getElementById('chipEmail');
+      const chipKyc = document.getElementById('chipKyc');
+      const chip2fa = document.getElementById('chip2fa');
+
+      if (chipEmail) chipEmail.innerHTML = `Email: <span class="${emailVerified?'good':'mid'}">${emailVerified?'Verified':'Unverified'}</span>`;
+      if (chipKyc) chipKyc.innerHTML = `KYC: <span class="${kyc==='verified'?'good':kyc==='rejected'?'bad':'mid'}">${kyc.charAt(0).toUpperCase()+kyc.slice(1)}</span>`;
+      if (chip2fa) chip2fa.innerHTML = `2FA: <span class="${twofa?'good':'mid'}">${twofa?'On':'Off'}</span>`;
+    }
+
+    // ===== Init & Live updates =====
+    function init(){
+      try{ if (typeof checkAuth === 'function') checkAuth(); }catch(_){}
+      renderGreeting();
+      renderAnnouncement();
+      renderRates();
+      renderPortfolio();
+      renderRecent();
+      renderMerchants();
+      renderSecurity();
+      refreshFxRate();
+      setInterval(refreshFxRate, 5*60*1000);
+    }
+
+    window.addEventListener('storage', (e)=>{
+      if (['transactions','platform.rates','platform.settings','wallets','fxRateMWK','platform.merchants'].includes(e.key||'')){
+        if (e.key==='transactions' || e.key==='wallets'){ renderPortfolio(); renderRecent(); }
+        if (e.key==='platform.rates'){ renderRates(); renderMerchants(); }
+        if (e.key==='platform.settings'){ renderAnnouncement(); }
+        if (e.key==='fxRateMWK'){ fxRateMWK = +e.newValue || fxRateMWK; renderPortfolio(); }
+        if (e.key==='platform.merchants'){ renderMerchants(); }
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+
+  <!-- Optional: your global helpers -->
+  <script src="app.js">
+</script>
+<style>
+  :root{ --navh: 80px; }
+  .fab-merchant{
+    position: fixed; right: 16px; bottom: calc(var(--navh, 80px) + 18px + env(safe-area-inset-bottom));
+    width:56px; height:56px; border-radius:50%;
+    background: linear-gradient(135deg, var(--gold, #D4AF37), var(--gold-2, #E0C16A));
+    color:#121212; border:none; box-shadow:0 8px 22px rgba(212,175,55,.45);
+    display:flex; align-items:center; justify-content:center; font-size:1.5rem;
+    cursor:pointer; z-index:1201;
+  }
+  .fab-merchant:focus{ outline:none; box-shadow:0 0 0 2px rgba(212,175,55,.35), 0 8px 22px rgba(212,175,55,.45); }
+</style>
+
+<script>
+(function(){
+  'use strict';
+  const $ = (s,r=document)=> r.querySelector(s);
+  const $$= (s,r=document)=> Array.from(r.querySelectorAll(s));
+
+  function isMerchantRole(){
+    const role = (localStorage.getItem('role')||'user').toLowerCase();
+    return role==='merchant' || role==='admin';
+  }
+
+  function setSafeHeights(){
+    const nav = document.querySelector('.nav-bar');
+    const h = nav ? nav.offsetHeight : 80;
+    document.documentElement.style.setProperty('--navh', h + 'px');
+  }
+
+  function onDashboard(){
+    const p = location.pathname.toLowerCase();
+    return p.endsWith('/merchant_dashboard.html') || p.endsWith('merchant_dashboard.html');
+  }
+
+  // Make bottom nav "Merchant" route to merchant_dashboard.html for merchants/admins
+  function adjustBottomNav(){
+    const nav = document.querySelector('.nav-bar');
+    if(!nav) return;
+
+    const links = Array.from(nav.querySelectorAll('a'));
+    let mlink = links.find(a=>{
+      const href = (a.getAttribute('href')||'').toLowerCase();
+      const text = (a.textContent||'').toLowerCase();
+      return href.includes('merchant') || text.includes('merchant') || text.includes('🏪');
+    });
+
+    if(isMerchantRole()){
+      // If no merchant link, create one
+      if(!mlink){
+        const a = document.createElement('a');
+        a.href = 'merchant_dashboard.html';
+        a.className = 'nav-item';
+        a.innerHTML = '<div class="nav-icon">🏪</div><div class="nav-label">Merchant</div>';
+        nav.appendChild(a);
+        mlink = a;
+      }else{
+        mlink.href = 'merchant_dashboard.html';
+        mlink.style.display = '';
+      }
+      // Active state when on dashboard
+      if(onDashboard()) mlink.classList.add('active');
+
+      // Hide/retarget any merchants.html link for merchants/admins
+      links.forEach(a=>{
+        const href = (a.getAttribute('href')||'').toLowerCase();
+        if(href.endsWith('merchants.html')) a.style.display = 'none';
+      });
+
+    }else{
+      // Non-merchants: show merchants.html if present; hide merchant_dashboard link
+      if(mlink && (mlink.getAttribute('href')||'').toLowerCase().includes('merchant_dashboard.html')){
+        // if there’s also a merchants.html entry, prefer that; otherwise hide
+        const listLink = links.find(a=> (a.getAttribute('href')||'').toLowerCase().includes('merchants.html'));
+        if(listLink){
+          mlink.replaceWith(listLink); // let listLink be visible
+        }else{
+          mlink.style.display = 'none';
+        }
+      }
+    }
+  }
+
+  // Floating quick button on every page (except the dashboard) for merchants/admins
+  function ensureMerchantFab(){
+    const fab = document.getElementById('goMerchantFab');
+    if(isMerchantRole() && !onDashboard()){
+      if(!fab){
+        const b = document.createElement('button');
+        b.id='goMerchantFab'; b.className='fab-merchant'; b.title='Go to Merchant Dashboard'; b.textContent='🏪';
+        b.addEventListener('click', ()=> location.href='merchant_dashboard.html');
+        document.body.appendChild(b);
+      }
+    }else if(fab){
+      fab.remove();
+    }
+  }
+
+  // Optional: add header icon (if a header actions bar exists) for extra redundancy
+  function ensureHeaderButton(){
+    const actions = document.querySelector('.actions');
+    if(!actions || !isMerchantRole()) return;
+    if(!document.getElementById('hdrMerchantBtn')){
+      const btn = document.createElement('button');
+      btn.id='hdrMerchantBtn'; btn.className='icon-btn'; btn.type='button'; btn.title='Merchant Dashboard';
+      btn.textContent='🏪';
+      btn.addEventListener('click', ()=> location.href='merchant_dashboard.html');
+      actions.appendChild(btn);
+    }
+  }
+
+  // Keyboard shortcut: Alt+M to open Merchant Dashboard
+  function wireShortcut(){
+    window.addEventListener('keydown', (e)=>{
+      if(!isMerchantRole()) return;
+      if(e.altKey && e.key.toLowerCase()==='m'){
+        e.preventDefault();
+        if(!onDashboard()) location.href='merchant_dashboard.html';
+      }
+    });
+  }
+
+  function init(){
+    setSafeHeights();
+    adjustBottomNav();
+    ensureMerchantFab();
+    ensureHeaderButton();
+    wireShortcut();
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+  window.addEventListener('resize', setSafeHeights);
+  window.addEventListener('storage', (e)=>{
+    if(e.key==='role'){ adjustBottomNav(); ensureMerchantFab(); ensureHeaderButton(); }
+  });
+
+  // If the page dynamically replaces the nav, observe and re-apply
+  const mo = new MutationObserver(()=>{ setSafeHeights(); adjustBottomNav(); ensureMerchantFab(); });
+  mo.observe(document.body, { childList:true, subtree:true });
+
+})();
+</script>
+</body>
+</html>

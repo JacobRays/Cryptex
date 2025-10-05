@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Withdraw Funds - Cryptex Malawi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root{
+      --bg-0:#0f0f10; --bg-1:#121212; --surface:#1e1e1e; --surface-2:#2c2c2c;
+      --gold:#D4AF37; --gold-2:#E0C16A; --muted:#9E9E9E; --text:#f5f5f5;
+      --danger:#F44336; --success:#4CAF50; --warn:#FF9800;
+      --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.45); --ring:0 0 0 2px rgba(212,175,55,.35);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      min-height:100vh; background:
+        radial-gradient(60vw 60vw at 10% -10%, rgba(212,175,55,.08), transparent 60%),
+        radial-gradient(70vw 70vw at 110% -20%, rgba(224,193,106,.06), transparent 60%),
+        linear-gradient(135deg, var(--bg-0), var(--bg-1));
+      color:var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      padding-bottom: 80px;
+    }
+
+    /* App bar + 3D brand */
+    .app-bar{
+      background:rgba(30,30,30,.8); border-bottom:1px solid rgba(212,175,55,.18);
+      backdrop-filter: blur(8px); padding:.85rem 1rem; box-shadow:0 8px 24px rgba(0,0,0,.25); display:flex; align-items:center; gap:.75rem;
+      position: sticky; top:0; z-index:10;
+    }
+    .back-btn{ text-decoration:none; color:var(--gold-2); font-size:1.5rem; }
+    .brand{ margin:0 auto; display:flex; align-items:center; justify-content:center; gap:.5rem; }
+    .logo-wrap{ perspective: 900px; }
+    .logo{
+      font-weight:900; letter-spacing:.18rem; font-size: clamp(1.4rem,4.5vw,2rem); line-height:1;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2) 70%);
+      background-clip: text;                 /* standard */
+      -webkit-background-clip: text;         /* Safari/iOS */
+      color: transparent;                    /* standard */
+      -webkit-text-fill-color: transparent;  /* Safari/iOS */
+      transform: rotateX(14deg) rotateY(-10deg); transform-style: preserve-3d;
+      text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 12px 24px rgba(212,175,55,.25);
+      position:relative; transition: transform .4s ease, text-shadow .4s ease;
+    }
+    .logo::after{
+      content:''; position:absolute; inset:-6px -12px;
+      background: linear-gradient(120deg, transparent 25%, rgba(255,255,255,.12) 40%, transparent 60%);
+      transform: translateZ(50px) skewX(-12deg); mix-blend-mode: screen; border-radius:24px;
+      animation: shine 4.5s linear infinite;
+    }
+    .logo:hover{ transform: rotateX(0deg) rotateY(0deg) translateY(-2px) scale(1.02); text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 20px 40px rgba(212,175,55,.35); }
+    @keyframes shine{ 0%{ transform: translateX(-120%) translateZ(50px) skewX(-12deg);} 100%{ transform: translateX(120%) translateZ(50px) skewX(-12deg);} }
+
+    .container{ padding:1rem; max-width:520px; margin: 0 auto; }
+    .withdraw-tabs{ display:flex; background:#2C2C2C; border-radius:12px; padding:.25rem; margin:1rem 0 1.25rem; border:1px solid #333; }
+    .tab{ flex:1; padding:.75rem; text-align:center; background:transparent; border:none; color:#cfcfcf; cursor:pointer; border-radius:10px; transition:.2s; font-weight:800 }
+    .tab.active{ background:linear-gradient(135deg, var(--gold), var(--gold-2)); color:#121212; }
+
+    .info-card{ background:#2C2C2C; border:1px solid rgba(212,175,55,.35); border-radius:12px; padding:1.2rem; margin-bottom:1rem; box-shadow: var(--shadow); }
+    .label{ font-size:.9rem; color:#E0C16A; font-weight:700; margin-bottom:.4rem; display:block }
+    .field{ width:100%; padding:1rem; background:#1E1E1E; border:1px solid #444; border-radius:10px; color:#fff; font-size:1rem; transition: border-color .2s, box-shadow .2s }
+    .field:focus{ outline:none; border-color:var(--gold-2); box-shadow: var(--ring); background:#191919 }
+    .muted{ color:var(--muted); font-size:.9rem }
+
+    .summary{ background:#1b1b1b; border:1px dashed #3a3a3a; border-radius:12px; padding: .75rem 1rem; display:grid; grid-template-columns: 1fr auto; gap:.4rem; margin-top:.5rem; }
+    .summary b{ color:#e7d59b }
+
+    .btn{ width:100%; padding:1rem; background: linear-gradient(135deg, var(--gold), var(--gold-2)); color:#121212; border:none; border-radius:12px; font-size:1.05rem; font-weight:900; cursor:pointer; margin-top:1rem; letter-spacing:.06em; box-shadow: 0 8px 20px rgba(212,175,55,.25); transition: transform .15s ease; }
+    .btn:hover{ transform: translateY(-2px) }
+    .btn:disabled{ opacity:.6; cursor:not-allowed }
+
+    /* Toast */
+    .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:24px; background:#1b1b1b; border:1px solid rgba(212,175,55,.35); color:var(--gold-2); padding:.7rem 1rem; border-radius:10px; box-shadow: var(--shadow); display:none; z-index:1200; min-width:220px; text-align:center; }
+    .toast.show{ display:block; animation: toast-in .2s ease }
+    @keyframes toast-in{ from{ opacity:0; transform: translate(-50%, 12px);} to{ opacity:1; transform: translate(-50%, 0);} }
+  </style>
+</head>
+<body>
+  <div class="app-bar">
+    <a class="back-btn" href="wallet.html" aria-label="Back">←</a>
+    <div class="brand">
+      <div class="logo-wrap"><div class="logo">CRYPT-X</div></div>
+      <div style="color:#e7d59b; font-weight:800; letter-spacing:.06rem;">Withdraw Funds</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="withdraw-tabs">
+      <button class="tab active" onclick="switchWithdrawTab('mwk', this)">MWK (Mobile Money)</button>
+      <button class="tab" onclick="switchWithdrawTab('usdt', this)">USDT (TRC20)</button>
+    </div>
+        <!-- MWK Withdrawal -->
+    <div id="withdraw-mwk">
+      <div class="info-card">
+        <div class="label">Available MWK</div>
+        <div class="summary"><span class="muted">Balance</span><b id="mwkAvailable">MK 0</b></div>
+      </div>
+
+      <div class="info-card">
+        <div class="label">Amount (MWK)</div>
+        <input id="mwk-amount" type="number" inputmode="decimal" class="field" placeholder="Enter amount" min="1000" step="1" />
+        <div class="label" style="margin-top:.8rem;">Receive to (Airtel or Mpamba number)</div>
+        <input id="mwk-number" type="tel" class="field" placeholder="e.g. 0888123456" />
+        <div class="summary">
+          <span class="muted">Service fee (1.5%)</span><b id="mwk-fee">MK 0</b>
+          <span class="muted">You will receive</span><b id="mwk-net">MK 0</b>
+        </div>
+        <button id="mwkBtn" class="btn" type="button">Submit MWK Withdrawal</button>
+        <div class="muted" style="margin-top:.5rem;">ℹ️ Processed within 5–10 minutes to your Mobile Money wallet.</div>
+      </div>
+    </div>
+
+    <!-- USDT Withdrawal -->
+    <div id="withdraw-usdt" style="display:none;">
+      <div class="info-card">
+        <div class="label">Available USDT</div>
+        <div class="summary"><span class="muted">Balance</span><b id="usdtAvailable">0.00 USDT</b></div>
+      </div>
+
+      <div class="info-card">
+        <div class="label">Amount (USDT)</div>
+        <input id="usdt-amount" type="number" inputmode="decimal" class="field" placeholder="Enter amount" min="5" step="0.01" />
+        <div class="label" style="margin-top:.8rem;">TRC20 Wallet Address</div>
+        <input id="usdt-wallet" type="text" class="field" placeholder="e.g. TN8RX7RDuWgDFc..." />
+        <div class="summary">
+          <span class="muted">Network fee (1 USDT)</span><b id="usdt-fee">1.00 USDT</b>
+          <span class="muted">You will receive</span><b id="usdt-net">0.00 USDT</b>
+        </div>
+        <button id="usdtBtn" class="btn" type="button">Submit USDT Withdrawal</button>
+        <div class="muted" style="margin-top:.5rem;">⚠️ TRC20 network only. Double-check your address — irreversible.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">Saved</div>
+    <script>
+    'use strict';
+
+    // ===== Config =====
+    const MWK_FEE_PCT = 0.015;       // 1.5% fee for MWK withdrawals
+    const USDT_NET_FEE = 1.0;        // 1 USDT network fee
+    const MWK_MIN = 1000;
+    const USDT_MIN = 5;
+    const DEMO_AUTO_APPROVE = true;  // Auto-complete for demo; set false for manual verification
+
+    // ===== Toast =====
+    function toast(msg){ const t=document.getElementById('toast'); if(!t){ alert(msg); return; } t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2000); }
+
+    // ===== Tabs =====
+    function switchWithdrawTab(type, btn){
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      btn?.classList.add('active');
+      document.getElementById('withdraw-mwk').style.display = (type==='mwk'?'block':'none');
+      document.getElementById('withdraw-usdt').style.display = (type==='usdt'?'block':'none');
+    }
+
+    // ===== Helpers (wallet/txns) =====
+    const fmtMWK = v => 'MK ' + Number(v||0).toLocaleString();
+    function getTxns(){ let tx = JSON.parse(localStorage.getItem('transactions')||'[]'); if(!Array.isArray(tx)) tx=[]; return tx; }
+    function saveTxns(tx){ localStorage.setItem('transactions', JSON.stringify(tx)); }
+    function generateTxnId(){ return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2,9).toUpperCase(); }
+
+    function persistWallet(w){ localStorage.setItem('wallet', JSON.stringify({ usdt: +w.usdt || 0, mwk: +w.mwk || 0 })); }
+    function recomputeWalletFromHistory(){
+      let tx = getTxns().sort((a,b)=> new Date(a.date||a.timestamp) - new Date(b.date||b.timestamp));
+      let w = { usdt:0, mwk:0 };
+      const fx = parseFloat(localStorage.getItem('fxRateMWK')||'1750') || 1750;
+      tx.forEach(t=>{
+        if((t.status||'').toLowerCase()!=='completed') return;
+        const typ=(t.type||'').toLowerCase();
+        if(typ==='deposit')       w.mwk += +t.amount || +t.totalMWK || 0;
+        else if(typ==='withdraw') w.mwk -= +t.amount || +t.totalMWK || 0;
+        else if(typ==='buy'){ const usdt=+t.amount||0; const mwk=+t.totalMWK||Math.round(usdt*fx); w.usdt += usdt; w.mwk -= mwk; }
+        else if(typ==='sell'){ const usdt=+t.amount||0; const mwk=+t.totalMWK||Math.round(usdt*fx); w.usdt -= usdt; w.mwk += mwk; }
+      });
+      w.usdt = Math.max(0, +w.usdt.toFixed(6)); w.mwk = Math.max(0, Math.round(w.mwk));
+      return w;
+    }
+    function getWallet(){
+      const w = JSON.parse(localStorage.getItem('wallet')||'null');
+      if (w && typeof w.usdt==='number' && typeof w.mwk==='number') return w;
+      const r = recomputeWalletFromHistory();
+      persistWallet(r);
+      return r;
+    }
+
+    // ===== UI State =====
+    function refreshAvailable(){
+      const w = getWallet();
+      document.getElementById('mwkAvailable').textContent = fmtMWK(w.mwk || 0);
+      document.getElementById('usdtAvailable').textContent = `${(w.usdt||0).toFixed(2)} USDT`;
+    }
+
+    // ===== MWK Calculation =====
+    function recalcMWK(){
+      const w = getWallet();
+      const amt = Math.max(0, parseFloat(document.getElementById('mwk-amount').value||'0'));
+      const fee = amt * MWK_FEE_PCT;
+      const net = Math.max(0, amt - fee);
+      document.getElementById('mwk-fee').textContent = fmtMWK(fee);
+      document.getElementById('mwk-net').textContent = fmtMWK(net);
+      return { amt, fee, net, available: w.mwk||0 };
+    }
+
+    // ===== USDT Calculation =====
+    function recalcUSDT(){
+      const w = getWallet();
+      const amt = Math.max(0, parseFloat(document.getElementById('usdt-amount').value||'0'));
+      const fee = USDT_NET_FEE;
+      const net = Math.max(0, amt - fee);
+      document.getElementById('usdt-fee').textContent = `${fee.toFixed(2)} USDT`;
+      document.getElementById('usdt-net').textContent = `${net.toFixed(2)} USDT`;
+      return { amt, fee, net, available: w.usdt||0 };
+    }
+
+    // ===== Validations =====
+    function validMobileNumber(v){
+      const digits = String(v||'').replace(/\D/g,'');
+      return digits.length>=9 && digits.length<=13;
+    }
+    function validTRC20(addr){
+      // Basic sanity: TRC20 addresses start with 'T' and are 34 chars typically
+      return typeof addr==='string' && addr.trim().length>=26 && addr.trim().[0]==='T';
+    }
+
+    // ===== Submit flows =====
+    function submitMWK(){
+      const btn = document.getElementById('mwkBtn');
+      const { amt, net, available } = recalcMWK();
+      const number = (document.getElementById('mwk-number').value||'').trim();
+
+      if (!amt || amt < MWK_MIN) return toast(`Minimum MWK withdrawal is ${fmtMWK(MWK_MIN)}`);
+      if (amt > available) return toast('Amount exceeds available MWK');
+      if (!validMobileNumber(number)) return toast('Enter a valid Airtel/Mpamba number');
+
+      btn.disabled = true; btn.textContent = 'Submitting...';
+
+      const id = generateTxnId();
+      const tx = {
+        id, type:'withdraw', amount:+amt, method:'mobile', receiver:number,
+        status:'pending', direction:'out', date:new Date().toISOString()
+      };
+      const all = getTxns(); all.unshift(tx); saveTxns(all);
+      toast('Withdrawal submitted — pending verification');
+
+      if (DEMO_AUTO_APPROVE){
+        setTimeout(()=>{
+          const arr = getTxns(); const i = arr.findIndex(t=>t.id===id);
+          if(i>-1){ arr[i].status='completed'; saveTxns(arr); persistWallet(recomputeWalletFromHistory()); }
+          btn.disabled = false; btn.textContent = 'Submit MWK Withdrawal';
+          toast('MWK sent'); setTimeout(()=> window.location.href='wallet.html', 600);
+        }, 2500);
+      } else {
+        btn.disabled = false; btn.textContent = 'Submit MWK Withdrawal';
+        setTimeout(()=> window.location.href='wallet.html', 400);
+      }
+    }
+
+    function submitUSDT(){
+      const btn = document.getElementById('usdtBtn');
+      const { amt, net, available } = recalcUSDT();
+      const addr = (document.getElementById('usdt-wallet').value||'').trim();
+
+      if (!amt || amt < USDT_MIN) return toast(`Minimum USDT withdrawal is ${USDT_MIN} USDT`);
+      if (amt > available) return toast('Amount exceeds available USDT');
+      if (net <= 0) return toast('Amount too small after network fee');
+      if (!validTRC20(addr)) return toast('Enter a valid TRC20 address');
+
+      btn.disabled = true; btn.textContent = 'Submitting...';
+
+      const id = generateTxnId();
+      // Record as 'sell' with totalMWK=0 to deduct USDT without changing MWK (fits wallet logic)
+      const tx = {
+        id, type:'sell', amount:+amt, totalMWK:0,
+        network:'TRC20', address:addr, status:'pending', direction:'out', date:new Date().toISOString()
+      };
+      const all = getTxns(); all.unshift(tx); saveTxns(all);
+      toast('USDT withdrawal submitted — pending verification');
+
+      if (DEMO_AUTO_APPROVE){
+        setTimeout(()=>{
+          const arr = getTxns(); const i = arr.findIndex(t=>t.id===id);
+          if(i>-1){ arr[i].status='completed'; saveTxns(arr); persistWallet(recomputeWalletFromHistory()); }
+          btn.disabled = false; btn.textContent = 'Submit USDT Withdrawal';
+          toast('USDT sent'); setTimeout(()=> window.location.href='wallet.html', 600);
+        }, 3000);
+      } else {
+        btn.disabled = false; btn.textContent = 'Submit USDT Withdrawal';
+        setTimeout(()=> window.location.href='wallet.html', 400);
+      }
+    }
+
+    // ===== Bindings =====
+    window.addEventListener('DOMContentLoaded', ()=>{
+      // Optional auth check (if app.js is present)
+      if (typeof checkAuth === 'function') { try{ checkAuth(); }catch(_){} }
+
+      refreshAvailable();
+      recalcMWK();
+      recalcUSDT();
+
+      document.getElementById('mwk-amount').addEventListener('input', recalcMWK);
+      document.getElementById('usdt-amount').addEventListener('input', recalcUSDT);
+
+      document.getElementById('mwkBtn').addEventListener('click', submitMWK);
+      document.getElementById('usdtBtn').addEventListener('click', submitUSDT);
+    });
+
+    // Keep in sync with changes from other tabs/pages
+    window.addEventListener('storage', (e)=>{
+      if(e.key==='transactions' || e.key==='wallet'){ refreshAvailable(); recalcMWK(); recalcUSDT(); }
+    });
+  </script>
+
+  <!-- Optional global helpers -->
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - Cryptex Malawi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root{
+      --bg-0:#0f0f10;
+      --bg-1:#121212;
+      --surface:#1e1e1e;
+      --surface-2:#2c2c2c;
+      --gold:#D4AF37;
+      --gold-2:#E0C16A;
+      --muted:#9E9E9E;
+      --text:#f5f5f5;
+      --danger:#F44336;
+      --success:#4CAF50;
+      --info:#2196F3;
+      --radius:14px;
+      --shadow:0 10px 30px rgba(0,0,0,.45);
+      --ring:0 0 0 2px rgba(212,175,55,.35);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      min-height:100vh;
+      background:
+        radial-gradient(60vw 60vw at 10% -10%, rgba(212,175,55,.08), transparent 60%),
+        radial-gradient(70vw 70vw at 110% -20%, rgba(224,193,106,.06), transparent 60%),
+        linear-gradient(135deg, var(--bg-0), var(--bg-1));
+      color:var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial;
+      display:flex; flex-direction:column;
+    }
+
+    /* Top bar with 3D logo */
+    .app-bar{
+      background:rgba(30,30,30,.8);
+      border-bottom:1px solid rgba(212,175,55,.18);
+      backdrop-filter: blur(8px);
+      padding: .85rem 1rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+      position: sticky; top:0; z-index:10;
+    }
+    .brand{
+      max-width: 1000px;
+      margin: 0 auto;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .logo-wrap{ perspective: 900px; }
+    .logo{
+      font-weight: 900;
+      letter-spacing: .18rem;
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      line-height: 1;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2) 70%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      transform: rotateX(14deg) rotateY(-10deg);
+      transform-style: preserve-3d;
+      text-shadow:
+        0 1px 0 #b38f2b,
+        0 2px 0 #9c7a1d,
+        0 12px 24px rgba(212,175,55,.25);
+      position: relative;
+      display: inline-block;
+      transition: transform .4s ease, text-shadow .4s ease;
+      will-change: transform;
+    }
+    .logo::after{
+      /* simulated 3D shine sweep */
+      content:'';
+      position:absolute; inset:-6px -12px;
+      background: linear-gradient(120deg, transparent 25%, rgba(255,255,255,.12) 40%, transparent 60%);
+      transform: translateZ(50px) skewX(-12deg);
+      mix-blend-mode: screen;
+      pointer-events:none;
+      animation: shine 4.5s linear infinite;
+      border-radius: 24px;
+    }
+    .logo:hover{
+      transform: rotateX(0deg) rotateY(0deg) translateY(-2px) scale(1.02);
+      text-shadow:
+        0 1px 0 #b38f2b,
+        0 2px 0 #9c7a1d,
+        0 20px 40px rgba(212,175,55,.35);
+    }
+    @keyframes shine{
+      0%{ transform: translateX(-120%) translateZ(50px) skewX(-12deg); }
+      100%{ transform: translateX(120%) translateZ(50px) skewX(-12deg); }
+    }
+
+    .container{
+      flex:1;
+      width:100%;
+      max-width:420px;
+      margin: 2rem auto 2.5rem;
+      padding: 0 1.25rem;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(44,44,44,.85), rgba(34,34,34,.85));
+      border: 1px solid rgba(212,175,55,.22);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    h2{ text-align:center; margin-bottom:.35rem; color:var(--gold-2); }
+    .tagline{ text-align:center; color:#e7d59b; opacity:.9; margin-bottom:1rem; }
+
+    .field{ margin:.75rem 0; }
+    label{ display:block; font-size:.9rem; color:#e0c16a; margin-bottom:.35rem; }
+    .control{
+      position: relative;
+    }
+    .input{
+      width:100%;
+      padding: .9rem 2.6rem .9rem .95rem;
+      background: #161616;
+      border: 1px solid #3a3a3a;
+      color: #fff;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    .input:focus{
+      outline: none;
+      border-color: var(--gold-2);
+      box-shadow: var(--ring);
+      background: #191919;
+    }
+    .icon-btn{
+      position: absolute; right:.4rem; top:50%; transform: translateY(-50%);
+      background: transparent; border:1px solid #3a3a3a; color:#cfcfcf;
+      border-radius: 8px; padding:.35rem .55rem; cursor:pointer; font-size:.85rem;
+      transition: border-color .2s, color .2s, background .2s;
+    }
+    .icon-btn:hover{ border-color: var(--gold-2); color: var(--gold-2); background:#1f1f1f; }
+
+    .row{ display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-top:.5rem; }
+    .checkbox{ display:flex; align-items:center; gap:.5rem; color:#d9d9d9; font-size:.95rem; }
+
+    .btn{
+      background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      color:#121212; border:none; padding:.95rem 1rem; font-weight:800;
+      border-radius: 12px; width:100%; cursor:pointer; font-size:1rem; letter-spacing:.04em;
+      box-shadow: 0 8px 20px rgba(212,175,55,.25);
+      transition: transform .15s ease, box-shadow .2s ease, filter .2s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); box-shadow: 0 12px 26px rgba(212,175,55,.35); }
+    .btn:active{ transform: translateY(0); filter: saturate(.95); }
+    .btn.secondary{
+      background: transparent; color: var(--gold-2);
+      border: 2px solid var(--gold-2);
+      box-shadow: none;
+    }
+    .btn.loading{ pointer-events:none; opacity:.85; position:relative; }
+    .btn.loading::after{
+      content:''; position:absolute; right:14px; top:50%; transform: translateY(-50%);
+      width:18px; height:18px; border:2px solid rgba(0,0,0,.4); border-top-color:#000; border-radius:50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin{ to{ transform: translateY(-50%) rotate(360deg); } }
+
+    .quick-access{ margin-top:1.5rem; padding-top:1.25rem; border-top:1px dashed #3a3a3a; }
+    .quick-title{ text-align:center; color:var(--muted); font-size:.9rem; margin-bottom:.75rem; }
+    .quick-buttons{
+      display:grid; grid-template-columns: repeat(3,1fr); gap:.6rem;
+    }
+    .quick-btn{
+      padding:.7rem .4rem; background:#171717; border:1px solid #373737;
+      color:#cfcfcf; border-radius:10px; text-align:center; cursor:pointer;
+      transition: transform .15s, border-color .2s, color .2s, box-shadow .2s;
+    }
+    .quick-btn:hover{ transform: translateY(-1px); border-color:var(--gold-2); color:var(--gold-2); box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+    .quick-btn.admin{ border-color: rgba(244,67,54,.45); color:#ff6b6b; }
+    .quick-btn.merchant{ border-color: rgba(76,175,80,.45); color:#6fe18b; }
+    .quick-btn.user{ border-color: rgba(33,150,243,.45); color:#7ac4ff; }
+
+    .credentials{
+      margin-top: 1.25rem; background:#161616; border:1px solid #2f2f2f; border-radius:12px; padding:1rem;
+      font-size:.9rem;
+    }
+    .credentials h3{ color:var(--gold-2); margin-bottom:.6rem; font-size:1rem; }
+    .cred-grid{
+      display:grid; grid-template-columns: 1fr 2fr 1fr; gap:.5rem;
+      border-top:1px solid #2b2b2b; padding-top:.6rem;
+    }
+    .cred-row{ display: contents; }
+    .role-badge{
+      display:inline-block; font-weight:800; font-size:.75rem; padding:.25rem .5rem; border-radius:6px; text-align:center;
+    }
+    .role-admin{ background:rgba(244,67,54,.18); color:#ff6b6b; }
+    .role-merchant{ background:rgba(76,175,80,.18); color:#93f3ad; }
+    .role-user{ background:rgba(33,150,243,.18); color:#8ad1ff; }
+
+    .footer-note{ text-align:center; margin-top:1rem; color:#b5b5b5; opacity:.8; }
+
+    /* Toast */
+    .toast{
+      position: fixed; left:50%; transform: translateX(-50%);
+      bottom: 24px; background:#1b1b1b; border:1px solid rgba(212,175,55,.35);
+      color:var(--gold-2); padding:.7rem 1rem; border-radius:10px; box-shadow: var(--shadow);
+      display:none; z-index:1000; min-width: 220px; text-align:center;
+    }
+    .toast.show{ display:block; animation: toast-in .2s ease; }
+    @keyframes toast-in{ from{ opacity:0; transform: translate(-50%, 12px); } to{ opacity:1; transform: translate(-50%, 0); } }
+
+    @media (prefers-reduced-motion: reduce){
+      .logo, .logo::after, .btn, .quick-btn{ transition:none; animation:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-bar">
+    <div class="brand">
+      <div class="logo-wrap">
+        <div class="logo" title="Cryptex Malawi">CRYPT-X</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+      <h2>Welcome Back</h2>
+      <p class="tagline">Secure P2P USDT Trading Platform · Malawi 🇲🇼</p>
+
+      <div class="field">
+        <label for="email">Email Address</label>
+        <div class="control">
+          <input type="email" id="email" class="input" placeholder="you@cryptex.mw" autocomplete="email" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="control">
+          <input type="password" id="password" class="input" placeholder="••••••••" autocomplete="current-password" />
+          <button class="icon-btn" id="togglePwd" type="button" aria-label="Show/Hide password">👁</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <label class="checkbox">
+          <input type="checkbox" id="rememberMe" />
+          <span>Remember me</span>
+        </label>
+        <a href="#" style="color:#e7d59b; text-decoration:none; opacity:.9;">Forgot password?</a>
+      </div>
+
+      <div class="field" style="margin-top:.85rem;">
+        <button id="loginBtn" class="btn" onclick="login()">Login</button>
+      </div>
+      <div class="field">
+        <button class="btn secondary" onclick="register()">Create Account</button>
+      </div>
+
+      <div class="quick-access">
+        <div class="quick-title">🚀 Quick Access (Testing)</div>
+        <div class="quick-buttons">
+          <div class="quick-btn admin" onclick="quickLogin('admin')">
+            <div style="font-size:1.3rem;">👨‍💼</div>
+            <div>Admin</div>
+          </div>
+          <div class="quick-btn merchant" onclick="quickLogin('merchant')">
+            <div style="font-size:1.3rem;">🏪</div>
+            <div>Merchant</div>
+          </div>
+          <div class="quick-btn user" onclick="quickLogin('user')">
+            <div style="font-size:1.3rem;">👤</div>
+            <div>User</div>
+          </div>
+        </div>
+
+        <div class="credentials">
+          <h3>📋 Test Credentials</h3>
+          <div class="cred-grid" style="font-weight:700; color:#e7d59b;">
+            <div>Role</div><div>Email</div><div>Password</div>
+          </div>
+          <div class="cred-grid">
+            <div class="role-badge role-admin">ADMIN</div><div>admin@cryptex.mw</div><div>admin123</div>
+            <div class="role-badge role-admin" style="opacity:.85;">ADMIN</div><div>jacob@cryptex.mw</div><div>jacob123</div>
+            <div class="role-badge role-merchant">MERCHANT</div><div>merchant@cryptex.mw</div><div>merchant123</div>
+            <div class="role-badge role-user">USER</div><div>user@cryptex.mw</div><div>user123</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="footer-note">Trusted by traders across Malawi · Fast · Secure · Compliant</p>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">Message</div>
+
+  <script src="app.js"></script>
+   </script>
+</body>
+</html>

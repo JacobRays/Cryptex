@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Buy USDT - Cryptex Malawi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <style>
+  /* Green highlight for selected merchant */
+  .merchant-card.selected {
+    border-color: #4CAF50 !important;
+    box-shadow: 0 0 0 2px rgba(76,175,80,.45), 0 8px 24px rgba(0,0,0,.25) !important;
+    background: linear-gradient(180deg, #2d2d2d, #243224) !important;
+  }
+    :root{
+      --bg-0:#0f0f10; --bg-1:#121212; --surface:#1e1e1e; --surface-2:#2c2c2c;
+      --gold:#D4AF37; --gold-2:#E0C16A; --muted:#9E9E9E; --text:#f5f5f5;
+      --danger:#F44336; --success:#4CAF50; --warn:#FF9800;
+      --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.45); --ring:0 0 0 2px rgba(212,175,55,.35);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      min-height:100vh; background:
+        radial-gradient(60vw 60vw at 10% -10%, rgba(212,175,55,.08), transparent 60%),
+        radial-gradient(70vw 70vw at 110% -20%, rgba(224,193,106,.06), transparent 60%),
+        linear-gradient(135deg, var(--bg-0), var(--bg-1));
+      color:var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    /* App bar + 3D logo */
+    .app-bar{
+      background:rgba(30,30,30,.8); border-bottom:1px solid rgba(212,175,55,.18);
+      backdrop-filter: blur(8px); padding:.85rem 1rem; box-shadow:0 8px 24px rgba(0,0,0,.25); display:flex; align-items:center; gap:.75rem;
+      position: sticky; top:0; z-index:10;
+    }
+    .back-btn{ text-decoration:none; color:var(--gold-2); font-size:1.5rem; }
+    .brand{ margin:0 auto; display:flex; align-items:center; justify-content:center; gap:.5rem; }
+    .logo-wrap{ perspective: 900px; }
+    .logo{
+      font-weight:900; letter-spacing:.18rem; font-size: clamp(1.4rem,4.5vw,2rem); line-height:1;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2) 70%);
+      background-clip: text;                 /* standard */
+      -webkit-background-clip: text;         /* Safari/iOS */
+      color: transparent;                    /* standard */
+      -webkit-text-fill-color: transparent;  /* Safari/iOS */
+      text-transform: uppercase;
+      transform: rotateX(14deg) rotateY(-10deg); transform-style: preserve-3d;
+      text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 12px 24px rgba(212,175,55,.25);
+      position:relative; transition: transform .4s ease, text-shadow .4s ease;
+    }
+    .logo::after{
+      content:''; position:absolute; inset:-6px -12px;
+      background: linear-gradient(120deg, transparent 25%, rgba(255,255,255,.12) 40%, transparent 60%);
+      transform: translateZ(50px) skewX(-12deg); mix-blend-mode: screen; border-radius:24px;
+      animation: shine 4.5s linear infinite;
+    }
+    .logo:hover{ transform: rotateX(0deg) rotateY(0deg) translateY(-2px) scale(1.02); text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 20px 40px rgba(212,175,55,.35); }
+    @keyframes shine{ 0%{ transform: translateX(-120%) translateZ(50px) skewX(-12deg);} 100%{ transform: translateX(120%) translateZ(50px) skewX(-12deg);} }
+
+    .container{ padding:1rem; max-width:520px; margin: 0 auto; }
+    .rate-card{
+      background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      color:#121212; padding:1rem; border-radius:12px; margin:1rem 0; text-align:center; box-shadow: 0 10px 26px rgba(212,175,55,.25);
+    }
+    .rate-label{ font-size:.9rem; opacity:.8; }
+    .rate-value{ font-size:1.5rem; font-weight:900; margin-top:.25rem }
+    .input-group{ background:#2C2C2C; padding:1.2rem; border-radius:12px; margin-bottom:1rem; border:1px solid #333; }
+    .input-label{ color:#E0C16A; margin-bottom:.5rem; font-size:.9rem; font-weight:700 }
+    .input-row{ display:flex; align-items:center; gap:.6rem }
+    .input-field{
+      flex:1; padding:1rem; background:#1E1E1E; border:1px solid #444; border-radius:10px; color:#fff; font-size:1.2rem;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .input-field:focus{ outline:none; border-color:var(--gold-2); box-shadow: var(--ring); background:#191919 }
+    .conversion-text{ color:var(--muted); font-size:.9rem; margin-top:.5rem }
+
+    .section-title{ color:#E0C16A; margin: .75rem 0; font-weight:800 }
+    .merchant-card{
+      background:#2C2C2C; border:1px solid #333; padding:1rem; border-radius:10px; margin-bottom:.6rem; cursor:pointer; transition:.2s;
+    }
+    .merchant-card:hover{ border-color:var(--gold-2); transform: translateX(4px); }
+    /* only one selected style (green) is used – see top rule */
+    .merchant-name{ font-weight:900; color:var(--gold-2); display:flex; align-items:center; gap:.4rem }
+    .merchant-info{ display:flex; justify-content:space-between; margin-top:.5rem; font-size:.9rem; color:var(--muted) }
+    .online-indicator{ width:8px; height:8px; border-radius:50%; background:var(--success) }
+
+    .fee-info{ background:#2C2C2C; padding:1rem; border-radius:10px; border:1px solid #333; margin-top:.6rem; font-size:.95rem }
+    .fee-row{ display:flex; justify-content:space-between; margin:.25rem 0 }
+    .total-row{ border-top:1px solid #444; padding-top:.5rem; font-weight:900; color:var(--gold-2) }
+
+    .proceed-btn{
+      width:100%; padding:1rem; background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      color:#121212; border:none; border-radius:12px; font-size:1.05rem; font-weight:900; cursor:pointer; margin-top:1rem;
+      text-transform: uppercase; letter-spacing:.06em; box-shadow: 0 8px 20px rgba(212,175,55,.25); transition: transform .15s ease;
+    }
+    .proceed-btn:hover{ transform: translateY(-2px) }
+    .proceed-btn:disabled{ opacity:.5; cursor:not-allowed }
+
+    /* Modal */
+    .modal{ display:none; position:fixed; z-index:1000; inset:0; background:rgba(0,0,0,.85) }
+    .modal-content{ background:#1E1E1E; margin:3% auto; width:92%; max-width:720px; border:2px solid var(--gold); border-radius:12px; box-shadow:0 0 40px rgba(212,175,55,.4); max-height:90vh; display:flex; flex-direction:column }
+    .modal-header{ padding:1rem 1.25rem; border-bottom:1px solid #444; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(135deg,#2C2C2C,#1E1E1E); border-radius:12px 12px 0 0 }
+    .modal-header h2{ color:var(--gold); margin:0; font-size:1.2rem }
+    .close-modal{ font-size:1.5rem; color:var(--gold); cursor:pointer; border:1px solid var(--gold); border-radius:10px; padding:.2rem .55rem; background:#2C2C2C }
+    .modal-body{ padding:1.25rem; overflow:auto }
+
+    .step-indicator{ display:flex; justify-content:space-between; margin-bottom:1.25rem; padding:0 1rem }
+    .step{ flex:1; text-align:center; position:relative }
+    .step::after{ content:''; position:absolute; top:15px; left:50%; width:100%; height:2px; background:#444; z-index:-1 }
+    .step:last-child::after{ display:none }
+    .step-circle{ width:30px; height:30px; border-radius:50%; background:#2C2C2C; border:2px solid #444; margin:0 auto .45rem; display:flex; align-items:center; justify-content:center; font-weight:900; color:#777 }
+    .step.active .step-circle{ background:linear-gradient(135deg,var(--gold),var(--gold-2)); border-color:var(--gold); color:#121212 }
+    .step.completed .step-circle{ background:var(--success); border-color:var(--success); color:#fff }
+    .step-label{ font-size:.8rem; color:#777 } .step.active .step-label{ color:var(--gold) }
+
+    .payment-info-card{ background:#2C2C2C; border:1px solid var(--gold); border-radius:10px; padding:1rem; margin-bottom:1rem }
+    .payment-method{ display:flex; gap:1rem; margin: .5rem 0 1rem }
+    .method-option{ flex:1; padding:1rem; background:#2C2C2C; border:2px solid #444; border-radius:10px; text-align:center; cursor:pointer; transition:.2s }
+    .method-option:hover{ border-color:var(--gold) }
+    .method-option.selected{ border-color:var(--gold); background:#3C3C3C }
+    .method-icon{ font-size:1.7rem; margin-bottom:.35rem }
+    .upload-area{ border:2px dashed var(--gold); border-radius:10px; padding:1.25rem; text-align:center; cursor:pointer; transition:.2s; margin-bottom:.6rem }
+    .upload-area:hover{ background: rgba(212,175,55,.08) }
+    .upload-area.has-file{ border-style: solid; background: rgba(76,175,80,.1); border-color: var(--success) }
+    .warning-box{ background: rgba(244,67,54,.1); border:1px solid var(--danger); padding:1rem; border-radius:10px; margin:.6rem 0; font-size:.9rem; color:var(--danger) }
+    .success-box{ background: rgba(76,175,80,.1); border:1px solid var(--success); padding:1rem; border-radius:10px; margin-bottom:1rem; color:var(--success); text-align:center }
+
+    .btn-group{ display:flex; gap:1rem; margin-top:1rem }
+    .btn-secondary{ flex:1; padding:1rem; background:#2C2C2C; color:var(--gold-2); border:1px solid var(--gold); border-radius:12px; cursor:pointer; font-weight:900 }
+    .btn-primary{ flex:1; padding:1rem; background: linear-gradient(135deg, var(--gold), var(--gold-2)); color:#121212; border:none; border-radius:12px; cursor:pointer; font-weight:900 }
+    .btn-primary:disabled{ opacity:.6; cursor:not-allowed }
+
+    .transaction-id{ font-family: monospace; background:#2C2C2C; padding:1rem; border-radius:10px; text-align:center; font-size:1.05rem; color:var(--success); margin: .75rem 0 }
+    .copy-btn{ background: var(--gold); color:#121212; border:none; padding:.5rem .8rem; border-radius:8px; cursor:pointer; font-size:.85rem; margin-left:.5rem }
+
+    /* Toast */
+    .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:24px; background:#1b1b1b; border:1px solid rgba(212,175,55,.35); color:var(--gold-2); padding:.7rem 1rem; border-radius:10px; box-shadow: var(--shadow); display:none; z-index:1200; min-width:220px; text-align:center; }
+    .toast.show{ display:block; animation: toast-in .2s ease }
+    @keyframes toast-in{ from{ opacity:0; transform: translate(-50%, 12px);} to{ opacity:1; transform: translate(-50%, 0);} }
+  </style>
+</head>
+<body>
+  <div class="app-bar">
+    <a class="back-btn" href="wallet.html" aria-label="Back">←</a>
+    <div class="brand">
+      <div class="logo-wrap"><div class="logo">CRYPT-X</div></div>
+      <div style="color:#e7d59b; font-weight:800; letter-spacing:.06em;">Buy USDT</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="rate-card">
+      <div class="rate-label">Selected Rate</div>
+      <div id="rateValue" class="rate-value">1 USDT = MK 1,750</div>
+    </div>
+
+    <div class="input-group">
+      <div class="input-label">Amount in USDT</div>
+      <div class="input-row">
+        <input id="usdtAmount" type="number" inputmode="decimal" class="input-field" placeholder="0.00" min="10" max="10000" step="0.01" />
+      </div>
+      <div id="mwkEquivalent" class="conversion-text">≈ MK 0.00</div>
+    </div>
+
+    <div class="section-title">Select Merchant</div>
+    <div class="merchant-card selected" data-merchant="Gold Exchange Pro" data-phone="0888123456" data-rate="1750">
+      <div class="merchant-name"><span class="online-indicator"></span> Gold Exchange Pro</div>
+      <div class="merchant-info"><span>⭐ 4.9 (234 trades)</span><span>Rate: MK 1,750</span></div>
+    </div>
+    <div class="merchant-card" data-merchant="Quick Trade MW" data-phone="0999234567" data-rate="1745">
+      <div class="merchant-name"><span class="online-indicator"></span> Quick Trade MW</div>
+      <div class="merchant-info"><span>⭐ 4.7 (156 trades)</span><span>Rate: MK 1,745</span></div>
+    </div>
+    <div class="merchant-card" data-merchant="Instant Crypto" data-phone="0881987654" data-rate="1755">
+      <div class="merchant-name"><span class="online-indicator"></span> Instant Crypto</div>
+      <div class="merchant-info"><span>⭐ 4.8 (189 trades)</span><span>Rate: MK 1,755</span></div>
+    </div>
+
+    <div class="fee-info">
+      <div class="fee-row"><span>Subtotal:</span><span id="subtotal">MK 0.00</span></div>
+      <div class="fee-row"><span>Service Fee (2%):</span><span id="serviceFee">MK 0.00</span></div>
+      <div class="fee-row total-row"><span>Total to Pay:</span><span id="totalAmount">MK 0.00</span></div>
+    </div>
+
+    <button id="proceedBtn" class="proceed-btn" type="button">Proceed to Payment</button>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">Saved</div>
+
+  <!-- Payment Modal -->
+  <div id="paymentModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="paymentTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="paymentTitle">Complete Your Payment</h2>
+        <button class="close-modal" type="button" onclick="closePaymentModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <!-- Steps -->
+        <div class="step-indicator">
+          <div class="step active" id="step1"><div class="step-circle">1</div><div class="step-label">Payment</div></div>
+          <div class="step" id="step2"><div class="step-circle">2</div><div class="step-label">Verification</div></div>
+          <div class="step" id="step3"><div class="step-circle">3</div><div class="step-label">Confirmation</div></div>
+        </div>
+
+        <!-- Step 1 -->
+        <div id="paymentStep" class="payment-step">
+          <div class="payment-info-card">
+            <h3 style="color:var(--gold); margin-bottom:.6rem;">Payment Details</h3>
+            <div style="margin-bottom:.4rem;"><span style="color:var(--muted);">Merchant:</span> <b id="selectedMerchant"></b></div>
+            <div style="margin-bottom:.4rem;"><span style="color:var(--muted);">Amount to Pay:</span> <b id="paymentAmount" style="color:var(--success); font-size:1.1rem;"></b></div>
+          </div>
+
+          <div class="section-title">Select Payment Method</div>
+          <div class="payment-method">
+            <div class="method-option selected" onclick="selectPaymentMethod(this,'airtel')"><div class="method-icon">📱</div><div>Airtel Money</div></div>
+            <div class="method-option" onclick="selectPaymentMethod(this,'mpamba')"><div class="method-icon">📲</div><div>TNM Mpamba</div></div>
+          </div>
+
+          <div class="payment-info-card" style="background:linear-gradient(135deg,#2C2C2C,#1E1E1E);">
+            <h4 style="color:#E0C16A; margin-bottom:.6rem;">Send Payment To:</h4>
+            <div style="text-align:center;">
+              <div id="paymentMethodName" style="color:var(--muted); margin-bottom:.35rem;">Airtel Money</div>
+              <div id="merchantPhone" style="font-size:1.4rem; color:var(--gold); font-weight:900; margin-bottom:.6rem;">0888123456</div>
+              <button class="copy-btn" onclick="copyPhone()">📋 Copy Number</button>
+            </div>
+            <div style="margin-top: .8rem; padding: .8rem; background:#1E1E1E; border-radius:10px;">
+              <p style="color:#E0C16A; font-size:.9rem;">⚠️ Important Instructions:</p>
+              <ul style="color:var(--muted); font-size:.85rem; margin-top:.4rem; padding-left:1.25rem;">
+                <li>Send exact amount: <b id="exactAmount" style="color:var(--gold);"></b></li>
+                <li>Use your registered phone number</li>
+                <li>Keep the transaction reference/ID ready</li>
+                <li>Take a clear screenshot of the confirmation</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn-secondary" type="button" onclick="closePaymentModal()">Cancel</button>
+            <button class="btn-primary" type="button" onclick="nextStep()">I've Sent Payment →</button>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div id="verificationStep" class="payment-step" style="display:none;">
+          <div class="section-title">Upload Payment Proof</div>
+
+          <div class="input-group">
+            <div class="input-label">Transaction Reference/ID</div>
+            <input type="text" id="transactionRef" class="input-field" placeholder="e.g., PP240101234567 or TM123456789" />
+            <div style="color:var(--muted); font-size:.85rem; margin-top:.4rem;">Enter the reference number from your payment confirmation</div>
+          </div>
+
+          <div class="input-group">
+            <div class="input-label">Upload Screenshot</div>
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('screenshotFile').click()">
+              <div style="font-size:2.4rem; margin-bottom:.4rem;">📸</div>
+              <div style="color:var(--gold); font-weight:900;">Click to upload screenshot</div>
+              <div style="color:var(--muted); font-size:.85rem; margin-top:.35rem;">or drag and drop</div>
+              <div style="color:#777; font-size:.75rem; margin-top:.35rem;">PNG, JPG, JPEG (Max 5MB)</div>
+            </div>
+            <input type="file" id="screenshotFile" accept="image/*" style="display:none" />
+            <div id="filePreview" class="file-preview" style="display:none;"></div>
+          </div>
+
+          <div class="warning-box">
+            ⚠️ Ensure your screenshot clearly shows: amount, recipient number, reference/ID, date & time.
+          </div>
+
+          <div class="btn-group">
+            <button class="btn-secondary" type="button" onclick="previousStep()">← Back</button>
+            <button id="verifyBtn" class="btn-primary" type="button" disabled>Verify Payment →</button>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div id="confirmationStep" class="payment-step" style="display:none;">
+          <div class="success-box">
+            <div style="font-size:3rem; margin-bottom:.4rem;">✅</div>
+            <h3 style="margin:0 0 .4rem;">Transaction Submitted Successfully!</h3>
+            <p style="margin:0;">We’re verifying your payment.</p>
+          </div>
+
+          <div class="payment-info-card">
+            <h4 style="color:var(--gold); margin-bottom:.6rem;">Transaction Details</h4>
+            <div class="transaction-id">
+              <span id="transactionId">TXN-</span>
+              <button class="copy-btn" onclick="copyTransactionId()">Copy</button>
+            </div>
+            <div style="margin-top:.4rem; color:var(--muted); font-size:.95rem;">
+              <div style="margin-bottom:.35rem;"><span>Amount:</span> <b id="confirmAmount" style="color:var(--gold); float:right;"></b></div>
+              <div style="margin-bottom:.35rem;"><span>Status:</span> <span id="confirmStatus" style="color:var(--warn); float:right;">⏳ Pending Verification</span></div>
+              <div style="margin-bottom:.35rem;"><span>Estimated Time:</span> <span style="color:var(--success); float:right;">5–10 minutes</span></div>
+            </div>
+          </div>
+
+          <div class="payment-info-card" style="background:rgba(33,150,243,.1); border-color:#2196F3;">
+            <h4 style="color:#2196F3; margin-bottom:.4rem;">What happens next?</h4>
+            <ol style="color:var(--muted); font-size:.9rem; margin-left:1.25rem;">
+              <li>We verify your payment</li>
+              <li>You’ll receive a notification</li>
+              <li>USDT is credited to your wallet automatically</li>
+              <li>Track status in your Wallet History</li>
+            </ol>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn-secondary" type="button" onclick="window.location.href='wallet.html'">View Wallet</button>
+            <button class="btn-primary" type="button" onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Config =====
+    const SERVICE_FEE_PCT = 0.02;
+    const MIN_USDT = 10, MAX_USDT = 10000;
+    const DEMO_AUTO_APPROVE = true;
+
+    // ===== State =====
+    let selectedMerchant = 'Gold Exchange Pro';
+    let selectedMerchantPhone = '0888123456';
+    let selectedRate = 1750;
+    let selectedPaymentMethod = 'airtel';
+    let uploadedFile = null;
+    let currentStep = 1;
+    let currentTxnId = '';
+
+    // ===== Utils =====
+    const fmtMWK = v => 'MK ' + Number(v||0).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
+    function toast(msg){
+      const t=document.getElementById('toast'); if(!t){ alert(msg); return; }
+      t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2000);
+    }
+    function setSteps(step){
+      currentStep = step;
+      ['step1','step2','step3'].forEach((id,i)=>{
+        const el = document.getElementById(id);
+        el.classList.remove('active','completed');
+        if(i+1 < step) el.classList.add('completed');
+        if(i+1 === step) el.classList.add('active');
+      });
+      document.getElementById('paymentStep').style.display = (step===1?'block':'none');
+      document.getElementById('verificationStep').style.display = (step===2?'block':'none');
+      document.getElementById('confirmationStep').style.display = (step===3?'block':'none');
+    }
+
+    // ===== Calculation =====
+    function recalc(){
+      const usdt = parseFloat(document.getElementById('usdtAmount').value||'0');
+      const mwk = usdt * selectedRate;
+      const fee = mwk * SERVICE_FEE_PCT;
+      const total = mwk + fee;
+      document.getElementById('rateValue').textContent = `1 USDT = MK ${Number(selectedRate).toLocaleString()}`;
+      document.getElementById('mwkEquivalent').textContent = `≈ ${fmtMWK(mwk)}`;
+      document.getElementById('subtotal').textContent = fmtMWK(mwk);
+      document.getElementById('serviceFee').textContent = fmtMWK(fee);
+      document.getElementById('totalAmount').textContent = fmtMWK(total);
+      return { usdt, mwk, fee, total };
+    }
+
+    // ===== Merchant selection =====
+    function bindMerchants(){
+      document.querySelectorAll('.merchant-card').forEach(card=>{
+        card.addEventListener('click',()=>{
+          document.querySelectorAll('.merchant-card').forEach(c=>c.classList.remove('selected'));
+          card.classList.add('selected');
+          selectedMerchant = card.dataset.merchant;
+          selectedMerchantPhone = card.dataset.phone;
+          selectedRate = parseFloat(card.dataset.rate);
+          recalc();
+        });
+      });
+    }
+
+    // ===== Payment flow =====
+    function proceedToPayment(){
+      const { usdt, total } = recalc();
+      if (!usdt || usdt <= 0) return toast('Enter a valid USDT amount');
+      if (usdt < MIN_USDT) return toast(`Minimum purchase is ${MIN_USDT} USDT`);
+      if (usdt > MAX_USDT) return toast(`Maximum purchase is ${MAX_USDT} USDT`);
+
+      document.getElementById('selectedMerchant').textContent = selectedMerchant;
+      document.getElementById('paymentAmount').textContent = fmtMWK(total);
+      document.getElementById('merchantPhone').textContent = selectedMerchantPhone;
+      document.getElementById('exactAmount').textContent = fmtMWK(total);
+      document.getElementById('paymentModal').style.display = 'block';
+      setSteps(1);
+    }
+    function closePaymentModal(){
+      if(currentStep===1){ document.getElementById('paymentModal').style.display='none'; return; }
+      if(currentStep===2){
+        if(confirm('Cancel verification? Your payment info will be lost.')){
+          resetVerificationUI(); document.getElementById('paymentModal').style.display='none';
+        }
+        return;
+      }
+      if(currentStep===3){ document.getElementById('paymentModal').style.display='none'; }
+    }
+    function nextStep(){ if(currentStep===1) setSteps(2); }
+    function previousStep(){ if(currentStep===2) setSteps(1); }
+
+    function selectPaymentMethod(el, method){
+      document.querySelectorAll('.method-option').forEach(o=>o.classList.remove('selected'));
+      el.classList.add('selected'); selectedPaymentMethod = method;
+      document.getElementById('paymentMethodName').textContent = method==='airtel' ? 'Airtel Money' : 'TNM Mpamba';
+    }
+
+    // ===== Upload handling =====
+    function bindUploads(){
+      const fileInput = document.getElementById('screenshotFile');
+      const area = document.getElementById('uploadArea');
+
+      fileInput.addEventListener('change', ()=> handleFileUpload(fileInput.files[0]));
+      area.addEventListener('dragover', (e)=>{ e.preventDefault(); area.style.background='rgba(212,175,55,.08)'; });
+      area.addEventListener('dragleave', ()=> area.style.background='transparent');
+      area.addEventListener('drop', (e)=>{
+        e.preventDefault(); area.style.background='transparent';
+        const file = e.dataTransfer.files && e.dataTransfer.files[0]; if(file) handleFileUpload(file);
+      });
+    }
+    function handleFileUpload(file){
+      if(!file) return;
+      if (file.size > 5 * 1024 * 1024) return toast('File must be under 5MB');
+      if (!file.type.startsWith('image/')) return toast('Please upload an image');
+
+      uploadedFile = file;
+      const reader = new FileReader();
+      reader.onload = (e)=>{
+        const area = document.getElementById('uploadArea');
+        area.classList.add('has-file');
+        area.innerHTML = `
+          <div style="color: var(--success); font-size: 2rem; margin-bottom:.35rem;">✅</div>
+          <div style="color: var(--success); font-weight:900;">Screenshot uploaded!</div>
+          <div style="color: var(--muted); font-size:.85rem; margin-top:.35rem;">${file.name}</div>
+          <div style="margin-top:.6rem;"><img src="${e.target.result}" style="max-width: 240px; max-height: 160px; border-radius:10px;" alt="Proof preview"></div>
+          <div style="color: var(--gold); font-size:.85rem; margin-top:.6rem; cursor:pointer;" onclick="document.getElementById('screenshotFile').click()">Change file</div>
+        `;
+        checkVerificationReady();
+      };
+      reader.readAsDataURL(file);
+    }
+    function resetVerificationUI(){
+      uploadedFile = null;
+      const ref = document.getElementById('transactionRef'); if(ref) ref.value='';
+      const file = document.getElementById('screenshotFile'); if(file) file.value='';
+      const area = document.getElementById('uploadArea');
+      if(area){
+        area.classList.remove('has-file');
+        area.innerHTML = `
+          <div style="font-size:2.4rem; margin-bottom:.4rem;">📸</div>
+          <div style="color:var(--gold); font-weight:900;">Click to upload screenshot</div>
+          <div style="color:var(--muted); font-size:.85rem; margin-top:.35rem;">or drag and drop</div>
+          <div style="color:#777; font-size:.75rem; margin-top:.35rem;">PNG, JPG, JPEG (Max 5MB)</div>
+        `;
+      }
+      const btn = document.getElementById('verifyBtn'); if(btn){ btn.disabled = true; btn.textContent = 'Verify Payment →'; }
+    }
+    function checkVerificationReady(){
+      const refFilled = (document.getElementById('transactionRef').value || '').trim() !== '';
+      const fileFilled = !!uploadedFile;
+      const btn = document.getElementById('verifyBtn');
+      if(btn) btn.disabled = !(refFilled && fileFilled);
+    }
+
+    // ===== Transactions storage =====
+    function getTxns(){ let tx = JSON.parse(localStorage.getItem('transactions')||'[]'); if(!Array.isArray(tx)) tx=[]; return tx; }
+    function saveTxns(tx){ localStorage.setItem('transactions', JSON.stringify(tx)); }
+    function generateTxnId(){ return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2,9).toUpperCase(); }
+
+    function verifyPayment(){
+      const ref = (document.getElementById('transactionRef').value || '').trim();
+      if(!ref) return toast('Enter your payment reference');
+      if(!uploadedFile) return toast('Upload your screenshot');
+
+      const verifyBtn = document.getElementById('verifyBtn');
+      verifyBtn.disabled = true; verifyBtn.textContent = 'Verifying...';
+
+      setTimeout(()=>{
+        const { usdt, total } = recalc();
+        currentTxnId = generateTxnId();
+
+        const txn = {
+          id: currentTxnId,
+          type: 'buy',
+          amount: +usdt,
+          totalMWK: +total,
+          merchant: selectedMerchant,
+          paymentMethod: selectedPaymentMethod,
+          reference: ref,
+          status: 'pending',
+          direction: 'in',
+          date: new Date().toISOString()
+        };
+        const all = getTxns(); all.unshift(txn); saveTxns(all);
+
+        document.getElementById('transactionId').textContent = currentTxnId;
+        document.getElementById('confirmAmount').textContent = `${usdt.toFixed(2)} USDT`;
+        document.getElementById('confirmStatus').innerHTML = '⏳ Pending Verification';
+        setSteps(3);
+
+        toast('Submitted for verification');
+
+        if (DEMO_AUTO_APPROVE) {
+          setTimeout(()=> completeTransaction(currentTxnId), 3500);
+        }
+      }, 1400);
+    }
+
+    function completeTransaction(id){
+      const tx = getTxns();
+      const i = tx.findIndex(t=>t.id===id);
+      if(i>-1){
+        tx[i].status = 'completed';
+        saveTxns(tx);
+        document.getElementById('confirmStatus').innerHTML = '✅ Completed';
+        toast('Payment verified — USDT credited');
+      }
+    }
+
+    // ===== Copy helpers =====
+    function copyPhone(){ navigator.clipboard.writeText(selectedMerchantPhone); toast('Number copied'); }
+    function copyTransactionId(){ const v = (document.getElementById('transactionId')||{}).textContent||''; if(v) navigator.clipboard.writeText(v); toast('Transaction ID copied'); }
+
+    // ===== Bindings =====
+    window.addEventListener('DOMContentLoaded', ()=>{
+      if (typeof checkAuth === 'function') try{ checkAuth(); }catch(_){}
+
+      document.getElementById('usdtAmount').addEventListener('input', ()=>{
+        let v = document.getElementById('usdtAmount').value;
+        v = v.replace(/[^0-9.]/g,'');
+        document.getElementById('usdtAmount').value = v;
+        recalc();
+      });
+
+      document.getElementById('proceedBtn').addEventListener('click', proceedToPayment);
+
+      bindMerchants(); bindUploads();
+
+      const refInput = document.getElementById('transactionRef');
+      refInput?.addEventListener('input', checkVerificationReady);
+
+      const vbtn = document.getElementById('verifyBtn');
+      vbtn?.addEventListener('click', verifyPayment);
+
+      recalc();
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (e)=>{
+      const modal = document.getElementById('paymentModal');
+      if(e.target === modal && currentStep===1) closePaymentModal();
+    });
+
+    // ESC to close when in step 1
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && currentStep===1){ closePaymentModal(); } });
+  </script>
+
+  <script src="app.js"></script>
+  <script>
+    // Auto-highlight & prefill from merchants Start Trade (query/localStorage)
+    (function buyPrefillAndSelect(){
+      try{
+        const qs = new URLSearchParams(location.search);
+        const stored = JSON.parse(localStorage.getItem('trade.pref')||'null') || {};
+        const name  = qs.get('merchant') || stored.merchant || '';
+        const rate  = parseFloat(qs.get('rate') || stored.rate);
+        const phone = qs.get('phone') || stored.phone || '';
+        const method= (stored.method || 'airtel').toLowerCase();
+
+        function selectCard(card){
+          document.querySelectorAll('.merchant-card').forEach(c=> c.classList.remove('selected'));
+          card.classList.add('selected');
+          selectedMerchant = card.dataset.merchant || name || selectedMerchant;
+          selectedMerchantPhone = card.dataset.phone || phone || selectedMerchantPhone;
+          selectedRate = parseFloat(card.dataset.rate || rate || selectedRate || 1750);
+          const rv = document.getElementById('rateValue'); if (rv && selectedRate) rv.textContent = `1 USDT = MK ${Number(selectedRate).toLocaleString()}`;
+          const ph = document.getElementById('merchantPhone'); if (ph && (card.dataset.phone || phone)) ph.textContent = (card.dataset.phone || phone);
+          recalc();
+        }
+
+        document.querySelectorAll('.merchant-card').forEach(card=>{
+          card.addEventListener('click', ()=> selectCard(card));
+        });
+
+        if (name){
+          const match = [...document.querySelectorAll('.merchant-card')].find(c =>
+            (c.dataset.merchant && c.dataset.merchant.trim() === name) ||
+            (c.querySelector('.merchant-name') && c.querySelector('.merchant-name').textContent.includes(name))
+          );
+          if (match) selectCard(match);
+        }
+
+        if (!isNaN(rate) && rate > 0){
+          selectedRate = rate;
+          const rv = document.getElementById('rateValue'); if (rv) rv.textContent = `1 USDT = MK ${Number(rate).toLocaleString()}`;
+        }
+
+        if (phone){
+          selectedMerchantPhone = phone;
+          const ph = document.getElementById('merchantPhone'); if (ph) ph.textContent = phone;
+        }
+
+        // Set default method (simple)
+        selectedPaymentMethod = method;
+
+        localStorage.removeItem('trade.pref');
+      }catch(e){ console.warn('Buy prefill error:', e); }
+    })();
+  </script>
+</body>
+</html>

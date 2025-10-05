@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Wallet - Cryptex Malawi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root{
+      --bg-0:#0f0f10; --bg-1:#121212; --surface:#1e1e1e; --surface-2:#2c2c2c;
+      --gold:#D4AF37; --gold-2:#E0C16A; --muted:#9E9E9E; --text:#f5f5f5;
+      --danger:#F44336; --success:#4CAF50; --warn:#FF9800;
+      --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.45); --ring:0 0 0 2px rgba(212,175,55,.35);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      min-height:100vh; padding-bottom:80px; color:var(--text);
+      background:
+        radial-gradient(60vw 60vw at 10% -10%, rgba(212,175,55,.08), transparent 60%),
+        radial-gradient(70vw 70vw at 110% -20%, rgba(224,193,106,.06), transparent 60%),
+        linear-gradient(135deg, var(--bg-0), var(--bg-1));
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    .app-bar{
+      background:rgba(30,30,30,.8); border-bottom:1px solid rgba(212,175,55,.18);
+      backdrop-filter: blur(8px); padding:.85rem 1rem; box-shadow:0 8px 24px rgba(0,0,0,.25); position:sticky; top:0; z-index:10;
+    }
+    .brand{ max-width: 1000px; margin:0 auto; display:flex; align-items:center; justify-content:center; gap:.75rem; }
+    .logo-wrap{ perspective: 900px; }
+    .logo{
+      font-weight:900; letter-spacing:.18rem; font-size: clamp(1.8rem,4.5vw,2.6rem); line-height:1;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2) 70%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase;
+      transform: rotateX(14deg) rotateY(-10deg); transform-style: preserve-3d;
+      text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 12px 24px rgba(212,175,55,.25);
+      position:relative; transition: transform .4s ease, text-shadow .4s ease; will-change: transform;
+    }
+    .logo::after{
+      content:''; position:absolute; inset:-6px -12px;
+      background: linear-gradient(120deg, transparent 25%, rgba(255,255,255,.12) 40%, transparent 60%);
+      transform: translateZ(50px) skewX(-12deg); mix-blend-mode: screen; pointer-events:none; border-radius:24px;
+      animation: shine 4.5s linear infinite;
+    }
+    .logo:hover{ transform: rotateX(0deg) rotateY(0deg) translateY(-2px) scale(1.02); text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 20px 40px rgba(212,175,55,.35); }
+    @keyframes shine{ 0%{ transform: translateX(-120%) translateZ(50px) skewX(-12deg);} 100%{ transform: translateX(120%) translateZ(50px) skewX(-12deg);} }
+    .subtitle{ color:#e7d59b; opacity:.9; font-weight:700; letter-spacing:.06em; }
+    .wallet-header{
+      margin: 1rem auto; max-width:1000px; border-radius: 16px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      color:#121212; padding: 1.5rem 1rem; text-align:center; box-shadow: 0 10px 26px rgba(212,175,55,.25);
+    }
+    .total-balance{ font-size:.95rem; opacity:.85; margin-bottom:.35rem; font-weight:700; }
+    .balance-amount{ font-size:2.4rem; font-weight:900; margin-bottom:.25rem; letter-spacing:.02em; }
+    .balance-usd{ font-size:1rem; opacity:.85; }
+    .wallet-stats{ display:flex; align-items:center; justify-content:center; gap:.5rem; margin-top:.8rem; flex-wrap:wrap; }
+    .chip{
+      background:#121212; color:var(--gold-2); border:1px solid rgba(212,175,55,.35);
+      padding:.35rem .6rem; border-radius:999px; font-weight:800; font-size:.8rem;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+    }
+    .sync{ display:inline-flex; align-items:center; gap:.4rem; background:#121212; color:#a1ffa8; border:1px solid rgba(0,0,0,.25); padding:.35rem .6rem; border-radius:999px; font-weight:800; font-size:.8rem; }
+    .sync-dot{ width:8px; height:8px; border-radius:50%; background:#aaa; box-shadow: 0 0 0 0 rgba(76,175,80,.7); }
+    .sync.ok .sync-dot{ background: var(--success); animation: pulse 1.6s ease-out infinite; }
+    .sync.warn .sync-dot{ background: var(--warn); animation: none; }
+    .sync.err .sync-dot{ background: var(--danger); animation: none; }
+    @keyframes pulse{ 0%{ box-shadow:0 0 0 0 rgba(76,175,80,.7);} 70%{ box-shadow:0 0 0 10px rgba(76,175,80,0);} 100%{ box-shadow:0 0 0 0 rgba(76,175,80,0);} }
+    .action-grid{ padding: 1rem; display:grid; grid-template-columns: repeat(2,1fr); gap:1rem; max-width:1000px; margin:0 auto; }
+    .action-card{
+      background: #2C2C2C; border:1px solid rgba(212,175,55,.35); padding:1.2rem; border-radius:12px;
+      text-align:center; text-decoration:none; color:var(--gold-2); font-weight:800; box-shadow: var(--shadow);
+      transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
+      display:flex; align-items:center; justify-content:center; flex-direction:column; gap:.35rem;
+    }
+    .action-card:hover{ transform: translateY(-2px); border-color: var(--gold-2); box-shadow: 0 10px 26px rgba(212,175,55,.18); }
+    .action-icon{ font-size:1.8rem; }
+    .action-label{ font-size:1rem; font-weight:900; letter-spacing:.04em; }
+    .recent-section{ padding:1rem; max-width:1000px; margin:0 auto; }
+    .section-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; gap:.75rem; flex-wrap:wrap; }
+    .section-title{ color:#E0C16A; font-size:1.1rem; font-weight:800; }
+    .history-popup-btn{
+      padding:.6rem 1.2rem; background:linear-gradient(135deg,var(--gold),var(--gold-2));
+      color:#121212; border:none; border-radius:10px; font-size:.95rem; font-weight:900;
+      cursor:pointer; display:inline-flex; align-items:center; gap:.5rem; transition:.2s; box-shadow:0 3px 14px rgba(212,175,55,.25)
+    }
+    .history-popup-btn:hover{ transform: translateY(-1px) }
+    .transaction-item{ background:#2C2C2C; padding:1rem; border-radius:10px; margin-bottom:.6rem; display:flex; justify-content:space-between; align-items:center; border:1px solid #333; }
+    .tran-left{ display:flex; align-items:center; gap:1rem }
+    .tran-icon{ font-size:1.4rem }
+    .tran-type{ font-weight:900; color:var(--gold-2) }
+    .tran-date{ font-size:.85rem; color:var(--muted) }
+    .tran-amount{ text-align:right }
+    .amount-in{ color: var(--success); font-weight:900 }
+    .amount-out{ color: var(--danger); font-weight:900 }
+    .status-badge{ display:inline-block; padding:.25rem .6rem; border-radius:12px; font-size:.75rem; margin-top:.25rem; font-weight:900 }
+    .status-completed{ background: var(--success); color:#fff }
+    .status-pending{ background: var(--warn); color:#121212; }
+    .status-rejected{ background: var(--danger); color:#fff }
+    .empty-state{ text-align:center; padding:2rem; color:var(--muted); }
+    .nav-bar{ position: fixed; bottom:0; width:100%; background:#1E1E1E; display:flex; justify-content:space-around; padding:.75rem; border-top:1px solid var(--gold); }
+    .nav-item{ text-align:center; color:#9E9E9E; text-decoration:none; }
+    .nav-item.active{ color:var(--gold-2) }
+    .nav-icon{ font-size:1.5rem; margin-bottom:.25rem }
+    .nav-label{ font-size:.75rem }
+    .modal{ display:none; position:fixed; z-index:1000; inset:0; background:rgba(0,0,0,.85) }
+    .modal-content{ background:#1E1E1E; margin:5% auto; width:95%; max-width:900px; border:2px solid var(--gold); border-radius:12px; box-shadow:0 0 40px rgba(212,175,55,.4); max-height:90vh; display:flex; flex-direction:column }
+    .modal-header{ padding:1rem 1.5rem; border-bottom:1px solid #444; display:flex; gap:.75rem; align-items:center; justify-content:space-between; position:sticky; top:0; background:#1E1E1E; z-index:1 }
+    .modal-title{ color:var(--gold); font-size:1.1rem; margin:0; display:flex; align-items:center; gap:.5rem; font-weight:900 }
+    .modal-actions{ display:flex; gap:.5rem; align-items:center; flex-wrap:wrap }
+    .close-modal{ font-size:1.4rem; color:var(--gold); cursor:pointer; border:1px solid var(--gold); border-radius:8px; padding:.25rem .55rem; background:#2C2C2C }
+    .export-btn{ padding:.5rem .85rem; border:1px solid var(--gold); color:var(--gold); background:#2C2C2C; border-radius:8px; cursor:pointer; font-size:.9rem; font-weight:800 }
+    .search-input{ width:200px; max-width:50vw; padding:.5rem .6rem; border:1px solid #444; border-radius:8px; background:#1E1E1E; color:#fff }
+    .modal-body{ padding:1rem 1.25rem; overflow:auto }
+    .filter-tabs{ display:flex; gap:.5rem; margin:0 0 .75rem; flex-wrap:wrap }
+    .filter-tab{ padding:.45rem .9rem; background:#2C2C2C; border:1px solid #444; border-radius:999px; cursor:pointer; font-size:.9rem; font-weight:800; color:#e8e8e8 }
+    .filter-tab.active{ background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:#121212; border-color:var(--gold) }
+    .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:90px; background:#1b1b1b; border:1px solid rgba(212,175,55,.35); color:var(--gold-2); padding:.7rem 1rem; border-radius:10px; box-shadow: var(--shadow); display:none; z-index:1200; min-width:220px; text-align:center; }
+    .toast.show{ display:block; animation: toast-in .2s ease }
+    @keyframes toast-in{ from{ opacity:0; transform: translate(-50%, 12px);} to{ opacity:1; transform: translate(-50%, 0);} }
+    .bar { height: 8px; background: #1E1E1E; border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; transition: width .3s ease; }
+    .row { display: flex; align-items: center; }
+    .field { margin-bottom: 1rem; }
+    .muted{ color: var(--muted); }
+
+    /* Merchant Modal form styling */
+    .form-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    @media (max-width: 720px){ .form-grid{ grid-template-columns: 1fr; } }
+    .label{ display:block; font-size:.9rem; color:#E0C16A; margin-bottom:.35rem; font-weight:700 }
+    .input, .select, .textarea{
+      width:100%; padding:.55rem .6rem; border:1px solid #444; border-radius:10px; background:#1b1b1b; color:#fff; outline:none;
+    }
+    .textarea{ min-height:90px; resize:vertical; }
+    .check-row{ display:flex; flex-wrap:wrap; gap:.5rem .75rem; }
+    .check-item{ display:flex; align-items:center; gap:.45rem; background:#222; padding:.35rem .6rem; border-radius:999px; border:1px solid #444; cursor:pointer; user-select:none }
+    .check-item input{ accent-color: var(--gold); }
+    .btn-secondary{
+      padding:.55rem 1rem; border:1px solid var(--gold); color:var(--gold); background:#2C2C2C; border-radius:10px; cursor:pointer; font-weight:900;
+    }
+    .divider{ height:1px; background:#333; margin: .75rem 0 1rem; border-radius:1px; }
+    .mini{ font-size:.85rem; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="app-bar">
+    <div class="brand">
+      <div class="logo-wrap"><div class="logo" title="Cryptex Malawi">CRYPT-X</div></div>
+      <div class="subtitle">Wallet</div>
+    </div>
+  </div>
+
+  <div class="wallet-header">
+    <div class="total-balance">Total Portfolio Value</div>
+    <div id="balanceMWK" class="balance-amount">MK 0</div>
+    <div id="balanceUSD" class="balance-usd">≈ $0.00 USD</div>
+    <div class="wallet-stats">
+      <span id="usdtChip" class="chip">USDT: 0.00</span>
+      <span id="mwkChip" class="chip">MWK: MK 0</span>
+      <span id="rateChip" class="chip" title="Buy/Sell rate">Rate: —</span>
+      <span id="syncBadge" class="sync warn"><span class="sync-dot"></span> Syncing rate</span>
+    </div>
+  </div>
+
+  <div class="action-grid">
+    <a href="recharge.html" class="action-card" aria-label="Deposit">
+      <div class="action-icon">📥</div><div class="action-label">Deposit</div>
+    </a>
+    <a href="withdraw.html" class="action-card" aria-label="Withdraw">
+      <div class="action-icon">📤</div><div class="action-label">Withdraw</div>
+    </a>
+    <a href="buy.html" class="action-card" aria-label="Buy USDT">
+      <div class="action-icon">💰</div><div class="action-label">Buy</div>
+    </a>
+    <a href="sell.html" class="action-card" aria-label="Sell USDT">
+      <div class="action-icon">💸</div><div class="action-label">Sell</div>
+    </a>
+  </div>
+
+  <!-- Merchant Application Section (Callout + Button -> Modal Form) -->
+  <div class="recent-section" id="merchantApplicationSection" style="display:none;">
+    <div class="section-header">
+      <div class="section-title" style="color: var(--gold-2);">🚀 Become a Merchant</div>
+      <div id="merchantActionArea"></div>
+    </div>
+    <div class="transaction-item" style="display:block; border: 1px solid var(--gold); background: linear-gradient(145deg, #2c2c2c, #1e1e1e);">
+      <div id="merchantApplyContent"></div>
+    </div>
+  </div>
+
+  <div class="recent-section">
+    <div class="section-header">
+      <div class="section-title">📊 Recent Activity</div>
+      <button class="history-popup-btn" type="button" onclick="openHistoryModal()" aria-haspopup="dialog" aria-expanded="false" aria-controls="historyModal">
+        <span aria-hidden="true">📄</span> View Full History
+      </button>
+    </div>
+    <div id="recentTransactions"></div>
+  </div>
+
+  <nav class="nav-bar">
+    <a href="dashboard.html" class="nav-item"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></a>
+    <a href="wallet.html" class="nav-item active"><div class="nav-icon">💼</div><div class="nav-label">Wallet</div></a>
+    <a href="merchants.html" class="nav-item"><div class="nav-icon">🏪</div><div class="nav-label">Merchants</div></a>
+    <a href="settings.html" class="nav-item"><div class="nav-icon">⚙️</div><div class="nav-label">Settings</div></a>
+  </nav>
+
+  <!-- HISTORY MODAL -->
+  <div id="historyModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="historyTitle" class="modal-title">📄 Transaction History</h2>
+        <div class="modal-actions">
+          <input id="historySearch" class="search-input" type="search" placeholder="Search ref/type..." />
+          <button class="export-btn" type="button" onclick="exportHistoryCSV()">Export CSV</button>
+          <button class="close-modal" type="button" onclick="closeHistoryModal()">×</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div id="historyFilterTabs" class="filter-tabs">
+          <button class="filter-tab active" onclick="filterHistory('all',event)">All</button>
+          <button class="filter-tab" onclick="filterHistory('pending',event)">Pending</button>
+          <button class="filter-tab" onclick="filterHistory('completed',event)">Completed</button>
+          <button class="filter-tab" onclick="filterHistory('rejected',event)">Rejected</button>
+          <button class="filter-tab" onclick="filterHistory('buy',event)">Buy</button>
+          <button class="filter-tab" onclick="filterHistory('sell',event)">Sell</button>
+          <button class="filter-tab" onclick="filterHistory('deposit',event)">Deposit</button>
+          <button class="filter-tab" onclick="filterHistory('withdraw',event)">Withdraw</button>
+        </div>
+        <div id="historyListContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MERCHANT APPLICATION MODAL -->
+  <div id="merchantModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="merchantTitle" aria-describedby="merchantDesc">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="merchantTitle" class="modal-title">🏪 Merchant Application</h2>
+        <div class="modal-actions">
+          <button class="close-modal" type="button" onclick="closeMerchantModal()">×</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <p id="merchantDesc" class="mini" style="margin-bottom:1rem;">Provide details below to apply. Admin will review and update your status.</p>
+
+        <form id="merchantForm">
+          <div class="form-grid">
+            <div class="field">
+              <label for="merchantBizName" class="label">Business or Trading Name</label>
+              <input id="merchantBizName" class="input" type="text" placeholder="e.g., Pro Traders MW" required />
+            </div>
+            <div class="field">
+              <label for="merchantBizType" class="label">Business Type</label>
+              <select id="merchantBizType" class="select" required>
+                <option value="">Select type</option>
+                <option>OTC Desk</option>
+                <option>P2P Trader</option>
+                <option>Agency</option>
+                <option>Store</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="merchantDailyLimit" class="label">Daily Trade Limit (USD)</label>
+              <input id="merchantDailyLimit" class="input" type="number" min="50" step="10" placeholder="e.g., 500" required />
+            </div>
+            <div class="field">
+              <label for="merchantLocation" class="label">City / Location</label>
+              <input id="merchantLocation" class="input" type="text" placeholder="e.g., Lilongwe" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="label">Preferred Payment Methods</div>
+            <div id="pmGroup" class="check-row" role="group" aria-label="Payment methods">
+              <label class="check-item"><input type="checkbox" value="Airtel Money" /> Airtel Money</label>
+              <label class="check-item"><input type="checkbox" value="TNM Mpamba" /> TNM Mpamba</label>
+              <label class="check-item"><input type="checkbox" value="National Bank" /> National Bank</label>
+              <label class="check-item"><input type="checkbox" value="Standard Bank" /> Standard Bank</label>
+              <label class="check-item"><input type="checkbox" value="NBS Bank" /> NBS Bank</label>
+              <label class="check-item"><input type="checkbox" value="FDH Bank" /> FDH Bank</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="merchantWhatsApp" class="label">WhatsApp / Contact</label>
+            <input id="merchantWhatsApp" class="input" type="text" placeholder="+265..." />
+          </div>
+
+          <div class="field">
+            <label for="merchantNotes" class="label">Notes (optional)</label>
+            <textarea id="merchantNotes" class="textarea" placeholder="Add any additional info..."></textarea>
+          </div>
+
+          <div class="field" style="display:flex; align-items:center; gap:.6rem;">
+            <input id="merchantAgree" type="checkbox" required />
+            <label for="merchantAgree" class="mini">I agree to the Cryptex Malawi Merchant Terms.</label>
+          </div>
+
+          <div class="divider"></div>
+          <div style="display:flex; gap:.6rem; flex-wrap:wrap; justify-content:flex-end;">
+            <button type="button" class="btn-secondary" onclick="closeMerchantModal()">Cancel</button>
+            <button id="merchantSubmitBtn" type="submit" class="history-popup-btn">Submit Application</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">Saved</div>
+
+  <script>
+    'use strict';
+    // ===== Helpers =====
+    const fmtMWK = v => 'MK ' + Number(v||0).toLocaleString();
+    const fmtUSD = v => '$' + Number(v||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+    function toast(msg){ const t=document.getElementById('toast'); if(!t){ alert(msg); return; } t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2000); }
+    const ucFirst = s => (s||'').charAt(0).toUpperCase() + (s||'').slice(1);
+
+    // ===== Wallet State =====
+    let fxRateMWK = parseFloat(localStorage.getItem('fxRateMWK')||'1770');
+    let historyFilter = localStorage.getItem('historyFilter') || 'all';
+    let searchTerm = '';
+
+    // ===== Broadcast bus (instant cross-page updates) =====
+    const bus = ('BroadcastChannel' in window) ? new BroadcastChannel('cryptex') : null;
+    if (bus) bus.onmessage = (ev)=> {
+      const msg = ev?.data;
+      if(!msg || typeof msg!=='object') return;
+      if(msg.type==='rates.update'){
+        if(msg.payload) localStorage.setItem('platform.rates', JSON.stringify(msg.payload));
+        toast('Rates updated');
+        if (typeof handleRatesChange === 'function') handleRatesChange();
+      }else if(msg.type==='transactions.update'){
+        if(msg.payload) localStorage.setItem('transactions', JSON.stringify(msg.payload));
+        toast('Transactions refreshed');
+        if (typeof handleRatesChange === 'function') handleRatesChange();
+      }else if(msg.type==='merchant.app.status'){
+        // Admin updated status
+        const apps = JSON.parse(localStorage.getItem('platform.merchantApps')||'[]');
+        const idx = apps.findIndex(a=>a.id===msg.payload?.id);
+        if(idx>-1){ apps[idx] = { ...apps[idx], ...msg.payload }; localStorage.setItem('platform.merchantApps', JSON.stringify(apps)); }
+        if (typeof renderMerchantApplication === 'function') renderMerchantApplication();
+      }
+    };
+
+    // ===== Rates (Buy/Sell) =====
+    function getEffectiveRates(){
+      const admin = JSON.parse(localStorage.getItem('platform.rates') || '{}');
+      const live = parseFloat(localStorage.getItem('fxRateMWK') || '1770');
+      let buy = +admin.buy;   // MWK per 1 USDT (user pays this when buying)
+      let sell = +admin.sell; // MWK per 1 USDT (user receives this when selling)
+      if(!buy || buy <= 0) buy = live;
+      if(!sell || sell <= 0) sell = buy; // fallback if sell missing
+      return { buy, sell, mid: (buy + sell) / 2 };
+    }
+
+    // ===== Wallet compute/persist =====
+    function getWallet(){
+      const w = JSON.parse(localStorage.getItem('wallet')||'null');
+      if (w && typeof w.usdt==='number' && typeof w.mwk==='number') return w;
+      const rebuilt = recomputeWalletFromHistory();
+      persistWallet(rebuilt);
+      return rebuilt;
+    }
+    function persistWallet(w){ localStorage.setItem('wallet', JSON.stringify({ usdt: +w.usdt || 0, mwk: +w.mwk || 0 })); }
+
+    function recomputeWalletFromHistory(){
+      const { buy, sell } = getEffectiveRates();
+      const tx = getTxnsRaw();
+      let w = { usdt: 0, mwk: 0 };
+      tx.forEach(t=>{
+        if(t.status!=='completed') return;
+        const typ=(t.type||'').toLowerCase();
+        if(typ==='deposit'){
+          w.mwk += +t.amount || +t.totalMWK || 0;
+        }else if(typ==='withdraw'){
+          w.mwk -= +t.amount || +t.totalMWK || 0;
+        }else if(typ==='buy'){
+          const usdt = +t.amount || 0;
+          const mwk = +t.totalMWK || Math.round(usdt * buy);   // use BUY rate
+          w.usdt += usdt; w.mwk -= mwk;
+        }else if(typ==='sell'){
+          const usdt = +t.amount || 0;
+          const mwk = +t.totalMWK || Math.round(usdt * sell);  // use SELL rate
+          w.usdt -= usdt; w.mwk += mwk;
+        }
+      });
+      w.usdt = Math.max(0, +w.usdt.toFixed(6));
+      w.mwk  = Math.max(0, Math.round(w.mwk));
+      return w;
+    }
+
+    // ===== UI updates =====
+    function updateBalanceUI(){
+      const w = getWallet();
+      const { buy, sell } = getEffectiveRates();
+      const portfolioMWK = Math.round(w.mwk + (w.usdt * sell));   // If user sold all USDT
+      const portfolioUSD = (w.usdt + (w.mwk / buy));              // If user bought USDT with MWK
+      document.getElementById('balanceMWK').textContent = fmtMWK(portfolioMWK);
+      document.getElementById('balanceUSD').textContent = '≈ ' + fmtUSD(portfolioUSD) + ' USD';
+      document.getElementById('usdtChip').textContent = 'USDT: ' + (w.usdt||0).toFixed(2);
+      document.getElementById('mwkChip').textContent  = 'MWK: ' + fmtMWK(w.mwk||0);
+    }
+
+    function updateRateChip(){
+      const chip = document.getElementById('rateChip');
+      if(!chip) return;
+      const { buy, sell } = getEffectiveRates();
+      const admin = JSON.parse(localStorage.getItem('platform.rates') || '{}');
+      const isAdmin = (+admin.buy > 0) || (+admin.sell > 0);
+      chip.textContent = `Buy: MK ${Math.round(buy).toLocaleString()} | Sell: MK ${Math.round(sell).toLocaleString()}`;
+      chip.title = isAdmin ? 'Admin Buy/Sell rates' : 'Live-derived rates';
+    }
+
+    // ===== FX refresh (prefers Admin rates) =====
+    async function refreshFxRate(){
+      const badge = document.getElementById('syncBadge');
+      try{
+        const admin = JSON.parse(localStorage.getItem('platform.rates') || '{}');
+        const hasAdmin = (+admin.buy > 0) || (+admin.sell > 0);
+        if(hasAdmin){
+          const { buy } = getEffectiveRates();
+          fxRateMWK = +buy;
+          localStorage.setItem('fxRateMWK', String(fxRateMWK));
+          badge?.classList.remove('warn','err'); badge?.classList.add('ok');
+          badge && (badge.innerHTML = '<span class="sync-dot"></span> Admin rates');
+          updateBalanceUI(); updateRateChip();
+          return;
+        }
+
+        badge?.classList.remove('ok','err'); badge?.classList.add('warn');
+        const ctrl = new AbortController();
+        const t = setTimeout(()=>ctrl.abort(), 4000);
+        const r = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=MWK',{signal:ctrl.signal});
+        clearTimeout(t);
+        if(!r.ok) throw new Error('Rate fetch failed');
+        const data = await r.json();
+        const rate = data?.rates?.MWK;
+        if(!rate || rate<=0) throw new Error('Invalid rate');
+
+        fxRateMWK = +rate;
+        localStorage.setItem('fxRateMWK', String(fxRateMWK));
+        badge?.classList.remove('warn','err'); badge?.classList.add('ok');
+        badge && (badge.innerHTML = '<span class="sync-dot"></span> Live rate');
+        updateBalanceUI(); updateRateChip();
+      }catch(e){
+        const stored = parseFloat(localStorage.getItem('fxRateMWK')||'1770');
+        fxRateMWK = isNaN(stored) ? 1770 : stored;
+        badge?.classList.remove('ok','warn'); badge?.classList.add('err');
+        badge && (badge.innerHTML = '<span class="sync-dot"></span> Offline');
+        updateRateChip();
+      }
+    }
+
+    // ===== Transactions helpers =====
+    function getTxnsRaw(){
+      let tx = JSON.parse(localStorage.getItem('transactions') || '[]');
+      if(!Array.isArray(tx)) tx = [];
+      if(!tx.length){
+        tx = [
+          {type:'buy', amount:100, totalMWK:177000, date:new Date().toISOString(), status:'completed', direction:'in', reference:'PP123'},
+          {type:'sell', amount:50, totalMWK:88500, date:new Date(Date.now()-86400000).toISOString(), status:'pending', direction:'out', reference:'SL456'},
+          {type:'deposit', amount:50000, date:new Date(Date.now()-172800000).toISOString(), status:'rejected', direction:'in', reference:'AM789'}
+        ];
+        localStorage.setItem('transactions', JSON.stringify(tx));
+      }
+      return tx.sort((a,b)=> new Date(b.date)-new Date(a.date));
+    }
+    function getTxns(){ return getTxnsRaw(); }
+    function getStatusClass(s){
+      const m={completed:'status-completed', approved:'status-completed', pending:'status-pending',
+               processing:'status-pending', rejected:'status-rejected', failed:'status-rejected'};
+      return m[s] || 'status-pending';
+    }
+    function getTimeAgo(date) {
+      const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+      if (seconds < 60) return 'Just now';
+      const minutes = Math.floor(seconds / 60); if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.floor(minutes / 60); if (hours < 24) return `${hours}h ago`;
+      const days = Math.floor(hours / 24); return `${days}d ago`;
+    }
+  </script>
+  <!-- END OF CHUNK 1/2 — Ask me for CHUNK 2 to complete this file -->
+   <script>
+  // ===== Recent activity UI =====
+  function loadRecentTransactions() {
+    const container = document.getElementById('recentTransactions');
+    let transactions = getTxns();
+    if (!transactions.length) {
+      container.innerHTML = `<div class="empty-state">No recent activity.</div>`;
+      return;
+    }
+    const icons = {buy:'💰', sell:'💸', deposit:'📥', withdraw:'📤'};
+    const recent = transactions.slice(0, 3);
+    container.innerHTML = '';
+    recent.forEach(tx => {
+      const item = document.createElement('div'); item.className='transaction-item';
+      const statusClass = getStatusClass(tx.status);
+      const amountClass = tx.direction==='in' ? 'amount-in' : 'amount-out';
+      const prefix = tx.direction==='in' ? '+' : '-';
+      const amountDisplay = (tx.type==='buy'||tx.type==='sell')
+        ? `${prefix}${(+tx.amount||0).toFixed(2)} USDT`
+        : `${prefix}${fmtMWK(tx.amount || tx.totalMWK || 0)}`;
+      const timeAgo = getTimeAgo(new Date(tx.date));
+      item.innerHTML = `
+        <div class="tran-left">
+          <div class="tran-icon">${icons[tx.type] || '📄'}</div>
+          <div>
+            <div class="tran-type">${ucFirst(tx.type)}</div>
+            <div class="tran-date">${timeAgo}</div>
+          </div>
+        </div>
+        <div class="tran-amount">
+          <div class="${amountClass}">${amountDisplay}</div>
+          <div class="status-badge ${statusClass}">${(tx.status||'').toUpperCase()}</div>
+        </div>`;
+      container.appendChild(item);
+    });
+  }
+
+  // ===== History modal + filtering =====
+  function openHistoryModal(){
+    renderFullHistory();
+    document.getElementById('historyModal').style.display='block';
+    const s = document.getElementById('historySearch'); if(s){ s.value = searchTerm; setTimeout(()=>s.focus(), 80); }
+  }
+  function closeHistoryModal(){
+    document.getElementById('historyModal').style.display='none';
+  }
+  window.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeHistoryModal(); closeMerchantModal(); } });
+
+  function filterHistory(filter,e){
+    historyFilter = filter;
+    localStorage.setItem('historyFilter',filter);
+    document.querySelectorAll('#historyFilterTabs .filter-tab').forEach(t=>t.classList.remove('active'));
+    if(e?.target) e.target.classList.add('active');
+    else {
+      const btn = Array.from(document.querySelectorAll('#historyFilterTabs .filter-tab')).find(b=>b.textContent.toLowerCase().includes(filter));
+      btn?.classList.add('active');
+    }
+    renderFullHistory();
+  }
+
+  document.addEventListener('input', (e)=>{
+    if(e.target.id==='historySearch'){
+      searchTerm = e.target.value.trim().toLowerCase();
+      renderFullHistory();
+    }
+  });
+
+  function renderFullHistory(){
+    const container = document.getElementById('historyListContainer');
+    let tx = getTxns();
+    if(historyFilter!=='all'){
+      if(['completed','pending','rejected'].includes(historyFilter)) tx = tx.filter(t=>t.status===historyFilter);
+      else tx = tx.filter(t=>(t.type||'').toLowerCase()===historyFilter);
+    }
+    if(searchTerm){
+      tx = tx.filter(t=> [t.type,t.status,t.reference,t.merchant,t.paymentMethod].filter(Boolean)
+        .some(v=>String(v).toLowerCase().includes(searchTerm)));
+    }
+    if(!tx.length){ container.innerHTML = `<div class="empty-state">No transactions match this view.</div>`; return; }
+    const icons = {buy:'💰', sell:'💸', deposit:'📥', withdraw:'📤'};
+    container.innerHTML = '';
+    tx.forEach(t=>{
+      const item = document.createElement('div'); item.className='transaction-item';
+      const amountClass = t.direction==='in' ? 'amount-in' : 'amount-out';
+      const statusClass = getStatusClass(t.status);
+      const prefix = t.direction==='in' ? '+' : '-';
+      const amountDisplay = (t.type==='buy'||t.type==='sell')
+        ? `${prefix}${(+t.amount||0).toFixed(2)} USDT`
+        : `${prefix}${fmtMWK(t.amount || t.totalMWK || 0)}`;
+      const dateStr = new Date(t.date).toLocaleString([],{dateStyle:'short', timeStyle:'short'});
+      item.innerHTML = `
+        <div class="tran-left">
+          <div class="tran-icon">${icons[t.type] || '📄'}</div>
+          <div>
+            <div class="tran-type">${t.type?.[0]?.toUpperCase()+t.type?.slice(1)}</div>
+            <div class="tran-date">${dateStr}${t.reference ? ' · Ref: '+t.reference : ''}</div>
+          </div>
+        </div>
+        <div class="tran-amount">
+          <div class="${amountClass}">${amountDisplay}</div>
+          <div class="status-badge ${statusClass}">${(t.status||'').toUpperCase()}</div>
+        </div>`;
+      container.appendChild(item);
+    });
+  }
+
+  function exportHistoryCSV(){
+    const tx = getTxns();
+    const active = document.querySelector('#historyFilterTabs .filter-tab.active')?.textContent.toLowerCase() || 'all';
+    let rows = [['Date','Type','Amount','Status','Reference','Method']];
+    tx.forEach(t=>{
+      if(active!=='all'){
+        if(['completed','pending','rejected'].includes(active) && t.status!==active) return;
+        if(['buy','sell','deposit','withdraw'].includes(active) && (t.type||'').toLowerCase()!==active) return;
+      }
+      const date = new Date(t.date).toLocaleString();
+      const amount = (t.type==='buy'||t.type==='sell') ? `${(+t.amount||0).toFixed(2)} USDT` : `MK ${(+t.amount||+t.totalMWK||0)}`;
+      rows.push([date, t.type, amount, t.status, t.reference||'', t.paymentMethod||'']);
+    });
+    const csv = rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv],{type:'text/csv'}); const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=`cryptex_history_${Date.now()}.csv`; a.click();
+  }
+
+  // ===== Merchant UI + Logic (Button -> Modal Form) =====
+  function openMerchantModal(mode='apply', data=null){
+    const modal = document.getElementById('merchantModal');
+    if(!modal) return;
+
+    const form = document.getElementById('merchantForm');
+    form.reset();
+
+    const phone = localStorage.getItem('userPhone') || '';
+    document.getElementById('merchantWhatsApp').value = phone;
+
+    const disable = (on)=> {
+      form.querySelectorAll('input,select,textarea,button').forEach(el=>{
+        if(el.id==='merchantSubmitBtn') return;
+        if(on){ el.setAttribute('disabled','disabled'); } else { el.removeAttribute('disabled'); }
+      });
+    };
+
+    if(mode==='view' && data){
+      document.getElementById('merchantBizName').value = data.businessName || '';
+      document.getElementById('merchantBizType').value = data.businessType || '';
+      document.getElementById('merchantDailyLimit').value = data.dailyLimitUSD || '';
+      document.getElementById('merchantLocation').value = data.location || '';
+      document.getElementById('merchantWhatsApp').value = data.contact || phone || '';
+      document.getElementById('merchantNotes').value = data.notes || '';
+      const pm = new Set(data.paymentMethods || []);
+      document.querySelectorAll('#pmGroup input[type="checkbox"]').forEach(cb=> cb.checked = pm.has(cb.value));
+      disable(true);
+      document.getElementById('merchantSubmitBtn').style.display='none';
+    }else{
+      disable(false);
+      document.getElementById('merchantSubmitBtn').style.display='';
+    }
+
+    modal.style.display='block';
+    setTimeout(()=> document.getElementById('merchantBizName')?.focus(), 50);
+  }
+  function closeMerchantModal(){
+    const modal=document.getElementById('merchantModal'); if(!modal) return; modal.style.display='none';
+  }
+
+  function handleRatesChange(){
+    persistWallet(recomputeWalletFromHistory());
+    updateBalanceUI();
+    loadRecentTransactions();
+    updateRateChip();
+    if (typeof renderMerchantApplication === 'function') renderMerchantApplication();
+  }
+
+  // ===== Init =====
+  window.addEventListener('DOMContentLoaded', () => {
+    // Initialize wallet and UI
+    persistWallet(recomputeWalletFromHistory());
+    updateBalanceUI();
+    loadRecentTransactions();
+    filterHistory(localStorage.getItem('historyFilter') || 'all');
+    updateRateChip();
+    refreshFxRate();
+    setInterval(refreshFxRate, 5 * 60 * 1000);
+
+    // Merchant Section logic
+    const section = document.getElementById('merchantApplicationSection');
+    const content = document.getElementById('merchantApplyContent');
+    const actionArea = document.getElementById('merchantActionArea');
+    const MIN_USD_VALUE = 150;
+
+    function renderEligibility(kycVerified, meetsBalance, portfolioUSD){
+      const kycProgress = kycVerified ? 100 : 0;
+      const balanceProgress = Math.min(100, (portfolioUSD / MIN_USD_VALUE) * 100);
+      return `
+        <p class="muted" style="margin-bottom: 1rem;">To apply, you need to meet the following requirements:</p>
+        <div style="margin-bottom: 1rem;">
+          <div class="row" style="justify-content: space-between; margin-bottom: .25rem; display:flex;">
+            <span>1. Verified KYC Status</span>
+            <strong style="color:${kycVerified ? 'var(--success)' : 'var(--warn)'}">${kycVerified ? 'Completed' : 'Pending'}</strong>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width:${kycProgress}%; background: ${kycVerified ? 'var(--success)' : 'var(--warn)'};"></div></div>
+        </div>
+        <div>
+          <div class="row" style="justify-content: space-between; margin-bottom: .25rem; display:flex;">
+            <span>2. Minimum Portfolio Value</span>
+            <strong style="color:${meetsBalance ? 'var(--success)' : 'var(--warn)'}">$${portfolioUSD.toFixed(2)} / $${MIN_USD_VALUE}</strong>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width:${balanceProgress.toFixed(1)}%; background: ${meetsBalance ? 'var(--success)' : 'var(--warn)'};"></div></div>
+        </div>
+      `;
+    }
+
+    window.renderMerchantApplication = function renderMerchantApplication(){
+      if (!section || !content || !actionArea) return;
+
+      const userRole = localStorage.getItem('role');
+      if (userRole === 'merchant' || userRole === 'admin') {
+        section.style.display = 'none';
+        return;
+      }
+
+      const wallet = recomputeWalletFromHistory();
+      const { buy } = getEffectiveRates();
+      const portfolioUSD = (wallet.usdt || 0) + ((wallet.mwk || 0) / buy);
+      const kycStatus = localStorage.getItem('kycStatus') || 'pending';
+      const isKycVerified = kycStatus === 'verified';
+      const meetsBalance = portfolioUSD >= MIN_USD_VALUE;
+
+      const apps = JSON.parse(localStorage.getItem('platform.merchantApps') || '[]');
+      const myApp = apps.find(app => app.user === localStorage.getItem('user'));
+
+      section.style.display = 'block';
+      actionArea.innerHTML = '';
+
+      if (myApp) {
+        let statusText = 'Pending Review', statusClass = 'status-pending', statusColor = 'var(--warn)';
+        if (myApp.status === 'approved') { statusText = 'Approved'; statusClass = 'status-completed'; statusColor = 'var(--success)'; }
+        if (myApp.status === 'rejected') { statusText = 'Rejected'; statusClass = 'status-rejected'; statusColor = 'var(--danger)'; }
+
+        content.innerHTML = `
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
+            <div>
+              <div style="font-size:1.05rem; margin-bottom:.35rem;">Application Status: <strong style="color:${statusColor};">${statusText}</strong></div>
+              <div class="mini">ID: ${myApp.id} • Submitted: ${new Date(myApp.createdAt).toLocaleString()}</div>
+            </div>
+            <span class="status-badge ${statusClass}">${statusText.toUpperCase()}</span>
+          </div>
+        `;
+        actionArea.innerHTML = `<button type="button" class="btn-secondary" onclick="openMerchantModal('view', ${JSON.stringify(myApp).replace(/"/g,'&quot;')})">View Application</button>`;
+        return;
+      }
+
+      // No app submitted yet
+      content.innerHTML = renderEligibility(isKycVerified, meetsBalance, portfolioUSD);
+
+      if (isKycVerified && meetsBalance) {
+        actionArea.innerHTML = `<button id="openMerchantBtn" class="history-popup-btn" type="button"><span>📝</span> Apply Now</button>`;
+        document.getElementById('openMerchantBtn').onclick = ()=> openMerchantModal('apply');
+      } else {
+        actionArea.innerHTML = `${!isKycVerified ? '<a href="settings.html" class="history-popup-btn" style="text-decoration:none;">Complete KYC</a>' : ''}`;
+      }
+    };
+
+    // Initial render
+    renderMerchantApplication();
+
+    // Merchant Form submission
+    document.getElementById('merchantForm')?.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const businessName = document.getElementById('merchantBizName').value.trim();
+      const businessType = document.getElementById('merchantBizType').value.trim();
+      const dailyLimitUSD = +document.getElementById('merchantDailyLimit').value || 0;
+      const location = document.getElementById('merchantLocation').value.trim();
+      const contact = document.getElementById('merchantWhatsApp').value.trim();
+      const notes = document.getElementById('merchantNotes').value.trim();
+      const agree = document.getElementById('merchantAgree').checked;
+      const paymentMethods = Array.from(document.querySelectorAll('#pmGroup input:checked')).map(cb=>cb.value);
+
+      if(!businessName) return toast('Enter a business name.');
+      if(!businessType) return toast('Select your business type.');
+      if(!paymentMethods.length) return toast('Select at least one payment method.');
+      if(!dailyLimitUSD || dailyLimitUSD < 50) return toast('Daily limit should be at least $50.');
+      if(!location) return toast('Enter your location.');
+      if(!agree) return toast('You must agree to the Merchant Terms.');
+
+      const newApp = {
+        id: 'MA-' + Date.now(),
+        user: localStorage.getItem('user'),
+        name: localStorage.getItem('userName'),
+        phone: localStorage.getItem('userPhone'),
+        businessName,
+        businessType,
+        paymentMethods,
+        dailyLimitUSD,
+        location,
+        contact,
+        notes,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
+      const allApps = JSON.parse(localStorage.getItem('platform.merchantApps') || '[]');
+      allApps.unshift(newApp);
+      localStorage.setItem('platform.merchantApps', JSON.stringify(allApps));
+
+      if (window.BroadcastChannel && typeof bus !== 'undefined' && bus) {
+        bus.postMessage({ type:'merchant.app.submitted', payload: newApp });
+      }
+
+      toast('Application submitted successfully!');
+      closeMerchantModal();
+      renderMerchantApplication();
+    });
+
+    // Listen to changes from other tabs/pages
+    window.addEventListener('storage', (e) => {
+      if(['transactions', 'wallet', 'platform.rates'].includes(e.key)){
+        handleRatesChange();
+        if(document.getElementById('historyModal').style.display==='block') renderFullHistory();
+      }
+      if(e.key==='fxRateMWK'){
+        fxRateMWK = +e.newValue || fxRateMWK;
+        updateBalanceUI(); updateRateChip();
+      }
+      if(['kycStatus', 'platform.merchantApps', 'role'].includes(e.key)){
+        renderMerchantApplication();
+      }
+    });
+  });
+
+  // Redundant cross-tab safety
+  window.addEventListener('storage', (e)=>{
+    if(['transactions', 'wallet', 'platform.rates'].includes(e.key)){
+      persistWallet(recomputeWalletFromHistory());
+      updateBalanceUI();
+      loadRecentTransactions();
+      updateRateChip();
+      if(document.getElementById('historyModal').style.display==='block') renderFullHistory();
+    }
+    if(e.key==='fxRateMWK'){
+      fxRateMWK = +e.newValue || fxRateMWK;
+      updateBalanceUI(); updateRateChip();
+    }
+  });
+</script>
+</body>
+</html>

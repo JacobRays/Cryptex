@@ -1,0 +1,3057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Merchant Dashboard - Cryptex Malawi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root{
+      --bg-0:#0f0f10; --bg-1:#121212; --surface:#1e1e1e; --surface-2:#2c2c2c;
+      --gold:#D4AF37; --gold-2:#E0C16A; --muted:#9E9E9E; --text:#f5f5f5;
+      --danger:#F44336; --success:#4CAF50; --warn:#FF9800;
+      --ring:0 0 0 2px rgba(212,175,55,.35); --shadow:0 10px 30px rgba(0,0,0,.45);
+      --radius:14px; --navh:80px;
+    }
+    *{ box-sizing:border-box; }
+    html, body{ height:-webkit-fill-available; }
+    body{
+      margin:0; color:var(--text);
+      min-height:100dvh; overflow-x:hidden;
+      padding-bottom:calc(var(--navh) + 28px + env(safe-area-inset-bottom));
+      background:
+        radial-gradient(60vw 60vw at 10% -10%, rgba(212,175,55,.08), transparent 60%),
+        radial-gradient(70vw 70vw at 110% -20%, rgba(224,193,106,.06), transparent 60%),
+        linear-gradient(135deg, var(--bg-0), var(--bg-1));
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    a{ color:inherit; text-decoration:none; }
+
+    /* App bar */
+    .app-bar{
+      background: rgba(30,30,30,.85);
+      backdrop-filter: blur(8px);
+      position: sticky; top:0; z-index:20;
+      border-bottom:1px solid rgba(212,175,55,.18);
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    }
+    .app-bar-inner{
+      max-width:1100px; margin:0 auto; display:flex; align-items:center; justify-content:space-between;
+      padding:.85rem 1rem; gap:1rem;
+    }
+    .brand{ display:flex; align-items:center; gap:.75rem; }
+    .logo{
+      font-weight:900; letter-spacing:.18rem; font-size: clamp(1.6rem, 4vw, 2.2rem); line-height:1;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2) 70%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-transform:uppercase;
+      text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 12px 24px rgba(212,175,55,.25);
+    }
+    .subtitle{ color:#e7d59b; font-weight:700; letter-spacing:.06em; }
+    .actions{ display:flex; align-items:center; gap:.5rem .6rem; flex-wrap:wrap; }
+    .chip{
+      background:#1e1e1e; color:var(--gold-2); border:1px solid rgba(212,175,55,.35);
+      padding:.35rem .6rem; border-radius:999px; font-weight:800; font-size:.8rem;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); display:inline-flex; align-items:center; gap:.4rem;
+    }
+    .sync-dot{ width:8px; height:8px; border-radius:50%; background:#aaa; box-shadow:0 0 0 0 rgba(76,175,80,.7); }
+    .ok .sync-dot{ background:var(--success); animation:pulse 1.6s ease-out infinite; }
+    .warn .sync-dot{ background:var(--warn); }
+    .err .sync-dot{ background:var(--danger); }
+    @keyframes pulse{ 0%{ box-shadow:0 0 0 0 rgba(76,175,80,.7);} 70%{ box-shadow:0 0 0 12px rgba(76,175,80,0);} 100%{ box-shadow:0 0 0 0 rgba(76,175,80,0);} }
+
+    .icon-btn{
+      background:#1e1e1e; border:1px solid rgba(212,175,55,.28); color:var(--gold-2);
+      border-radius:10px; padding:.4rem .55rem; cursor:pointer; display:inline-flex; gap:.4rem; align-items:center;
+      box-shadow: var(--shadow); transition: transform .15s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .icon-btn:hover{ transform: translateY(-1px); border-color: var(--gold-2); box-shadow: 0 10px 26px rgba(212,175,55,.18); }
+    .icon-btn:focus{ outline:none; box-shadow:0 0 0 2px rgba(212,175,55,.35); }
+    .notif-dot{ display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--danger); box-shadow:0 0 0 2px #121212; margin-left:.2rem; transform: translateY(-1px); }
+
+    .container{ max-width:1100px; margin: 1rem auto; padding: 0 1rem; }
+
+    /* Cards */
+    .card{
+      background: linear-gradient(135deg, #2C2C2C, #1E1E1E);
+      border:1px solid rgba(212,175,55,.25);
+      border-radius:14px; padding:1rem; box-shadow: var(--shadow); color:#eee;
+    }
+    .card + .card{ margin-top:1rem; }
+    .section-title{ color: var(--gold-2); font-weight:900; margin-bottom:.75rem; display:flex; align-items:center; gap:.5rem; }
+
+    /* Status toggle */
+    .status-row{ display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .status-text{ color:#cfcfcf; font-size:.92rem; }
+    .toggle-switch{
+      position: relative; width:64px; height:32px; background:#444; border-radius:999px; cursor:pointer; transition:.2s;
+      border:1px solid #333;
+    }
+    .toggle-switch.active{ background: rgba(76,175,80,.85); }
+    .toggle-slider{ position:absolute; top:3px; left:3px; width:26px; height:26px; background:#fff; border-radius:50%; transition: transform .25s ease; }
+    .toggle-switch.active .toggle-slider{ transform: translateX(32px); }
+
+    /* Rates */
+    .rate-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap:1rem; }
+    @media (max-width:720px){ .rate-grid{ grid-template-columns:1fr; } }
+    .rate-card{ background:#121212; border:1px solid #333; padding:1rem; border-radius:10px; text-align:center; }
+    .rate-label{ color:#9E9E9E; font-size:.9rem; margin-bottom:.35rem; }
+    .rate-value{ color:var(--gold-2); font-weight:900; font-size:1.4rem; letter-spacing:.02em; }
+    .rate-input{ width:100%; margin-top:.5rem; padding:.55rem .6rem; background:#0f0f0f; color:#fff; border:1px solid #444; border-radius:10px; text-align:center; font-size:1.1rem; outline:none; }
+    .save-row{ display:flex; justify-content:flex-end; margin-top:.6rem; }
+    .btn{ padding:.6rem 1rem; border-radius:10px; font-weight:900; cursor:pointer; border:1px solid var(--gold); background:#2C2C2C; color:var(--gold); }
+    .btn.primary{ background: linear-gradient(135deg, var(--gold), var(--gold-2)); color:#121212; border:none; }
+    .btn.small{ padding:.45rem .7rem; font-size:.9rem; }
+
+    /* Stats */
+    .stats-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:1rem; }
+    .stat{ background:#2C2C2C; border:1px solid #333; border-radius:12px; padding:1rem; text-align:center; }
+    .stat-val{ font-size:1.6rem; font-weight:900; color:var(--gold-2); }
+    .stat-label{ font-size:.85rem; color:#9E9E9E; margin-top:.25rem; }
+
+    /* Bottom nav */
+    .nav-bar{
+      position: fixed; bottom:0; width:100%; background:#1E1E1E; display:flex; justify-content:space-around;
+      padding:.75rem; padding-bottom: calc(.75rem + env(safe-area-inset-bottom)); border-top:1px solid var(--gold); z-index:10;
+    }
+    .nav-item{ text-align:center; color:#9E9E9E; }
+    .nav-item.active{ color:var(--gold-2); }
+    .nav-icon{ font-size:1.5rem; margin-bottom:.25rem; }
+    .nav-label{ font-size:.75rem; }
+
+    /* Toast */
+    .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--navh) + 10px); background:#1b1b1b; border:1px solid rgba(212,175,55,.35); color:var(--gold-2); padding:.7rem 1rem; border-radius:10px; box-shadow: var(--shadow); display:none; z-index:1200; min-width:220px; text-align:center; }
+    .toast.show{ display:block; animation: toast-in .2s ease }
+    @keyframes toast-in{ from{ opacity:0; transform: translate(-50%, 12px);} to{ opacity:1; transform: translate(-50%, 0);} }
+
+    /* Drawers (Announcements, Settings, Activity, Directory stub) */
+    .drawer{ position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:2000; display:none; }
+    .panel{ position:absolute; right:0; top:0; bottom:0; width:min(92vw, 520px); background:#111;
+      border-left:1px solid rgba(212,175,55,.28); box-shadow: -20px 0 40px rgba(0,0,0,.4); display:flex; flex-direction:column; }
+    .head{ padding:1rem; border-bottom:1px solid #333; display:flex; align-items:center; justify-content:space-between; }
+    .title{ margin:0; color:var(--gold-2); font-weight:900; }
+    .body{ padding:1rem; overflow:auto; }
+    .ghost{ background:#1e1e1e; border:1px solid var(--gold); color:var(--gold); border-radius:10px; }
+  </style>
+</head>
+<body>
+  <div class="app-bar">
+    <div class="app-bar-inner">
+      <div class="brand">
+        <div class="logo" title="Cryptex Malawi">CRYPT-X</div>
+        <div class="subtitle">Merchant</div>
+      </div>
+      <div class="actions">
+        <span id="rateChip" class="chip" title="Effective Buy/Sell">Buy: — | Sell: —</span>
+        <span id="syncBadge" class="chip warn"><span class="sync-dot"></span> Syncing</span>
+        <button id="btnAnnouncements" class="icon-btn" type="button" aria-haspopup="dialog" aria-expanded="false" title="Announcements">
+          <span>🔔</span><span id="notifBadge" class="notif-dot" style="display:none;"></span>
+        </button>
+        <button id="btnActivity" class="icon-btn" type="button" title="Activity">🧾</button>
+        <button id="btnSettings" class="icon-btn" type="button" title="Settings">⚙️</button>
+        <button id="btnMerchantsList" class="icon-btn" type="button" title="Merchants Directory">📇</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="card">
+      <div class="section-title">🟢 Merchant Status</div>
+      <div class="status-row">
+        <div>
+          <div style="font-weight:900; letter-spacing:.02em;">Availability</div>
+          <div id="statusText" class="status-text">You are currently online</div>
+        </div>
+        <div id="statusToggle" class="toggle-switch active" role="switch" aria-checked="true" tabindex="0" title="Online/Offline">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">💱 Your Exchange Rates</div>
+      <div class="rate-grid">
+        <div class="rate-card">
+          <div class="rate-label">Buy Rate (you charge for 1 USDT)</div>
+          <div class="rate-value">MK <span id="buyRate">—</span></div>
+          <input type="number" class="rate-input" id="buyRateInput" min="1" inputmode="numeric" placeholder="e.g. 1800">
+        </div>
+        <div class="rate-card">
+          <div class="rate-label">Sell Rate (you pay for 1 USDT)</div>
+          <div class="rate-value">MK <span id="sellRate">—</span></div>
+          <input type="number" class="rate-input" id="sellRateInput" min="1" inputmode="numeric" placeholder="e.g. 1750">
+        </div>
+      </div>
+      <div class="save-row">
+        <button id="saveRatesBtn" class="btn primary" type="button">Save My Rates</button>
+      </div>
+      <div class="muted" style="color:#c9b882; font-size:.85rem; margin-top:.5rem;">
+        Platform rates are set by Admin. Your personal rates apply to your P2P quotes and requests.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">📈 Today</div>
+      <div class="stats-grid">
+        <div class="stat"><div id="statToday" class="stat-val">0</div><div class="stat-label">Today's Trades</div></div>
+        <div class="stat"><div id="statTotal" class="stat-val">0</div><div class="stat-label">Total Trades</div></div>
+        <div class="stat"><div id="statRating" class="stat-val">—</div><div class="stat-label">Rating ⭐</div></div>
+        <div class="stat"><div id="statSuccess" class="stat-val">—</div><div class="stat-label">Success Rate</div></div>
+      </div>
+    </div>
+
+    <div class="card" id="dirCtaCard">
+      <div class="section-title">📇 Merchants</div>
+      <div style="display:flex; gap:.75rem; align-items:center; justify-content:space-between; flex-wrap:wrap;">
+        <div class="muted">Browse verified merchants, compare rates and start trades securely.</div>
+        <div>
+          <button id="openDirBtn" class="btn primary" type="button">Open Directory</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="nav-bar">
+    <a href="dashboard.html" class="nav-item"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></a>
+    <a href="wallet.html" class="nav-item"><div class="nav-icon">💼</div><div class="nav-label">Wallet</div></a>
+    <a id="navMerchant" href="merchant_dashboard.html" class="nav-item active"><div class="nav-icon">🏪</div><div class="nav-label">Merchant</div></a>
+    <a href="settings.html" class="nav-item"><div class="nav-icon">⚙️</div><div class="nav-label">Settings</div></a>
+  </nav>
+
+  <!-- Drawers: Announcements, Settings, Activity, Merchants Directory (stub; full features in later chunks) -->
+  <div id="annDrawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="annTitle">
+    <div class="panel">
+      <div class="head">
+        <h3 id="annTitle" class="title">📣 Announcements</h3>
+        <div>
+          <button id="annMarkAll" class="btn small ghost" type="button">Mark all read</button>
+          <button id="annClose" class="btn small" type="button">Close</button>
+        </div>
+      </div>
+      <div id="annList" class="body"><div class="muted">Loading…</div></div>
+    </div>
+  </div>
+
+  <div id="settingsDrawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="panel">
+      <div class="head">
+        <h3 id="settingsTitle" class="title">Settings</h3>
+        <button id="setClose" class="btn small" type="button">Close</button>
+      </div>
+      <div class="body">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:.6rem; margin-bottom:.5rem;">
+          <div class="muted">Desktop notifications</div>
+          <div id="setDesk" class="ghost" style="padding:.35rem .6rem; border-radius:8px; cursor:pointer;">Off</div>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:.6rem; margin-bottom:.5rem;">
+          <div class="muted">Sound chime</div>
+          <div id="setSound" class="ghost" style="padding:.35rem .6rem; border-radius:8px; cursor:pointer;">On</div>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:.6rem;">
+          <div class="muted">Auto-open new request</div>
+          <div id="setAutoOpen" class="ghost" style="padding:.35rem .6rem; border-radius:8px; cursor:pointer;">Off</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="activityDrawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="actTitle">
+    <div class="panel">
+      <div class="head">
+        <h3 id="actTitle" class="title">🧾 Activity & Audit Log</h3>
+        <button id="actClose" class="btn small" type="button">Close</button>
+      </div>
+      <div id="actList" class="body"><div class="muted">No activity yet.</div></div>
+    </div>
+  </div>
+
+  <div id="dirDrawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="dirTitle">
+    <div class="panel" style="width:min(98vw,1080px);">
+      <div class="head">
+        <h3 id="dirTitle" class="title">📇 Merchants Directory</h3>
+        <button id="dirClose" class="btn small" type="button">Close</button>
+      </div>
+      <div id="dirBody" class="body">
+        <div class="muted">Directory will load here…</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Saved</div>
+
+  <script>
+    (function(){
+      'use strict';
+
+      /* ========= Utilities ========= */
+      const $ = (s,r=document)=> r.querySelector(s);
+      const $$= (s,r=document)=> Array.from(r.querySelectorAll(s));
+      const parse = (s,d)=>{ try{return JSON.parse(s)}catch(e){return d} };
+      const toast = (m)=>{ const t=$('#toast'); if(!t){ alert(m); return; } t.textContent=m; t.classList.add('show'); clearTimeout(window._t); window._t=setTimeout(()=>t.classList.remove('show'),2000); };
+      const now = ()=> new Date().toISOString();
+      const fmtMWK = v => 'MK ' + Number(v||0).toLocaleString();
+
+      // Bottom padding vs nav height
+      function setSafeHeights(){
+        const nav = document.querySelector('.nav-bar');
+        const h = nav ? nav.offsetHeight : 80;
+        document.documentElement.style.setProperty('--navh', h + 'px');
+      }
+      window.addEventListener('DOMContentLoaded', setSafeHeights);
+      window.addEventListener('resize', setSafeHeights);
+
+      // Session + Role-gate
+      const role = (localStorage.getItem('role')||'user').toLowerCase();
+      const user = (localStorage.getItem('user')||'').toLowerCase() || 'guest';
+      const isMerchant = role==='merchant' || role==='admin';
+      if(!isMerchant){
+        // Non-merchants don’t belong here
+        window.location.replace('dashboard.html#merchant-restricted');
+        return;
+      }
+
+      // Keys
+      const PREF_KEY = `merchant.pref.${user}`;
+      const STATUS_KEY = `merchant.status.${user}`;
+      const RATES_KEY = `merchant.rates.${user}`;
+      const ANN_KEY = 'platform.announcements';
+      const TRADES_KEY = 'platform.p2p.trades';
+
+      // Bus
+      const bus = ('BroadcastChannel' in window) ? new BroadcastChannel('cryptex') : null;
+
+      /* ========= Rates (Admin + Live fallback) ========= */
+      function getPlatformRates(){
+        const admin = parse(localStorage.getItem('platform.rates'), {});
+        const live = parseFloat(localStorage.getItem('fxRateMWK') || '1770') || 1770;
+        let buy = +admin.buy; let sell = +admin.sell;
+        if(!buy || buy<=0) buy = live;
+        if(!sell || sell<=0) sell = buy;
+        return { buy, sell, updatedAt: admin.updatedAt, source: admin.buy ? 'admin':'live' };
+      }
+      function updateRateChip(){
+        const chip=$('#rateChip'), badge=$('#syncBadge');
+        if(!chip || !badge) return;
+        const { buy,sell,updatedAt,source } = getPlatformRates();
+        chip.textContent = `Buy: MK ${Math.round(buy).toLocaleString()} | Sell: MK ${Math.round(sell).toLocaleString()}`;
+        chip.title = updatedAt ? `Updated: ${new Date(updatedAt).toLocaleString()} • Source: ${source}` : `Source: ${source}`;
+        if(source==='admin'){ badge.classList.remove('warn','err'); badge.classList.add('ok'); badge.innerHTML='<span class="sync-dot"></span> Admin rates'; }
+        else { badge.classList.remove('ok','err'); badge.classList.add('warn'); badge.innerHTML='<span class="sync-dot"></span> Live rate'; }
+      }
+      async function refreshFxRate(){
+        const badge = $('#syncBadge');
+        try{
+          const admin = parse(localStorage.getItem('platform.rates'), {});
+          if(+admin.buy>0 || +admin.sell>0){ updateRateChip(); return; }
+          badge?.classList.remove('ok','err'); badge?.classList.add('warn');
+          const ctrl = new AbortController(); const t=setTimeout(()=>ctrl.abort(),4000);
+          const r = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=MWK',{signal:ctrl.signal});
+          clearTimeout(t);
+          if(!r.ok) throw new Error('rate fetch failed');
+          const data = await r.json(); const mwk = data?.rates?.MWK;
+          if(!mwk) throw new Error('no rate');
+          localStorage.setItem('fxRateMWK', String(+mwk));
+          badge?.classList.remove('warn','err'); badge?.classList.add('ok');
+          badge && (badge.innerHTML = '<span class="sync-dot"></span> Live rate');
+          updateRateChip();
+        }catch(e){
+          badge?.classList.remove('ok','warn'); badge?.classList.add('err');
+          badge && (badge.innerHTML = '<span class="sync-dot"></span> Offline');
+        }
+      }
+
+      function loadMyRates(){
+        const platform = getPlatformRates();
+        const mine = parse(localStorage.getItem(RATES_KEY), {});
+        return { buy: +mine.buy || platform.buy, sell: +mine.sell || platform.sell };
+      }
+      function renderMyRates(){
+        const { buy, sell } = loadMyRates();
+        $('#buyRate').textContent = buy ? Number(buy).toLocaleString() : '—';
+        $('#sellRate').textContent = sell ? Number(sell).toLocaleString() : '—';
+        $('#buyRateInput').value = buy ? Math.round(buy) : '';
+        $('#sellRateInput').value = sell ? Math.round(sell) : '';
+      }
+      function saveMyRates(){
+        const p = getPlatformRates();
+        let buy = Math.round(+$('#buyRateInput').value||0);
+        let sell= Math.round(+$('#sellRateInput').value||0);
+        // default guard ±30% (advanced guard in later chunk)
+        const clamp=(n,min,max)=> Math.min(max, Math.max(min, n));
+        buy = clamp(buy, Math.floor(p.buy*0.7), Math.ceil(p.buy*1.3));
+        sell= clamp(sell,Math.floor(p.sell*0.7),Math.ceil(p.sell*1.3));
+        localStorage.setItem(RATES_KEY, JSON.stringify({ buy, sell, updatedAt: now() }));
+        $('#buyRate').textContent = buy.toLocaleString();
+        $('#sellRate').textContent = sell.toLocaleString();
+        toast('Your rates were saved');
+        bus && bus.postMessage({ type:'merchant.rates.update', payload:{ user, buy, sell }});
+      }
+
+      /* ========= Status ========= */
+      function getStatus(){ return parse(localStorage.getItem(STATUS_KEY), { online:true, updatedAt:null }); }
+      function renderStatus(){
+        const s=getStatus(); const t=$('#statusToggle'), txt=$('#statusText');
+        t?.classList.toggle('active', !!s.online);
+        t?.setAttribute('aria-checked', !!s.online);
+        if(txt) txt.textContent = s.online ? 'You are currently online' : 'You are currently offline';
+      }
+      function toggleStatus(){
+        const s=getStatus(); s.online=!s.online; s.updatedAt=now();
+        localStorage.setItem(STATUS_KEY, JSON.stringify(s));
+        renderStatus();
+        toast(s.online ? 'You are now accepting trades' : 'You are now offline');
+        bus && bus.postMessage({ type:'merchant.status', payload:{ user, ...s }});
+      }
+
+      /* ========= Announcements / Settings / Activity Drawers ========= */
+      function openDrawer(id){ const d=$(id); if(!d) return; d.style.display='block'; }
+      function closeDrawer(id){ const d=$(id); if(!d) return; d.style.display='none'; }
+
+      function updateNotifBadge(){
+        const dot = $('#notifBadge'); if(!dot) return;
+        const anns = parse(localStorage.getItem(ANN_KEY), []);
+        const read = parse(localStorage.getItem(`ann.read.${user}`), { ids:{} });
+        const cnt = anns.filter(a=> !read.ids?.[a.id]).length;
+        dot.style.display = cnt>0 ? 'inline-block' : 'none';
+        dot.title = cnt>0 ? `${cnt} new announcement${cnt>1?'s':''}` : '';
+      }
+      function renderAnnouncements(){
+        const list=$('#annList'); if(!list) return;
+        const anns = parse(localStorage.getItem(ANN_KEY), []);
+        const read = parse(localStorage.getItem(`ann.read.${user}`), { ids:{} });
+        if(!anns.length){ list.innerHTML='<div class="muted">No announcements yet.</div>'; return; }
+        list.innerHTML = anns.sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt)).map(a=>{
+          const viewed = !!read.ids[a.id];
+          return `<div style="border:1px solid #333; border-left:4px solid ${a.level==='urgent'?'#F44336':a.level==='warn'?'#FFB300':'#4FC3F7'}; border-radius:10px; padding:.6rem .7rem; background:#1b1b1b; margin-bottom:.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:.5rem;">
+              <div style="font-weight:900; color:#e9e9e9;">${a.title||'Announcement'} ${!viewed?'<span class="chip">NEW</span>':''}</div>
+              <button class="btn small ghost" data-id="${a.id}" type="button">${viewed?'Read':'Mark read'}</button>
+            </div>
+            <div style="color:#cfcfcf; margin-top:.25rem;">${a.body||''}</div>
+            <div class="muted" style="font-size:.8rem; margin-top:.25rem;">${new Date(a.createdAt).toLocaleString()}</div>
+          </div>`;
+        }).join('');
+        list.onclick = (e)=>{
+          const b=e.target.closest('button[data-id]'); if(!b) return;
+          const id=b.getAttribute('data-id');
+          const r = parse(localStorage.getItem(`ann.read.${user}`), { ids:{} });
+          r.ids[id]=true; localStorage.setItem(`ann.read.${user}`, JSON.stringify(r));
+          renderAnnouncements(); updateNotifBadge();
+        };
+      }
+
+      function getPref(){
+        return parse(localStorage.getItem(PREF_KEY), { notifyDesktop:false, notifySound:true, autoOpen:false });
+      }
+      function savePref(p){ localStorage.setItem(PREF_KEY, JSON.stringify(p)); }
+
+      function renderSettingsDrawer(){
+        const p=getPref();
+        const togg=(el, state)=>{ el.textContent = state?'On':'Off'; el.classList.toggle('ghost', true); };
+        togg($('#setDesk'), !!p.notifyDesktop);
+        togg($('#setSound'), !!p.notifySound);
+        togg($('#setAutoOpen'), !!p.autoOpen);
+
+        $('#setDesk').onclick = ()=>{
+          let np=getPref(); const want= !np.notifyDesktop;
+          if(want && 'Notification' in window && Notification.permission!=='granted'){
+            Notification.requestPermission().then(res=>{
+              if(res==='granted'){ np.notifyDesktop=true; savePref(np); renderSettingsDrawer(); toast('Desktop notifications enabled'); }
+              else { toast('Desktop notifications blocked'); }
+            });
+          }else{ np.notifyDesktop = !np.notifyDesktop; savePref(np); renderSettingsDrawer(); }
+        };
+        $('#setSound').onclick = ()=>{ let np=getPref(); np.notifySound=!np.notifySound; savePref(np); renderSettingsDrawer(); };
+        $('#setAutoOpen').onclick = ()=>{ let np=getPref(); np.autoOpen=!np.autoOpen; savePref(np); renderSettingsDrawer(); };
+      }
+
+      function recordActivity(type,title,detail){
+        const key = `merchant.audit.${user}`;
+        const list = parse(localStorage.getItem(key), []);
+        list.push({ id:'A-'+(Date.now().toString(36)+Math.random().toString(36).slice(2,6)).toUpperCase(), type, title, detail, createdAt: now() });
+        localStorage.setItem(key, JSON.stringify(list.slice(-500)));
+        renderActivity();
+      }
+      function renderActivity(){
+        const key = `merchant.audit.${user}`;
+        const list = parse(localStorage.getItem(key), []).sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
+        const host = $('#actList'); if(!host) return;
+        if(!list.length){ host.innerHTML = '<div class="muted">No activity yet.</div>'; return; }
+        const iconFor=(t)=> t==='trade'?'💱':t==='status'?'🟢':t==='rates'?'💹':t==='announce'?'📣':t==='receipt'?'🧾':t==='feedback'?'⭐':'⚙️';
+        host.innerHTML = list.map(a=>`
+          <div style="display:grid; grid-template-columns:auto 1fr auto; gap:.6rem; align-items:center; background:#141414; border:1px solid #333; border-radius:10px; padding:.5rem;">
+            <div style="width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#1e1e1e;">${iconFor(a.type)}</div>
+            <div><div style="font-weight:900">${a.title}</div><div style="font-size:.8rem; color:#c9b882;">${a.type.toUpperCase()}</div></div>
+            <div style="font-size:.8rem; color:#9E9E9E" title="${new Date(a.createdAt).toLocaleString()}">${new Date(a.createdAt).toLocaleString()}</div>
+          </div>
+        `).join('');
+      }
+
+      /* ========= Header buttons & drawers ========= */
+      function wireDrawers(){
+        // Announcements
+        $('#btnAnnouncements')?.addEventListener('click', ()=>{ renderAnnouncements(); openDrawer('#annDrawer'); $('#btnAnnouncements').setAttribute('aria-expanded','true'); });
+        $('#annClose')?.addEventListener('click', ()=>{ closeDrawer('#annDrawer'); $('#btnAnnouncements').setAttribute('aria-expanded','false'); });
+        $('#annDrawer')?.addEventListener('click', (e)=>{ if(e.target===e.currentTarget) closeDrawer('#annDrawer'); });
+
+        // Settings
+        $('#btnSettings')?.addEventListener('click', ()=>{ renderSettingsDrawer(); openDrawer('#settingsDrawer'); });
+        $('#setClose')?.addEventListener('click', ()=> closeDrawer('#settingsDrawer'));
+        $('#settingsDrawer')?.addEventListener('click', (e)=>{ if(e.target===e.currentTarget) closeDrawer('#settingsDrawer'); });
+
+        // Activity
+        $('#btnActivity')?.addEventListener('click', ()=>{ renderActivity(); openDrawer('#activityDrawer'); });
+        $('#actClose')?.addEventListener('click', ()=> closeDrawer('#activityDrawer'));
+        $('#activityDrawer')?.addEventListener('click', (e)=>{ if(e.target===e.currentTarget) closeDrawer('#activityDrawer'); });
+
+        // Directory (popup only; no full page)
+        const openDir = ()=>{ openDrawer('#dirDrawer'); /* populated in later chunks */ };
+        $('#btnMerchantsList')?.addEventListener('click', openDir);
+        $('#openDirBtn')?.addEventListener('click', openDir);
+        $('#dirClose')?.addEventListener('click', ()=> closeDrawer('#dirDrawer'));
+        $('#dirDrawer')?.addEventListener('click', (e)=>{ if(e.target===e.currentTarget) closeDrawer('#dirDrawer'); });
+
+        // ESC to close any
+        window.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ ['#annDrawer','#settingsDrawer','#activityDrawer','#dirDrawer'].forEach(id=> closeDrawer(id)); } });
+      }
+
+      /* ========= Role-aware bottom nav routing ========= */
+      function adjustNav(){
+        const link = $('#navMerchant');
+        if(!link) return;
+        // For merchants/admins: Merchant nav always points to dashboard (this page)
+        link.href = 'merchant_dashboard.html';
+        link.style.display = '';
+        link.classList.add('active');
+      }
+
+      /* ========= Stats (basic placeholders; filled in later chunks) ========= */
+      function updateStats(){
+        const trades = parse(localStorage.getItem(TRADES_KEY), []);
+        const me = trades.filter(t=> t.merchant===user);
+        const start = new Date(); start.setHours(0,0,0,0);
+        const today = me.filter(t=> new Date(t.createdAt) >= start).length;
+        const completed = me.filter(t=> t.status==='completed').length;
+        const failed = me.filter(t=> ['cancelled','declined'].includes(t.status)).length;
+        const success = (completed+failed)>0 ? Math.round((completed/(completed+failed))*100)+'%' : '—';
+        $('#statToday').textContent = today;
+        $('#statTotal').textContent = me.length;
+        $('#statRating').textContent = localStorage.getItem(`merchant.rating.${user}`) || '—';
+        $('#statSuccess').textContent = success;
+      }
+
+      /* ========= Init ========= */
+      window.addEventListener('DOMContentLoaded', ()=>{
+        setSafeHeights();
+        adjustNav();
+
+        // Rates
+        updateRateChip(); refreshFxRate();
+        renderMyRates();
+        $('#buyRateInput')?.addEventListener('input', e=> $('#buyRate').textContent = Math.max(1, Math.round(+e.target.value||0)).toLocaleString());
+        $('#sellRateInput')?.addEventListener('input', e=> $('#sellRate').textContent = Math.max(1, Math.round(+e.target.value||0)).toLocaleString());
+        $('#saveRatesBtn')?.addEventListener('click', saveMyRates);
+
+        // Status
+        renderStatus();
+        $('#statusToggle')?.addEventListener('click', (e)=>{ e.preventDefault(); toggleStatus(); });
+        $('#statusToggle')?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleStatus(); } });
+
+        // Drawers
+        wireDrawers();
+        updateNotifBadge();
+        updateStats();
+      });
+
+      /* ========= Live Updates ========= */
+      window.addEventListener('storage', (e)=>{
+        if(e.key==='platform.rates' || e.key==='fxRateMWK'){ updateRateChip(); }
+        if(e.key===RATES_KEY){ renderMyRates(); }
+        if(e.key===STATUS_KEY){ renderStatus(); }
+        if(e.key===ANN_KEY){ updateNotifBadge(); if($('#annDrawer').style.display==='block') renderAnnouncements(); }
+        if(e.key===TRADES_KEY){ updateStats(); }
+      });
+      if(bus) bus.onmessage = (ev)=>{
+        const m = ev?.data || {};
+        if(m.type==='rates.update'){ updateRateChip(); }
+        if(m.type==='announce.push' || m.type==='announce.bulk'){ updateNotifBadge(); if($('#annDrawer').style.display==='block') renderAnnouncements(); }
+        if(m.type==='p2p.trade.new' || m.type==='p2p.trade.update' || m.type==='p2p.trades.sync'){ updateStats(); }
+        if(m.type==='merchant.status.override' && m.payload?.user===user){
+          localStorage.setItem(STATUS_KEY, JSON.stringify({ online: !!m.payload.online, updatedAt: now() }));
+          renderStatus(); toast('Status updated by Admin');
+        }
+      };
+    })();
+  </script>
+<!-- END CHUNK 1/8 -->
+ <!-- CHUNK 2/8: Trades Center (Requests/Active/History) + Filters + Exports + Live sync -->
+<style>
+  /* Trades toolbar + tabs */
+  .trade-card{ background:#2C2C2C; border:1px solid #333; border-radius:12px; padding:1rem; transition:.2s; }
+  .trade-card:hover{ border-color: var(--gold-2); transform: translateY(-2px); }
+  .trade-header{ display:flex; justify-content:space-between; align-items:center; gap:.5rem; }
+  .trade-meta{ display:flex; align-items:center; gap:.6rem; color:#cfcfcf; font-size:.9rem; }
+  .avatar{ width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, var(--gold), var(--gold-2)); color:#121212; font-weight:900; display:flex; align-items:center; justify-content:center; }
+  .badge{ display:inline-block; padding:.2rem .55rem; border-radius:999px; font-size:.75rem; font-weight:900; }
+  .b-buy{ background: rgba(76,175,80,.18); color:#8BE28F; }
+  .b-sell{ background: rgba(244,67,54,.18); color:#ff9a9a; }
+  .b-status{ background:#1b1b1b; border:1px solid #444; color:#ddd; }
+  .trade-grid{ display:grid; grid-template-columns: repeat(2,1fr); gap:.4rem .75rem; margin:.75rem 0; }
+  @media (max-width: 640px){ .trade-grid{ grid-template-columns: 1fr; } }
+  .trade-actions{ display:flex; gap:.5rem; flex-wrap:wrap; }
+  .btn.small{ padding:.45rem .7rem; font-size:.9rem; }
+
+  .toolbar{ display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; margin-bottom:.75rem; }
+  .input, .select{ padding:.55rem .6rem; background:#121212; color:#fff; border:1px solid #444; border-radius:10px; outline:none; }
+  .search{ flex:1 1 240px; }
+  .date{ width: 170px; }
+  .export-group{ margin-left:auto; display:flex; gap:.4rem; flex-wrap:wrap; }
+
+  .tabs2{ display:flex; gap:.4rem; margin-bottom:.6rem; flex-wrap:wrap; }
+  .tab2{ padding:.45rem .9rem; border-radius:999px; border:1px solid #444; background:#1b1b1b; color:#e8e8e8; cursor:pointer; font-weight:800; }
+  .tab2.active{ background: linear-gradient(135deg, var(--gold), var(--gold-2)); color:#121212; border-color: var(--gold); }
+  .tab-count{ margin-left:.35rem; background:#222; color:#cfcfcf; padding:.05rem .45rem; border-radius:999px; font-size:.75rem; }
+
+  .list{ display:grid; gap:.6rem; }
+  .empty{ text-align:center; color:#9E9E9E; padding:2rem; }
+</style>
+
+<template id="tradesTpl">
+  <section class="card">
+    <div class="section-title">🛒 Trade Center</div>
+
+    <div class="toolbar">
+      <input id="tSearch" class="input search" type="search" placeholder="Search ref, user, email, phone, method…" />
+      <select id="tType" class="select">
+        <option value="">Type: All</option>
+        <option value="buy">Buy</option>
+        <option value="sell">Sell</option>
+      </select>
+      <select id="tStatus" class="select">
+        <option value="">Status: All</option>
+        <option value="request">Request</option>
+        <option value="active">Active</option>
+        <option value="completed">Completed</option>
+        <option value="declined">Declined</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <select id="tMethod" class="select">
+        <option value="">Method: All</option>
+        <option value="Airtel Money">Airtel Money</option>
+        <option value="TNM Mpamba">TNM Mpamba</option>
+        <option value="National Bank">National Bank</option>
+        <option value="Standard Bank">Standard Bank</option>
+        <option value="NBS Bank">NBS Bank</option>
+        <option value="FDH Bank">FDH Bank</option>
+      </select>
+      <input id="tFrom" type="date" class="input date" />
+      <input id="tTo" type="date" class="input date" />
+      <div class="export-group">
+        <button id="btnCSV" class="btn small" type="button">Export CSV</button>
+        <button id="btnXLS" class="btn small" type="button">Export Excel</button>
+        <button id="btnPDF" class="btn small ghost" type="button">Export PDF</button>
+      </div>
+    </div>
+
+    <div class="tabs2" role="tablist">
+      <button id="tabReq" class="tab2 active" data-tab="requests" role="tab" aria-selected="true">📥 Requests <span id="countReq" class="tab-count">0</span></button>
+      <button id="tabAct" class="tab2" data-tab="active" role="tab" aria-selected="false">🔄 Active <span id="countAct" class="tab-count">0</span></button>
+      <button id="tabHist" class="tab2" data-tab="history" role="tab" aria-selected="false">📊 History <span id="countHist" class="tab-count">0</span></button>
+    </div>
+
+    <div id="listRequests" class="list"></div>
+    <div id="listActive" class="list" style="display:none;"></div>
+    <div id="listHistory" class="list" style="display:none;"></div>
+  </section>
+</template>
+
+<!-- Print area for PDF -->
+<div id="printArea" style="display:none;"></div>
+
+<script>
+(function(){
+  'use strict';
+  // Local utilities
+  const $ = (s,r=document)=> r.querySelector(s);
+  const $$= (s,r=document)=> Array.from(r.querySelectorAll(s));
+  const parse = (s,d)=>{ try{return JSON.parse(s)}catch(e){return d} };
+  const toast = (window.Core && Core.toast) ? Core.toast : (m)=>{ const t=document.getElementById('toast')||document.createElement('div'); t.id='toast'; t.className='toast'; t.textContent=m; document.body.appendChild(t); t.classList.add('show'); clearTimeout(window._t); window._t=setTimeout(()=>t.classList.remove('show'),2000); };
+  const now = ()=> new Date().toISOString();
+  const fmtMWK = v => 'MK ' + Number(v||0).toLocaleString();
+
+  const user = (localStorage.getItem('user')||'').toLowerCase() || 'guest';
+  const role = (localStorage.getItem('role')||'user').toLowerCase();
+  const TRADES_KEY = 'platform.p2p.trades';
+  const USERS_KEY  = 'platform.users';
+  const PREF_KEY   = `merchant.pref.${user}`;
+  const AUDIT_KEY  = `merchant.audit.${user}`;
+  const bus = ('BroadcastChannel' in window) ? new BroadcastChannel('cryptex') : null;
+
+  // Inject trades UI under main
+  window.addEventListener('DOMContentLoaded', ()=>{
+    const main = document.querySelector('main.container');
+    if(main && !document.getElementById('tSearch')){
+      const tpl = document.getElementById('tradesTpl');
+      main.appendChild(tpl.content.cloneNode(true));
+      initTradesUI();
+      renderAll();
+      updateCountsAndStats();
+    }
+  });
+
+  // Seed demo if empty
+  function seedIfEmpty(){
+    let trades = parse(localStorage.getItem(TRADES_KEY), []);
+    if(!Array.isArray(trades) || !trades.length){
+      trades = [
+        { id:'T-'+Date.now(), createdAt:now(), type:'buy',  amountUSDT:50,  rate:1650, totalMWK:82500, method:'Airtel Money', status:'request', user:'sarah@user.mw', merchant:'', reference:'RQ-'+Math.random().toString(36).slice(2,7).toUpperCase() },
+        { id:'T-'+(Date.now()-120000), createdAt:new Date(Date.now()-12*60*1000).toISOString(), type:'sell', amountUSDT:100, rate:1680, totalMWK:168000, method:'TNM Mpamba', status:'request', user:'james@user.mw', merchant:'', reference:'RQ-'+Math.random().toString(36).slice(2,7).toUpperCase() }
+      ];
+      localStorage.setItem(TRADES_KEY, JSON.stringify(trades));
+    }
+  }
+
+  function getUsersMap(){
+    const users = parse(localStorage.getItem(USERS_KEY), []);
+    const map = new Map();
+    users.forEach(u=> map.set((u.email||'').toLowerCase(), { name:u.name, phone:u.phone }));
+    return map;
+  }
+
+  function getTrades(){
+    seedIfEmpty();
+    const umap = getUsersMap();
+    let trades = parse(localStorage.getItem(TRADES_KEY), []);
+    let changed = false;
+    trades.forEach(t=>{
+      const u = umap.get((t.user||'').toLowerCase());
+      if(u){
+        if(!t.userName && u.name){ t.userName = u.name; changed = true; }
+        if(!t.userPhone && u.phone){ t.userPhone = u.phone; changed = true; }
+      }
+    });
+    if(changed) localStorage.setItem(TRADES_KEY, JSON.stringify(trades));
+    return trades.sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
+  }
+  function saveTrades(arr){
+    localStorage.setItem(TRADES_KEY, JSON.stringify(arr));
+    bus && bus.postMessage({ type:'p2p.trades.sync', payload: arr });
+  }
+
+  // Filter state
+  const state = { tab:'requests', q:'', type:'', status:'', method:'', from:'', to:'' };
+
+  function initTradesUI(){
+    // Tabs
+    [['tabReq','requests'],['tabAct','active'],['tabHist','history']].forEach(([id,tab])=>{
+      const btn = document.getElementById(id);
+      if(!btn || btn.dataset.bound) return;
+      btn.dataset.bound='1';
+      btn.addEventListener('click', ()=>{
+        $$('.tab2').forEach(x=>{ x.classList.remove('active'); x.setAttribute('aria-selected','false'); });
+        btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+        state.tab = tab;
+        document.getElementById('listRequests').style.display = tab==='requests' ? '' : 'none';
+        document.getElementById('listActive').style.display   = tab==='active'   ? '' : 'none';
+        document.getElementById('listHistory').style.display  = tab==='history'  ? '' : 'none';
+        renderAll();
+      });
+    });
+
+    // Filters
+    document.getElementById('tSearch')?.addEventListener('input', e=>{ state.q=e.target.value.trim().toLowerCase(); renderAll(); });
+    document.getElementById('tType')?.addEventListener('change', e=>{ state.type=e.target.value; renderAll(); });
+    document.getElementById('tStatus')?.addEventListener('change', e=>{ state.status=e.target.value; renderAll(); });
+    document.getElementById('tMethod')?.addEventListener('change', e=>{ state.method=e.target.value; renderAll(); });
+    document.getElementById('tFrom')?.addEventListener('change', e=>{ state.from=e.target.value; renderAll(); });
+    document.getElementById('tTo')?.addEventListener('change', e=>{ state.to=e.target.value; renderAll(); });
+
+    // Exports
+    document.getElementById('btnCSV')?.addEventListener('click', ()=> exportCSV(filteredTradesForCurrentTab()));
+    document.getElementById('btnXLS')?.addEventListener('click', ()=> exportExcel(filteredTradesForCurrentTab()));
+    document.getElementById('btnPDF')?.addEventListener('click', ()=> exportPDF(filteredTradesForCurrentTab()));
+
+    // Delegated actions
+    document.getElementById('listRequests')?.addEventListener('click', onActionClick);
+    document.getElementById('listActive')?.addEventListener('click', onActionClick);
+    document.getElementById('listHistory')?.addEventListener('click', onActionClick);
+  }
+
+  function applyFilters(list){
+    const inRange=(dt)=>{
+      if(!state.from && !state.to) return true;
+      const d=new Date(dt);
+      if(state.from && d < new Date(state.from+'T00:00:00')) return false;
+      if(state.to   && d > new Date(state.to+'T23:59:59')) return false;
+      return true;
+    };
+    return list.filter(t=>{
+      if(state.type && t.type!==state.type) return false;
+      if(state.status && t.status!==state.status) return false;
+      if(state.method && t.method!==state.method) return false;
+      if(state.q){
+        const blob = [t.reference, t.user, t.userName, t.userPhone, t.method, t.merchant].join(' ').toLowerCase();
+        if(!blob.includes(state.q) && !(t.amountUSDT+'').includes(state.q)) return false;
+      }
+      if(!inRange(t.createdAt)) return false;
+      return true;
+    });
+  }
+
+  function partitionTrades(trades){
+    const assignedToMe = (t)=> !t.merchant || t.merchant==='' || t.merchant===user;
+    const requests = trades.filter(t=> t.status==='request');
+    const active    = trades.filter(t=> t.status==='active'  && assignedToMe(t));
+    const history   = trades.filter(t=> ['completed','cancelled','declined'].includes(t.status) && assignedToMe(t));
+    return { requests, active, history };
+  }
+
+  function updateCountsAndStats(){
+    const trades = getTrades();
+    const { requests, active, history } = partitionTrades(trades);
+    document.getElementById('countReq').textContent  = requests.length;
+    document.getElementById('countAct').textContent  = active.length;
+    document.getElementById('countHist').textContent = history.length;
+
+    // Update dashboard stat tiles directly
+    const me = trades.filter(t=> t.merchant===user);
+    const start = new Date(); start.setHours(0,0,0,0);
+    const today = me.filter(t=> new Date(t.createdAt) >= start).length;
+    const completed = me.filter(t=> t.status==='completed').length;
+    const failed = me.filter(t=> ['cancelled','declined'].includes(t.status)).length;
+    const success = (completed + failed) > 0 ? Math.round((completed/(completed+failed))*100) + '%' : '—';
+    const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.textContent = val; };
+    set('statToday', today);
+    set('statTotal', me.length);
+    set('statSuccess', success);
+    // rating left as-is (could be set elsewhere)
+  }
+
+  function filteredTradesForCurrentTab(){
+    const trades = getTrades();
+    const parts = partitionTrades(trades);
+    const list = state.tab==='requests' ? parts.requests
+              : state.tab==='active'   ? parts.active
+              : parts.history;
+    return applyFilters(list);
+  }
+
+  function renderAll(){
+    const listReq = document.getElementById('listRequests');
+    const listAct = document.getElementById('listActive');
+    const listHist= document.getElementById('listHistory');
+    const trades = getTrades();
+    const parts = partitionTrades(trades);
+
+    renderList(listReq, applyFilters(parts.requests), 'requests');
+    renderList(listAct, applyFilters(parts.active), 'active');
+    renderList(listHist, applyFilters(parts.history), 'history');
+
+    updateCountsAndStats();
+  }
+
+  function renderList(container, list, kind){
+    if(!container) return;
+    container.innerHTML = '';
+    if(!list.length){
+      container.innerHTML = `<div class="empty">No ${kind} trades match this view.</div>`;
+      return;
+    }
+    list.forEach(t=>{
+      const el = document.createElement('div');
+      el.className = 'trade-card';
+      const name = t.userName || (t.user||'').split('@')[0] || 'User';
+      const initials = (name||'U').toString().trim()[0]?.toUpperCase() || 'U';
+      const typeBadge = t.type==='buy' ? '<span class="badge b-buy">BUY</span>' : '<span class="badge b-sell">SELL</span>';
+      const statusBadge = `<span class="badge b-status">${t.status.toUpperCase()}</span>`;
+      el.innerHTML = `
+        <div class="trade-header">
+          <div class="trade-meta">
+            <div class="avatar">${initials}</div>
+            <div>
+              <div style="font-weight:900">${name}</div>
+              <div style="font-size:.82rem; color:#9E9E9E;">${new Date(t.createdAt).toLocaleString()} · Ref: ${t.reference}</div>
+            </div>
+          </div>
+          <div>${typeBadge} ${statusBadge}</div>
+        </div>
+        <div class="trade-grid">
+          <div>Amount: <strong>${(+t.amountUSDT).toFixed(2)} USDT</strong></div>
+          <div>Rate: <strong>${fmtMWK(t.rate)}</strong></div>
+          <div>Total: <strong>${fmtMWK(t.totalMWK)}</strong></div>
+          <div>Method: <strong>${t.method}</strong></div>
+          <div style="grid-column:1/-1;">
+            <div style="display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:.5rem;">
+              <div>User: <strong>${name}</strong></div>
+              <div>Email: <strong>${t.user || '—'}</strong></div>
+              <div>Phone: <strong>${t.userPhone || '—'}</strong></div>
+            </div>
+          </div>
+        </div>
+        <div class="trade-actions">
+          ${kind==='requests' ? `
+            <button class="btn small" data-act="accept" data-id="${t.id}">Accept</button>
+            <button class="btn small ghost" data-act="decline" data-id="${t.id}">Decline</button>
+            <button class="btn small" data-act="view" data-id="${t.id}">View</button>
+          ` : kind==='active' ? `
+            <button class="btn small" data-act="complete" data-id="${t.id}">Mark Completed</button>
+            <button class="btn small ghost" data-act="cancel" data-id="${t.id}">Cancel</button>
+            <button class="btn small" data-act="view" data-id="${t.id}">View</button>
+          ` : `
+            <button class="btn small" data-act="view" data-id="${t.id}">Details</button>
+          `}
+        </div>
+      `;
+      container.appendChild(el);
+    });
+  }
+
+  function recordAudit(type,title,detail){
+    const list = parse(localStorage.getItem(AUDIT_KEY), []);
+    list.push({ id:'A-'+(Date.now().toString(36)+Math.random().toString(36).slice(2,6)).toUpperCase(), type, title, detail, createdAt: now() });
+    localStorage.setItem(AUDIT_KEY, JSON.stringify(list.slice(-500)));
+  }
+
+  function onActionClick(e){
+    const btn = e.target.closest('button[data-act]');
+    if(!btn) return;
+    const act = btn.getAttribute('data-act');
+    const id  = btn.getAttribute('data-id');
+    let trades = getTrades();
+    const ix = trades.findIndex(x=>x.id===id);
+    if(ix<0) return;
+
+    if(act==='accept'){
+      if(trades[ix].status!=='request') return toast('Not a request anymore');
+      trades[ix].status='active';
+      trades[ix].acceptedAt=now();
+      trades[ix].merchant=user;
+      saveTrades(trades); renderAll();
+      toast('Trade accepted');
+      recordAudit('trade','Accepted trade', `Ref ${trades[ix].reference}`);
+      bus && bus.postMessage({ type:'p2p.trade.update', payload: trades[ix] });
+
+      // Auto-open if enabled (details modal may arrive in later chunks)
+      const pref = parse(localStorage.getItem(PREF_KEY), { autoOpen:false });
+      if(pref.autoOpen){ /* if openTradeModal available later */ }
+
+    }else if(act==='decline'){
+      if(trades[ix].status!=='request') return toast('Not a request anymore');
+      trades[ix].status='declined';
+      trades[ix].declinedAt=now();
+      trades[ix].merchant=user;
+      saveTrades(trades); renderAll();
+      toast('Trade declined');
+      recordAudit('trade','Declined trade', `Ref ${trades[ix].reference}`);
+      bus && bus.postMessage({ type:'p2p.trade.update', payload: trades[ix] });
+
+    }else if(act==='complete'){
+      if(trades[ix].status!=='active') return toast('Trade is not active');
+      trades[ix].status='completed';
+      trades[ix].completedAt=now();
+      saveTrades(trades); renderAll();
+      toast('Trade marked completed');
+      recordAudit('trade','Completed trade', `Ref ${trades[ix].reference}`);
+      bus && bus.postMessage({ type:'p2p.trade.update', payload: trades[ix] });
+
+    }else if(act==='cancel'){
+      if(trades[ix].status!=='active') return toast('Trade is not active');
+      trades[ix].status='cancelled';
+      trades[ix].cancelledAt=now();
+      saveTrades(trades); renderAll();
+      toast('Trade cancelled');
+      recordAudit('trade','Cancelled trade', `Ref ${trades[ix].reference}`);
+      bus && bus.postMessage({ type:'p2p.trade.update', payload: trades[ix] });
+
+    }else if(act==='view'){
+      if(typeof window.openTradeModal==='function'){ window.openTradeModal(trades[ix].id); }
+      else toast('Details will be available shortly');
+    }
+  }
+
+  // Exports
+  function toRows(items){
+    const head = ['Date','Ref','Type','Amount(USDT)','Rate(MK)','Total(MK)','Method','Status','User Name','User Email','User Phone','Merchant'];
+    const rows = items.map(t=>[
+      new Date(t.createdAt).toLocaleString(), t.reference, t.type.toUpperCase(),
+      (+t.amountUSDT||0).toFixed(2), t.rate, t.totalMWK, t.method, t.status,
+      t.userName||'', t.user||'', t.userPhone||'', t.merchant||''
+    ]);
+    return [head, ...rows];
+  }
+  function exportCSV(items){
+    const rows = toRows(items);
+    const csv = rows.map(r=> r.map(v=> `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `cryptex_trades_${Date.now()}.csv`;
+    a.click();
+  }
+  function exportExcel(items){
+    const rows = toRows(items);
+    const html = `
+      <html><head><meta charset="UTF-8"></head><body>
+      <table border="1" cellspacing="0" cellpadding="4">
+        ${rows.map((r,i)=> `<tr>${r.map(c=> i===0 ? `<th>${c}</th>` : `<td>${c}</td>`).join('')}</tr>`).join('')}
+      </table>
+      </body></html>`;
+    const blob = new Blob([html], {type:'application/vnd.ms-excel'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `cryptex_trades_${Date.now()}.xls`;
+    a.click();
+  }
+  function exportPDF(items){
+    const area = document.getElementById('printArea');
+    const rows = toRows(items);
+    area.innerHTML = `
+      <div style="padding:16px; font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial; color:#000;">
+        <h2 style="margin:0 0 8px;">Cryptex Trades Report</h2>
+        <div style="margin:0 0 12px; font-size:12px;">Generated: ${new Date().toLocaleString()} · Merchant: ${user}</div>
+        <table style="width:100%; border-collapse:collapse;">
+          <thead>
+            <tr>${rows[0].map(h=>`<th style="border:1px solid #000; padding:6px; text-align:left; background:#eee;">${h}</th>`).join('')}</tr>
+          </thead>
+          <tbody>
+            ${rows.slice(1).map(r=> `<tr>${r.map(c=> `<td style="border:1px solid #000; padding:6px;">${c}</td>`).join('')}</tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    setTimeout(()=> window.print(), 50);
+  }
+
+  // Live updates from admin/other tabs
+  window.addEventListener('storage', (e)=>{
+    if(e.key===TRADES_KEY || e.key===USERS_KEY){ renderAll(); }
+  });
+  if(bus) bus.onmessage = (ev)=>{
+    const m = ev?.data || {};
+    if(m.type==='p2p.trade.new' || m.type==='p2p.trade.update' || m.type==='p2p.trades.sync'){ renderAll(); }
+  };
+
+})();
+</script>
+<!-- END CHUNK 2/8 -->
+ <!-- CHUNK 3/8: Preferences (auto-accept), Pull New, Bulk actions, Trade Details modal -->
+<style>
+  /* Preferences row above toolbar */
+  .pref-row{
+    display:flex; align-items:center; gap:.6rem .8rem; flex-wrap:wrap;
+    background:#1b1b1b; border:1px solid #333; border-radius:10px; padding:.6rem .75rem; margin:.75rem 0;
+  }
+  .switch{ position:relative; width:50px; height:26px; background:#444; border-radius:999px; cursor:pointer; border:1px solid #333; }
+  .switch.active{ background: rgba(76,175,80,.85); }
+  .switch .knob{ position:absolute; top:2px; left:2px; width:22px; height:22px; background:#fff; border-radius:50%; transition: transform .25s ease; }
+  .switch.active .knob{ transform: translateX(24px); }
+  .check-group{ display:flex; gap:.4rem .5rem; flex-wrap:wrap; }
+  .check-pill{ display:inline-flex; align-items:center; gap:.35rem; border:1px solid #444; background:#121212; color:#eee; padding:.3rem .55rem; border-radius:999px; }
+  .check-pill input{ accent-color: var(--gold); }
+
+  /* Bulk bar */
+  .bulkbar{
+    display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; background:#1b1b1b; border:1px solid #333; border-radius:10px; padding:.55rem .7rem; margin:.6rem 0 .2rem;
+  }
+  .bulkbar .spacer{ flex:1 1 auto; }
+  .bulkbar .count{ color:#cfcfcf; }
+  .bulkbar .btn{ padding:.45rem .7rem; font-size:.9rem; }
+
+  /* Selection checkbox injected into trade-card */
+  .selbox{ display:inline-flex; align-items:center; gap:.35rem; color:#cfcfcf; font-size:.85rem; }
+  .selbox input{ width:16px; height:16px; accent-color: var(--gold); }
+
+  /* Trade modal */
+  .modal3{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:2050; }
+  .panel3{
+    background:#111; border:1px solid rgba(212,175,55,.3); border-radius:14px; width:min(92vw, 720px);
+    margin:4% auto; box-shadow:0 0 40px rgba(212,175,55,.25); overflow:hidden;
+  }
+  .head3{ padding:1rem 1.1rem; border-bottom:1px solid #333; display:flex; align-items:center; justify-content:space-between; }
+  .title3{ margin:0; color:var(--gold-2); font-weight:900; }
+  .body3{ padding:1rem 1.1rem; display:grid; gap:.8rem; }
+  .row2{ display:grid; grid-template-columns: 1fr 1fr; gap:.6rem; }
+  @media (max-width:720px){ .row2{ grid-template-columns: 1fr; } }
+  .field{ display:flex; flex-direction:column; gap:.25rem; }
+  .label{ color:#c9b882; font-size:.9rem; font-weight:700; }
+  .ro{ background:#1b1b1b; border:1px solid #333; color:#eaeaea; padding:.55rem .6rem; border-radius:10px; }
+  .in{ background:#1b1b1b; border:1px solid #444; color:#fff; padding:.55rem .6rem; border-radius:10px; outline:none; }
+  .note{ min-height:80px; resize:vertical; }
+  .foot3{ display:flex; gap:.5rem; justify-content:flex-end; flex-wrap:wrap; padding:0 1.1rem 1rem; }
+</style>
+
+<!-- Trade Details Modal -->
+<template id="tradeModalTpl">
+  <div id="tradeModal" class="modal3" role="dialog" aria-modal="true" aria-labelledby="tradeModalTitle">
+    <div class="panel3">
+      <div class="head3">
+        <h3 id="tradeModalTitle" class="title3">Trade Details</h3>
+        <button id="tradeCloseBtn" class="btn small" type="button">Close</button>
+      </div>
+      <div class="body3">
+        <div class="row2">
+          <div class="field">
+            <div class="label">Reference</div>
+            <input id="tmRef" class="ro" readonly>
+          </div>
+          <div class="field">
+            <div class="label">Status</div>
+            <input id="tmStatus" class="ro" readonly>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <div class="label">Type</div>
+            <input id="tmType" class="ro" readonly>
+          </div>
+          <div class="field">
+            <div class="label">Method</div>
+            <input id="tmMethod" class="ro" readonly>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <div class="label">Amount (USDT)</div>
+            <input id="tmAmount" class="ro" readonly>
+          </div>
+          <div class="field">
+            <div class="label">Rate (MK per 1 USDT)</div>
+            <input id="tmRate" class="in" type="number" min="1">
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <div class="label">Total (MWK)</div>
+            <input id="tmTotal" class="ro" readonly>
+          </div>
+          <div class="field">
+            <div class="label">User</div>
+            <div style="display:flex; align-items:center; gap:.5rem;">
+              <input id="tmUser" class="ro" readonly>
+              <a id="tmContact" class="btn small" target="_blank" rel="noopener">Email</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="label">Internal Notes</div>
+          <textarea id="tmNotes" class="in note" placeholder="Private note (visible to you and admin)"></textarea>
+        </div>
+
+        <div class="field">
+          <div class="label">Timeline</div>
+          <div id="tmTimeline" class="ro" style="max-height:160px; overflow:auto; white-space:pre-wrap;"></div>
+        </div>
+      </div>
+
+      <div class="foot3" id="tmActions">
+        <!-- buttons injected by status -->
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+(function(){
+  'use strict';
+  // Utilities and keys
+  const $ = (s,r=document)=> r.querySelector(s);
+  const $$= (s,r=document)=> Array.from(r.querySelectorAll(s));
+  const parse = (s,d)=>{ try{return JSON.parse(s)}catch(e){return d} };
+  const toast = (window.Core && Core.toast) ? Core.toast : (m)=>{ const t=document.getElementById('toast')||document.createElement('div'); t.id='toast'; t.className='toast'; t.textContent=m; document.body.appendChild(t); t.classList.add('show'); clearTimeout(window._t); window._t=setTimeout(()=>t.classList.remove('show'),2000); };
+  const now = ()=> new Date().toISOString();
+  const fmtMWK = v => 'MK ' + Number(v||0).toLocaleString();
+
+  const user = (localStorage.getItem('user')||'').toLowerCase() || 'guest';
+  const PREF_KEY   = `merchant.pref.${user}`;
+  const TRADES_KEY = 'platform.p2p.trades';
+  const AUDIT_KEY  = `merchant.audit.${user}`;
+  const bus3 = ('BroadcastChannel' in window) ? new BroadcastChannel('cryptex') : null;
+
+  const METHODS = ['Airtel Money','TNM Mpamba','National Bank','Standard Bank','NBS Bank','FDH Bank'];
+
+  // Log wrapper (uses chunk 1 activity if available)
+  function record(type,title,detail){
+    if(typeof recordActivity==='function'){ recordActivity(type,title,detail); return; }
+    const list = parse(localStorage.getItem(AUDIT_KEY), []);
+    list.push({ id:'A-'+(Date.now().toString(36)+Math.random().toString(36).slice(2,6)).toUpperCase(), type, title, detail, createdAt: now() });
+    localStorage.setItem(AUDIT_KEY, JSON.stringify(list.slice(-500)));
+  }
+
+  function getTrades(){ return parse(localStorage.getItem(TRADES_KEY), []).sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt)); }
+  function saveTrades(arr, broadcast=true){
+    localStorage.setItem(TRADES_KEY, JSON.stringify(arr));
+    if(broadcast && bus3) bus3.postMessage({ type:'p2p.trades.sync', payload: arr });
+  }
+
+  function getPlatformRates(){
+    const admin = parse(localStorage.getItem('platform.rates'), {});
+    const live = parseFloat(localStorage.getItem('fxRateMWK') || '1770') || 1770;
+    let buy = +admin.buy || live; let sell = +admin.sell || buy;
+    return { buy, sell };
+  }
+
+  // ===== Preferences row: Auto-accept & Methods + Pull New =====
+  function enhanceTradeCenterUI(){
+    const card = document.getElementById('tSearch')?.closest('section.card');
+    const toolbar = document.getElementById('tSearch')?.closest('.toolbar');
+    if(!card || !toolbar) return;
+
+    // Pull New in export group
+    const ex = card.querySelector('.export-group');
+    if(ex && !document.getElementById('btnPull')){
+      const btn = document.createElement('button');
+      btn.id='btnPull'; btn.className='btn small primary'; btn.type='button';
+      btn.textContent='Pull New';
+      btn.title = 'Pull new P2P requests (demo/local)';
+      ex.prepend(btn);
+      btn.addEventListener('click', pullNewRequests);
+    }
+
+    // Preferences strip
+    if(!card.querySelector('.pref-row')){
+      const pref = parse(localStorage.getItem(PREF_KEY), { autoAccept:false, methods:[] });
+      const row = document.createElement('div'); row.className='pref-row';
+      row.innerHTML = `
+        <div style="display:flex; align-items:center; gap:.55rem;">
+          <div id="autoAssignSwitch" class="switch${pref.autoAccept?' active':''}" role="switch" aria-checked="${pref.autoAccept}">
+            <div class="knob"></div>
+          </div>
+          <div style="color:#cfcfcf;">Auto-accept matching requests</div>
+        </div>
+        <div class="check-group" id="prefMethods"></div>
+      `;
+      card.insertBefore(row, toolbar);
+
+      // Methods chips
+      const wrap = row.querySelector('#prefMethods');
+      METHODS.forEach(m=>{
+        const id = 'pm-' + m.replace(/\s+/g,'-');
+        const div = document.createElement('label'); div.className='check-pill';
+        div.innerHTML = `<input type="checkbox" id="${id}" value="${m}"> ${m}`;
+        wrap.appendChild(div);
+      });
+      // Apply stored selection
+      (pref.methods||[]).forEach(m=>{
+        const cb = document.getElementById('pm-'+m.replace(/\s+/g,'-')); if(cb) cb.checked = true;
+      });
+
+      // Toggle auto-accept
+      row.querySelector('#autoAssignSwitch')?.addEventListener('click', ()=>{
+        const cur = parse(localStorage.getItem(PREF_KEY), { autoAccept:false, methods:[] });
+        cur.autoAccept = !cur.autoAccept;
+        localStorage.setItem(PREF_KEY, JSON.stringify(cur));
+        row.querySelector('#autoAssignSwitch').classList.toggle('active', cur.autoAccept);
+        row.querySelector('#autoAssignSwitch').setAttribute('aria-checked', cur.autoAccept);
+        toast(cur.autoAccept ? 'Auto-accept enabled' : 'Auto-accept disabled');
+      });
+
+      // Save method prefs on change
+      row.addEventListener('change', (e)=>{
+        if(e.target.type==='checkbox'){
+          const cur = parse(localStorage.getItem(PREF_KEY), { autoAccept:false, methods:[] });
+          const set = new Set(cur.methods || []);
+          if(e.target.checked) set.add(e.target.value); else set.delete(e.target.value);
+          cur.methods = Array.from(set);
+          localStorage.setItem(PREF_KEY, JSON.stringify(cur));
+        }
+      });
+    }
+
+    // Bulk bar
+    injectBulkBar(toolbar);
+    // Selection observers
+    setupSelectionObservers();
+  }
+
+  // ===== Pull New Requests (demo) =====
+  function pullNewRequests(){
+    const { buy, sell } = getPlatformRates();
+    const choose = (arr)=> arr[Math.floor(Math.random()*arr.length)];
+    const makeTrade = ()=>{
+      const type = Math.random() > .5 ? 'buy' : 'sell';
+      const amount = choose([25,50,75,100,150]);
+      const rate = type==='buy' ? buy : sell;
+      const method = choose(METHODS);
+      const id = 'T-' + (Date.now() + Math.floor(Math.random()*1000));
+      const userNum = Math.floor(Math.random()*900)+100;
+      const email = `user${userNum}@mail.mw`;
+      const phone = '+265' + (Math.floor(100000000 + Math.random()*899999999));
+      const name = `User ${userNum}`;
+      return {
+        id, createdAt: now(), type, amountUSDT: amount, rate, totalMWK: Math.round(amount*rate),
+        method, status:'request', user: email, userName: name, userPhone: phone,
+        merchant:'', reference:'RQ-'+Math.random().toString(36).slice(2,7).toUpperCase()
+      };
+    };
+
+    const trades = getTrades();
+    const n = 1 + Math.floor(Math.random()*3);
+    for(let i=0;i<n;i++) trades.unshift(makeTrade());
+    saveTrades(trades);
+    toast(`${n} new request${n>1?'s':''} pulled`);
+    record('trade','New request(s) pulled', `+${n}`);
+    autoAssignNew(trades.slice(0,n));
+  }
+
+  // ===== Selection & Bulk actions =====
+  const selected = new Set();
+
+  function injectSelectionControls(container){
+    $$('.trade-card', container).forEach(card=>{
+      if(card.querySelector('.selbox')) return;
+
+      // Try to find any data-id
+      let id = card.querySelector('[data-id]')?.getAttribute('data-id') || '';
+      // Fallback via reference text
+      if(!id){
+        const refMatch = card.innerText.match(/Ref:\s([A-Z0-9-]+)/i);
+        const ref = refMatch ? refMatch[1] : '';
+        const t = getTrades().find(x=> x.reference === ref);
+        id = t?.id || '';
+      }
+
+      // Inject checkbox
+      const hdr = card.querySelector('.trade-header') || card;
+      const left = hdr.querySelector('.trade-meta') || hdr;
+      const sel = document.createElement('label');
+      sel.className='selbox';
+      sel.innerHTML = `<input type="checkbox" data-sel="${id}"> Select`;
+      left.prepend(sel);
+
+      // Ensure View button exists
+      const actions = card.querySelector('.trade-actions');
+      if(actions && !actions.querySelector('[data-view]') && id){
+        const b = document.createElement('button');
+        b.className='btn small ghost';
+        b.setAttribute('data-view','1');
+        b.setAttribute('data-id', id);
+        b.type='button';
+        b.textContent='View';
+        actions.appendChild(b);
+        actions.addEventListener('click', (e)=>{
+          const vb = e.target.closest('button[data-view]'); if(!vb) return;
+          openTradeModal(vb.getAttribute('data-id'));
+        });
+      }
+
+      sel.addEventListener('change', (e)=>{
+        const box = e.target.closest('input[type="checkbox"][data-sel]');
+        if(!box) return;
+        const tid = box.getAttribute('data-sel');
+        if(box.checked) selected.add(tid); else selected.delete(tid);
+        updateBulkBarState();
+      });
+    });
+  }
+
+  function setupSelectionObservers(){
+    ['#listRequests','#listActive','#listHistory'].forEach(sel=>{
+      const container = document.querySelector(sel);
+      if(!container) return;
+      const mo = new MutationObserver(()=> injectSelectionControls(container));
+      mo.observe(container, { childList:true });
+      injectSelectionControls(container);
+    });
+  }
+
+  function injectBulkBar(toolbar){
+    if(document.getElementById('bulkBar')) return;
+    const bulk = document.createElement('div'); bulk.className='bulkbar'; bulk.id='bulkBar';
+    bulk.innerHTML = `
+      <label class="selbox"><input id="selAll" type="checkbox"> Select all</label>
+      <span class="count">Selected: <strong id="selCount">0</strong></span>
+      <div class="spacer"></div>
+      <button id="bAccept" class="btn small" type="button">Accept</button>
+      <button id="bDecline" class="btn small ghost" type="button">Decline</button>
+      <button id="bComplete" class="btn small" type="button">Complete</button>
+      <button id="bCancel" class="btn small ghost" type="button">Cancel</button>
+      <button id="bExport" class="btn small" type="button">Export</button>
+      <button id="bClear" class="btn small" type="button">Clear</button>
+    `;
+    toolbar.after(bulk);
+
+    // Wire
+    document.getElementById('selAll').addEventListener('change', (e)=>{
+      const tab = currentTab();
+      const list = tab==='requests' ? '#listRequests' : tab==='active' ? '#listActive' : '#listHistory';
+      $$('.trade-card', document.querySelector(list)).forEach(card=>{
+        const cb = card.querySelector('input[type="checkbox"][data-sel]');
+        if(cb){ cb.checked = e.target.checked; cb.dispatchEvent(new Event('change')); }
+      });
+    });
+    document.getElementById('bAccept').addEventListener('click', ()=> bulkChangeStatus('accept'));
+    document.getElementById('bDecline').addEventListener('click', ()=> bulkChangeStatus('decline'));
+    document.getElementById('bComplete').addEventListener('click', ()=> bulkChangeStatus('complete'));
+    document.getElementById('bCancel').addEventListener('click', ()=> bulkChangeStatus('cancel'));
+    document.getElementById('bExport').addEventListener('click', ()=> bulkExport());
+    document.getElementById('bClear').addEventListener('click', ()=> { selected.clear(); updateBulkBarState(); document.getElementById('selAll').checked=false; });
+
+    updateBulkBarState();
+  }
+
+  function currentTab(){
+    const a = document.querySelector('.tab2.active');
+    return a ? a.getAttribute('data-tab') : 'requests';
+  }
+
+  function updateBulkBarState(){
+    const count = selected.size;
+    const tab = currentTab();
+    const show = (id, on)=> document.getElementById(id).style.display = on ? '' : 'none';
+
+    document.getElementById('selCount').textContent = count;
+    const onReq = (tab==='requests'), onAct = (tab==='active');
+    show('bAccept',   onReq);
+    show('bDecline',  onReq);
+    show('bComplete', onAct);
+    show('bCancel',   onAct);
+    show('bExport',   count>0);
+  }
+
+  function bulkExport(){
+    if(!selected.size) return toast('No trades selected');
+    const trades = getTrades().filter(t=> selected.has(t.id));
+    if(window.exportCSV) return window.exportCSV(trades);
+    // Fallback quick CSV
+    const head = 'Date,Ref,Type,Amount(USDT),Rate(MK),Total(MK),Method,Status,User,Merchant\n';
+    const rows = trades.map(t=>[
+      new Date(t.createdAt).toLocaleString(), t.reference, t.type.toUpperCase(), (+t.amountUSDT||0).toFixed(2),
+      t.rate, t.totalMWK, t.method, t.status, t.user||'', t.merchant||''
+    ].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([head+rows], {type:'text/csv'}); const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download = `selected_trades_${Date.now()}.csv`; a.click();
+  }
+
+  function bulkChangeStatus(action){
+    if(!selected.size) return toast('No trades selected');
+    const trades = getTrades();
+    let changed = 0;
+    trades.forEach(t=>{
+      if(!selected.has(t.id)) return;
+      if(action==='accept' && t.status==='request'){
+        t.status='active'; t.acceptedAt=now(); t.merchant=user; changed++;
+      }else if(action==='decline' && t.status==='request'){
+        t.status='declined'; t.declinedAt=now(); t.merchant=user; changed++;
+      }else if(action==='complete' && t.status==='active'){
+        t.status='completed'; t.completedAt=now(); changed++;
+      }else if(action==='cancel' && t.status==='active'){
+        t.status='cancelled'; t.cancelledAt=now(); changed++;
+      }
+    });
+    if(!changed) return toast('Nothing to update for the selected items');
+    saveTrades(trades);
+    toast(`Updated ${changed} trade${changed>1?'s':''}`);
+    record('trade', 'Bulk update', `${action} x${changed}`);
+    selected.clear(); updateBulkBarState();
+  }
+
+  // ===== Trade modal =====
+  window.openTradeModal = function(id){
+    const trades = getTrades();
+    const t = trades.find(x=>x.id===id); if(!t) return toast('Trade not found');
+    // Create modal if not present
+    if(!document.getElementById('tradeModal')){
+      const tpl = document.getElementById('tradeModalTpl');
+      tpl && document.body.appendChild(tpl.content.cloneNode(true));
+    }
+
+    const modal = document.getElementById('tradeModal'); if(!modal) return;
+    const ttl = document.getElementById('tradeModalTitle');
+    const ref = document.getElementById('tmRef'), st = document.getElementById('tmStatus'), ty = document.getElementById('tmType'), mtd = document.getElementById('tmMethod');
+    const amt = document.getElementById('tmAmount'), rate = document.getElementById('tmRate'), tot = document.getElementById('tmTotal');
+    const usr = document.getElementById('tmUser'), cta = document.getElementById('tmContact'), notes = document.getElementById('tmNotes'), tl = document.getElementById('tmTimeline');
+    const acts = document.getElementById('tmActions');
+
+    ttl.textContent = `${t.type.toUpperCase()} · ${t.status.toUpperCase()}`;
+    ref.value = t.reference; st.value = t.status.toUpperCase(); ty.value = t.type.toUpperCase(); mtd.value = t.method;
+    amt.value = (+t.amountUSDT||0).toFixed(2); rate.value = Math.round(+t.rate||0); tot.value = Math.round(+t.totalMWK||0);
+    usr.value = t.user || '';
+    cta.textContent = t.user ? 'Email' : 'Contact';
+    cta.href = t.user ? `mailto:${t.user}?subject=Cryptex Trade ${t.reference}` : '#';
+    notes.value = t.note || '';
+
+    const events = [
+      t.createdAt && `Created: ${new Date(t.createdAt).toLocaleString()}`,
+      t.acceptedAt && `Accepted: ${new Date(t.acceptedAt).toLocaleString()}`,
+      t.completedAt && `Completed: ${new Date(t.completedAt).toLocaleString()}`,
+      t.cancelledAt && `Cancelled: ${new Date(t.cancelledAt).toLocaleString()}`,
+      t.declinedAt && `Declined: ${new Date(t.declinedAt).toLocaleString()}`
+    ].filter(Boolean);
+    tl.textContent = events.length ? events.join('\n') : 'No events yet';
+
+    acts.innerHTML = '';
+    function addBtn(id, label, cls=''){ const b=document.createElement('button'); b.id=id; b.className='btn '+cls; b.type='button'; b.textContent=label; acts.appendChild(b); return b; }
+    if(t.status==='request'){
+      addBtn('tmAccept','Accept');
+      addBtn('tmDecline','Decline','ghost');
+      rate.disabled = false; notes.disabled = false;
+    }else if(t.status==='active'){
+      addBtn('tmComplete','Mark Completed');
+      addBtn('tmCancel','Cancel','ghost');
+      rate.disabled = false; notes.disabled = false;
+    }else{
+      addBtn('tmClose','Close');
+      rate.disabled = true; notes.disabled = false;
+    }
+
+    rate.oninput = ()=>{ const r = Math.max(1, Math.round(+rate.value||0)); tot.value = Math.round((+t.amountUSDT||0) * r); };
+
+    acts.onclick = (e)=>{
+      const idb = e.target.id;
+      if(!idb) return;
+      if(idb==='tmAccept'){ t.status='active'; t.acceptedAt=now(); t.merchant=user; record('trade','Accepted trade',`Ref ${t.reference}`); }
+      else if(idb==='tmDecline'){ t.status='declined'; t.declinedAt=now(); t.merchant=user; record('trade','Declined trade',`Ref ${t.reference}`); }
+      else if(idb==='tmComplete'){ t.status='completed'; t.completedAt=now(); record('trade','Completed trade',`Ref ${t.reference}`); }
+      else if(idb==='tmCancel'){ t.status='cancelled'; t.cancelledAt=now(); record('trade','Cancelled trade',`Ref ${t.reference}`); }
+      else if(idb==='tmClose'){ closeTradeModal(); return; }
+
+      // Persist rate and notes
+      const r = Math.max(1, Math.round(+rate.value||t.rate));
+      t.rate = r; t.totalMWK = Math.round((+t.amountUSDT||0) * r);
+      t.note = notes.value || '';
+      const all = getTrades();
+      const ix = all.findIndex(x=>x.id===t.id);
+      if(ix>-1) all[ix]=t;
+      saveTrades(all);
+      toast('Updated');
+      closeTradeModal();
+    };
+
+    document.getElementById('tradeCloseBtn').onclick = closeTradeModal;
+    modal.style.display='block';
+    setTimeout(()=> document.getElementById('tradeCloseBtn')?.focus(), 30);
+    const onEsc = (e)=>{ if(e.key==='Escape'){ closeTradeModal(); window.removeEventListener('keydown', onEsc);} };
+    window.addEventListener('keydown', onEsc);
+    modal.addEventListener('click', (e)=>{ if(e.target===modal) closeTradeModal(); }, { once:true });
+  };
+  function closeTradeModal(){
+    const modal = document.getElementById('tradeModal'); if(!modal) return;
+    modal.style.display='none';
+  }
+
+  // ===== Auto-assign engine =====
+  function autoAssignNew(candidates){
+    const pref = parse(localStorage.getItem(PREF_KEY), { autoAccept:false, methods:[] });
+    if(!pref.autoAccept) return;
+    if(!Array.isArray(candidates) || !candidates.length) return;
+    const trades = getTrades();
+    let changed = 0;
+    trades.forEach(t=>{
+      if(t.status!=='request') return;
+      const isNew = candidates.find(c=> c.id===t.id);
+      if(!isNew) return;
+      if(pref.methods.length && !pref.methods.includes(t.method)) return;
+      t.status='active'; t.acceptedAt=now(); t.merchant=user; changed++;
+    });
+    if(changed){
+      saveTrades(trades);
+      toast(`Auto-accepted ${changed} request${changed>1?'s':''}`);
+      record('trade','Auto-accepted', `x${changed}`);
+    }
+  }
+
+  function setupAutoAssign(){
+    if(bus3){
+      bus3.addEventListener('message', (ev)=>{
+        const m = ev?.data || {};
+        if(m.type==='p2p.trade.new'){ autoAssignNew([m.payload]); }
+        if(m.type==='p2p.trades.sync'){ autoAssignNew(m.payload); }
+      });
+    }
+    window.addEventListener('storage', (e)=>{
+      if(e.key===TRADES_KEY){ autoAssignNew(parse(localStorage.getItem(TRADES_KEY), [])); }
+    });
+  }
+
+  // Init for this chunk
+  window.addEventListener('DOMContentLoaded', ()=>{
+    enhanceTradeCenterUI();
+    setupAutoAssign();
+  });
+
+})();
+</script>
+<!-- END CHUNK 3/8 -->
+ <!-- CHUNK 4/8: Merchants Directory (popup only) with filters, cards, profile/report, Start Trade -->
+<style>
+  /* Directory UI */
+  .dir-toolbar{ display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; margin-bottom:.6rem; }
+  .dir-in, .dir-sel, .dir-chip{
+    background:#1E1E1E; border:1px solid #444; color:#fff; padding:.55rem .6rem; border-radius:10px; font-size:.95rem;
+  }
+  .dir-in{ flex:1 1 240px; }
+  .dir-sel{ min-width:160px; }
+  .dir-chip{ color:#E0C16A; cursor:pointer; }
+  .dir-chip input{ margin-right:.35rem; accent-color: var(--gold); }
+
+  .dir-stats{ color:#cfcfcf; }
+
+  .m-card{ background:#2C2C2C; border:1px solid #3a3a3a; padding:1rem; border-radius:12px; margin-bottom:.75rem;
+    transition: transform .2s, border-color .2s, box-shadow .2s; }
+  .m-card:hover{ transform: translateY(-2px); border-color: var(--gold,#D4AF37); box-shadow: 0 8px 24px rgba(212,175,55,.25); }
+  .m-hd{ display:flex; justify-content:space-between; gap:.5rem; }
+  .m-name{ display:flex; align-items:center; gap:.5rem; font-weight:900; font-size:1.05rem; color:#E0C16A; }
+  .badge{ border:1px solid var(--gold,#D4AF37); color:#121212; background: linear-gradient(135deg,var(--gold,#D4AF37),var(--gold-2,#E0C16A)); font-size:.72rem; padding:.1rem .5rem; border-radius:999px; font-weight:800; }
+  .kyc{ border:1px solid var(--gold-2,#E0C16A); color:var(--gold-2,#E0C16A); background:transparent; font-size:.72rem; padding:.1rem .5rem; border-radius:999px; font-weight:800; }
+  .online{ color:#4CAF50; } .offline{ color:#F44336; }
+  .chips{ display:flex; gap:.35rem; flex-wrap:wrap; margin:.35rem 0 .1rem; }
+  .chipx{ padding:.25rem .55rem; border:1px solid #444; border-radius:999px; font-size:.78rem; color:#E0C16A; background:#1E1E1E; }
+  .chipx.m{ border-color: var(--gold,#D4AF37); }
+  .row-min{ display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; justify-content:space-between; }
+  .m-sub{ display:grid; grid-template-columns: repeat(2,1fr); gap:.5rem .75rem; color:#C9C9C9; font-size:.92rem; margin:.5rem 0; }
+  @media (min-width: 800px){ .m-sub{ grid-template-columns: repeat(4,1fr); } }
+
+  .m-actions{ display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.6rem; }
+  .btn{ padding:.55rem .85rem; border-radius:10px; border:1px solid var(--gold,#D4AF37); cursor:pointer; background:#2C2C2C; color:var(--gold,#D4AF37); font-weight:800; }
+  .btn.primary{ background:linear-gradient(135deg,var(--gold,#D4AF37),var(--gold-2,#E0C16A)); border:none; color:#121212; }
+  .btn.small{ padding:.35rem .6rem; font-size:.85rem; }
+
+  /* Simple modals inside directory drawer */
+  .simple-modal{ display:none; position:fixed; inset:0; z-index:2050; background:rgba(0,0,0,.8); }
+  .simple-panel{ background:#1E1E1E; border:2px solid var(--gold,#D4AF37); border-radius:12px; box-shadow:0 0 40px rgba(212,175,55,.3); max-width:840px; width:95%; max-height:90vh; overflow:auto; margin:5% auto; padding:1rem 1.25rem; }
+  .simple-head{ display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #444; padding-bottom:.5rem; margin-bottom:.5rem; }
+  .simple-title{ font-weight:900; color:var(--gold,#D4AF37); }
+</style>
+
+<!-- Profile / Report modals (inside drawer context) -->
+<div id="dirProfile" class="simple-modal" role="dialog" aria-modal="true" aria-labelledby="dirProfileTitle">
+  <div class="simple-panel">
+    <div class="simple-head">
+      <div id="dirProfileTitle" class="simple-title">Merchant profile</div>
+      <button id="dirProfileClose" class="btn small" type="button">×</button>
+    </div>
+    <div id="dirProfileBody"></div>
+  </div>
+</div>
+
+<div id="dirReport" class="simple-modal" role="dialog" aria-modal="true" aria-labelledby="dirReportTitle">
+  <div class="simple-panel">
+    <div class="simple-head">
+      <div id="dirReportTitle" class="simple-title">Report Merchant</div>
+      <button id="dirReportClose" class="btn small" type="button">×</button>
+    </div>
+    <div>
+      <div class="muted" style="margin-bottom:.35rem;">Reason</div>
+      <select id="repReason" class="dir-sel" style="width:100%; margin-bottom:.6rem;">
+        <option value="fraud">Suspected fraud</option>
+        <option value="delay">Excessive delay</option>
+        <option value="abuse">Abusive behavior</option>
+        <option value="other">Other</option>
+      </select>
+      <div class="muted" style="margin-bottom:.35rem;">Details (optional)</div>
+      <textarea id="repDetails" class="dir-in" rows="4" style="width:100%;"></textarea>
+      <div class="dir-row" style="margin-top:.6rem; justify-content:flex-end;">
+        <button id="repSubmit" class="btn small primary" type="button">Submit</button>
+        <button class="btn small" type="button" onclick="document.getElementById('dirReport').style.display='none'">Cancel</button>
+      </div>
+      <div class="muted" style="margin-top:.5rem;">Reports are private and reviewed by Admin.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  const $ = (s,r=document)=> r.querySelector(s);
+  const $$= (s,r=document)=> Array.from(r.querySelectorAll(s));
+  const parse = (s,d)=>{ try{return JSON.parse(s)}catch(e){return d} };
+  const toast = (window.Core && Core.toast) ? Core.toast : (m)=>{ const t=document.getElementById('toast')||document.createElement('div'); t.id='toast'; t.className='toast'; t.textContent=m; document.body.appendChild(t); t.classList.add('show'); clearTimeout(window._t); window._t=setTimeout(()=>t.classList.remove('show'),2000); };
+
+  const bus = ('BroadcastChannel' in window) ? new BroadcastChannel('cryptex') : null;
+  const user = (localStorage.getItem('user')||'').toLowerCase() || 'guest';
+  const role = (localStorage.getItem('role')||'user').toLowerCase();
+  const isMerchant = role==='merchant' || role==='admin';
+
+  const favKey='merchantFavorites';
+  const FILTERS_KEY='dir.filters';
+  const REPORTS_KEY='platform.reports';
+
+  // Helpers
+  function minsAgo(m){ return new Date(Date.now() - m*60*1000).toISOString(); }
+  function timeAgo(iso){ const s=Math.floor((Date.now()-new Date(iso))/1000); if(s<60)return'just now'; const m=Math.floor(s/60); if(m<60)return`${m}m ago`; const h=Math.floor(m/60); if(h<24)return`${h}h ago`; const d=Math.floor(h/24); return `${d}d ago`; }
+  function stars(n){ const full=Math.floor(n), half=n-full>=0.5; let out=''; for(let i=0;i<full;i++) out+='★'; if(half) out+='☆'; while(out.length<5) out+='✩'; return out; }
+  function methodLabel(m){ return m==='airtel'?'Airtel Money':m==='mpamba'?'TNM Mpamba':''; }
+  function fmtMWK(x){ return 'MK ' + Number(x).toLocaleString(); }
+  function fmtUSDT(x){ return Number(x).toLocaleString(undefined,{maximumFractionDigits:2}) + ' USDT'; }
+  function trustScore(m){ const base=(m.rating/5)*40 + (m.completion/100)*35 + (1 - Math.min(m.dispute/5,1))*15 + Math.min(m.years/5,1)*10; return Math.round(base); }
+  function getRates(){ return parse(localStorage.getItem('platform.rates'), null) || { buy:1750, sell:1745 }; }
+
+  // Data source (admin list or demo)
+  const demoMerchants = [
+    { id:1, name:"Gold Exchanger", phone:"0888123456", online:true,  lastSeen: minsAgo(2),  rating:4.9,  trades:842, completion:98, dispute:0.6, avgReleaseMin:7,  years:4, methods:["airtel","mpamba"], buyRate:1750, sellRate:1745, limits:{min:5000, max:200000}, location:"Lilongwe", languages:["EN","NY"], liquidityUSDT:3500, verified:true, kycLevel:2, badges:["Top Rated","Fast Payout"] },
+    { id:2, name:"QuickTrade MW", phone:"0999123456", online:false, lastSeen: minsAgo(35), rating:4.7,  trades:610, completion:95, dispute:1.2, avgReleaseMin:10, years:3, methods:["mpamba","airtel"], buyRate:1747, sellRate:1742, limits:{min:10000, max:150000}, location:"Blantyre", languages:["EN"], liquidityUSDT:1200, verified:true, kycLevel:2, badges:["Trusted","Great Support"] },
+    { id:3, name:"TrustedCrypt",  phone:"0888654321", online:true,  lastSeen: minsAgo(1),  rating:4.95, trades:1054,completion:99, dispute:0.3, avgReleaseMin:5,  years:5, methods:["airtel"], buyRate:1752, sellRate:1748, limits:{min:2000, max:500000}, location:"Mzuzu",    languages:["EN","NY"], liquidityUSDT:8200, verified:true, kycLevel:2, badges:["Top Rated","Low Disputes","High Liquidity"] },
+    { id:4, name:"Crypto4U",      phone:"0999765432", online:true,  lastSeen: minsAgo(8),  rating:4.6,  trades:402, completion:93, dispute:1.8, avgReleaseMin:12, years:2, methods:["mpamba"], buyRate:1745, sellRate:1740, limits:{min:3000, max:100000}, location:"Zomba",     languages:["EN"], liquidityUSDT:600,  verified:true, kycLevel:1, badges:["Great Support"] }
+  ];
+  function loadMerchants(){
+    const adminList = parse(localStorage.getItem('platform.merchants'), []);
+    let list = Array.isArray(adminList) && adminList.length ? adminList.map(m=>({
+      id: m.id || Math.floor(Math.random()*1e6),
+      name: m.name, phone: m.phone, online: !!m.online, lastSeen: m.online? minsAgo(1) : minsAgo(30),
+      rating: m.rating || 4.6, trades: m.trades || 0, completion: m.completion || 96, dispute: m.dispute || 0.5,
+      avgReleaseMin: m.avgReleaseMin || 10, years: m.years || 1,
+      methods: (m.methods || ['airtel']).filter(x=> x!=='bank'),
+      buyRate: m.buyRate || (getRates().buy||1750), sellRate: m.sellRate || (getRates().sell||1745),
+      limits: m.limits || {min:5000,max:200000}, location: m.location || 'Lilongwe',
+      languages: m.languages || ['EN'], liquidityUSDT: m.liquidityUSDT || 0, verified: m.verified!==false, kycLevel: m.kycLevel || 1,
+      badges: m.badges || []
+    })) : demoMerchants.slice();
+    return list.filter(m=> m.verified!==false);
+  }
+
+  // State
+  let favorites = parse(localStorage.getItem(favKey), []);
+  const F = { q:'', method:'all', minRating:0, online:false, fav:false, sort:'rating' };
+  let currentData = [];
+
+  function ensureDirToolbar(){
+    const body = document.getElementById('dirBody');
+    if(!body) return;
+    // Render toolbar if not present
+    if(!document.getElementById('dirSearch')){
+      body.innerHTML = `
+        <div class="dir-row" style="justify-content:space-between; margin-bottom:.5rem;">
+          <div id="dirStats" class="dir-stats">Loading merchants…</div>
+        </div>
+        <div class="dir-toolbar">
+          <input id="dirSearch" class="dir-in" type="search" placeholder="🔍 Search name, phone, location…" />
+          <select id="dirMethod" class="dir-sel">
+            <option value="all">All methods</option>
+            <option value="airtel">Airtel Money</option>
+            <option value="mpamba">TNM Mpamba</option>
+          </select>
+          <select id="dirMinRating" class="dir-sel">
+            <option value="0">Min rating: Any</option>
+            <option value="4.5">Min rating: 4.5</option>
+            <option value="4.7">Min rating: 4.7</option>
+            <option value="4.9">Min rating: 4.9</option>
+          </select>
+          <label class="dir-chip"><input id="dirOnline" type="checkbox"> Online only</label>
+          <label class="dir-chip"><input id="dirFav" type="checkbox"> Favorites</label>
+          <select id="dirSort" class="dir-sel">
+            <option value="rating">Rating</option>
+            <option value="completion">Completion</option>
+            <option value="release">Fastest release</option>
+            <option value="trades">Most trades</option>
+            <option value="buyRate">Best buy rate</option>
+            <option value="sellRate">Best sell rate</option>
+            <option value="favorites">My favorites</option>
+          </select>
+          <button id="dirClear" class="dir-chip" type="button">Clear</button>
+        </div>
+        <div id="dirList"></div>
+      `;
+      bindDirControls();
+    }
+  }
+
+  function bindDirControls(){
+    const saved = parse(localStorage.getItem(FILTERS_KEY), null);
+    if(saved){ Object.assign(F, saved); }
+
+    const setUI = ()=>{
+      $('#dirSearch').value = F.q || '';
+      $('#dirMethod').value = F.method || 'all';
+      $('#dirMinRating').value = String(F.minRating||0);
+      $('#dirOnline').checked = !!F.online;
+      $('#dirFav').checked = !!F.fav;
+      $('#dirSort').value = F.sort || 'rating';
+    };
+    setUI();
+
+    const saveFilters = ()=> localStorage.setItem(FILTERS_KEY, JSON.stringify(F));
+
+    const debounce = (fn,ms)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); } };
+    $('#dirSearch').addEventListener('input', debounce(()=>{ F.q=$('#dirSearch').value.trim().toLowerCase(); renderDirectory(); saveFilters(); }, 200));
+    $('#dirMethod').addEventListener('change', ()=>{ F.method=$('#dirMethod').value; renderDirectory(); saveFilters(); });
+    $('#dirMinRating').addEventListener('change', ()=>{ F.minRating=parseFloat($('#dirMinRating').value||'0'); renderDirectory(); saveFilters(); });
+    $('#dirOnline').addEventListener('change', ()=>{ F.online=$('#dirOnline').checked; renderDirectory(); saveFilters(); });
+    $('#dirFav').addEventListener('change', ()=>{ F.fav=$('#dirFav').checked; renderDirectory(); saveFilters(); });
+    $('#dirSort').addEventListener('change', ()=>{ F.sort=$('#dirSort').value; renderDirectory(); saveFilters(); });
+    $('#dirClear').addEventListener('click', ()=>{
+      F.q=''; F.method='all'; F.minRating=0; F.online=false; F.fav=false; F.sort='rating';
+      setUI(); renderDirectory(); saveFilters();
+    });
+  }
+
+  function applyFilters(list){
+    const favs = parse(localStorage.getItem(favKey), []);
+    let out = list.slice();
+    if(F.q){ out = out.filter(m=> [m.name, m.phone, m.location].some(v=> String(v).toLowerCase().includes(F.q))); }
+    if(F.method!=='all'){ out = out.filter(m=> (m.methods||[]).includes(F.method)); }
+    out = out.filter(m=> (m.rating||0) >= (F.minRating||0));
+    if(F.online) out = out.filter(m=> m.online);
+    if(F.fav) out = out.filter(m=> favs.includes(m.id));
+
+    out.sort((a,b)=>{
+      switch(F.sort){
+        case 'rating': return b.rating - a.rating;
+        case 'completion': return b.completion - a.completion;
+        case 'release': return a.avgReleaseMin - b.avgReleaseMin;
+        case 'trades': return b.trades - a.trades;
+        case 'buyRate': return b.buyRate - a.buyRate;
+        case 'sellRate': return b.sellRate - a.sellRate;
+        case 'favorites': return (favs.includes(b.id)?1:0) - (favs.includes(a.id)?1:0) || (b.rating - a.rating);
+        default: return b.rating - a.rating;
+      }
+    });
+    return out;
+  }
+
+  function renderDirectory(){
+    ensureDirToolbar();
+    currentData = loadMerchants();
+    const list = applyFilters(currentData);
+    const stats = $('#dirStats');
+    const onlineCount = list.filter(m=>m.online).length;
+    const avgRating = list.length ? (list.reduce((a,b)=>a+b.rating,0)/list.length).toFixed(2) : '—';
+    if(stats) stats.textContent = `${list.length} merchants • ${onlineCount} online • Avg rating ${avgRating}`;
+
+    const host = $('#dirList'); if(!host) return;
+    host.innerHTML = '';
+    if(!list.length){ host.innerHTML = '<div class="muted">No merchants match your filters.</div>'; return; }
+
+    favorites = parse(localStorage.getItem(favKey), []);
+
+    list.forEach(m=>{
+      const card = document.createElement('div'); card.className='m-card';
+      card.innerHTML = `
+        <div class="m-hd">
+          <div>
+            <div class="m-name">${m.name} ${m.verified?'<span class="badge">Verified</span>':''} <span class="kyc">KYC L${m.kycLevel||1}</span></div>
+            <div class="muted"><span class="${m.online?'online':'offline'}">${m.online?'🟢 Online':'🔴 Offline'}</span> • Last seen ${timeAgo(m.lastSeen)} • ${m.location||'—'}</div>
+          </div>
+          <button class="dir-chip" data-fav="${m.id}" type="button">${favorites.includes(m.id)?'★ Saved':'☆ Save'}</button>
+        </div>
+
+        <div class="m-sub">
+          <div><strong>${stars(m.rating)}</strong> <span class="muted">(${(m.rating||0).toFixed(2)})</span></div>
+          <div><strong>${(m.trades||0).toLocaleString()}</strong> trades</div>
+          <div><strong>${m.completion||0}%</strong> completion</div>
+          <div><strong>${m.dispute||0}%</strong> dispute</div>
+          <div><strong>${m.avgReleaseMin||0} min</strong> avg release</div>
+          <div><strong>${m.years||0} yr</strong> active</div>
+          <div><strong>${fmtUSDT(m.liquidityUSDT||0)}</strong> liquidity</div>
+          <div class="row-min">
+            <div class="muted">Trust</div>
+            <div style="flex:1; height:6px; background:#1E1E1E; border:1px solid #444; border-radius:999px; overflow:hidden;"><div style="width:${trustScore(m)}%; height:100%; background:linear-gradient(90deg,#4CAF50,#E0C16A);"></div></div>
+            <div class="muted">${trustScore(m)}/100</div>
+          </div>
+        </div>
+
+        <div class="chips">
+          ${(m.badges||[]).map(b=>`<span class="chipx">${b}</span>`).join('')}
+          ${(m.methods||[]).filter(x=>x!=='bank').map(me=> methodLabel(me) ? `<span class="chipx m">${methodLabel(me)}</span>` : '').join('')}
+          <span class="chipx">Limits: ${fmtMWK(m.limits?.min||0)} - ${fmtMWK(m.limits?.max||0)}</span>
+        </div>
+
+        <div class="row-min">
+          <div class="muted">Rates:</div>
+          <div>Buy <strong>${fmtMWK(m.buyRate)}</strong> • Sell <strong>${fmtMWK(m.sellRate)}</strong></div>
+          <div class="muted">Lang: ${Array.isArray(m.languages)?m.languages.join(', '):'EN'}</div>
+        </div>
+
+        <div class="m-actions">
+          <button class="btn primary" data-act="trade" data-id="${m.id}">Start Trade</button>
+          <button class="btn" data-act="profile" data-id="${m.id}">View Profile</button>
+          <button class="btn" data-act="phone" data-phone="${m.phone||''}">Copy Phone</button>
+          <button class="btn small" data-act="report" data-id="${m.id}">Report</button>
+        </div>
+      `;
+      host.appendChild(card);
+    });
+
+    host.onclick = (e)=>{
+      const favBtn = e.target.closest('button[data-fav]');
+      if(favBtn){
+        const id = +favBtn.getAttribute('data-fav');
+        const idx = favorites.indexOf(id);
+        if(idx===-1) favorites.push(id); else favorites.splice(idx,1);
+        localStorage.setItem(favKey, JSON.stringify(favorites));
+        favBtn.textContent = favorites.includes(id) ? '★ Saved' : '☆ Save';
+        return;
+      }
+      const b = e.target.closest('button[data-act]'); if(!b) return;
+      const act = b.getAttribute('data-act');
+      if(act==='phone'){ const ph=b.getAttribute('data-phone')||''; if(ph){ navigator.clipboard.writeText(ph); toast('Phone copied'); } return; }
+      const id = +b.getAttribute('data-id');
+      if(act==='trade') startTrade(id);
+      if(act==='profile') openProfile(id);
+      if(act==='report') openReport(id);
+    };
+  }
+
+  function startTrade(id){
+    let m = (currentData||[]).find(x=>x.id===id);
+    if(!m) m = loadMerchants().find(x=>x.id===id);
+    if(!m){ toast('Merchant not found'); return; }
+    const rates = parse(localStorage.getItem('platform.rates'), null) || { buy:1750 };
+    const rate = m.buyRate || rates.buy || 1750;
+    // Persist for buy.html to prefill
+    localStorage.setItem('trade.pref', JSON.stringify({
+      merchant: m.name, rate: rate, phone: m.phone || '', method: (m.methods||['airtel'])[0] || 'airtel'
+    }));
+    const url = `buy.html?merchant=${encodeURIComponent(m.name)}&rate=${rate}&phone=${encodeURIComponent(m.phone||'')}`;
+    window.location.href = url;
+  }
+
+  function openProfile(id){
+    const m = (currentData||[]).find(x=>x.id===id) || loadMerchants().find(x=>x.id===id);
+    if(!m) return;
+    $('#dirProfileTitle').textContent = `Merchant Profile • ${m.name}`;
+    $('#dirProfileBody').innerHTML = `
+      <div class="m-sub" style="grid-template-columns:1fr 1fr;">
+        <div><div class="muted">Phone</div><div>${m.phone||'—'}</div></div>
+        <div><div class="muted">Location</div><div>${m.location||'—'}</div></div>
+        <div><div class="muted">Methods</div><div>${(m.methods||[]).filter(x=>x!=='bank').map(methodLabel).join(', ')||'—'}</div></div>
+        <div><div class="muted">Languages</div><div>${Array.isArray(m.languages)?m.languages.join(', '):'EN'}</div></div>
+        <div><div class="muted">Rating</div><div>${(m.rating||0).toFixed(2)} (${stars(m.rating||0)})</div></div>
+        <div><div class="muted">Trades</div><div>${(m.trades||0).toLocaleString()}</div></div>
+        <div><div class="muted">Completion</div><div>${m.completion||0}%</div></div>
+        <div><div class="muted">Dispute</div><div>${m.dispute||0}%</div></div>
+        <div><div class="muted">Avg release</div><div>${m.avgReleaseMin||0} min</div></div>
+        <div><div class="muted">Years active</div><div>${m.years||0}</div></div>
+      </div>
+      <div class="dir-row" style="justify-content:flex-end; margin-top:.6rem;">
+        <button class="btn primary" type="button" onclick="(${startTrade.toString()})(${id})">Start Trade</button>
+        <button class="btn" type="button" onclick="document.getElementById('dirProfile').style.display='none'">Close</button>
+      </div>
+    `;
+    document.getElementById('dirProfile').style.display='block';
+  }
+
+  function openReport(id){
+    document.getElementById('dirReport').style.display='block';
+    document.getElementById('repSubmit').onclick = ()=>{
+      const mer = (currentData||[]).find(x=>x.id===id) || loadMerchants().find(x=>x.id===id);
+      const reason = document.getElementById('repReason').value;
+      const details = (document.getElementById('repDetails').value||'').trim();
+      const logs = parse(localStorage.getItem(REPORTS_KEY), []);
+      logs.unshift({
+        id:'RP-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),
+        merchantId: mer?.id, merchantName: mer?.name, reason, details,
+        ts: new Date().toISOString(), user: (localStorage.getItem('user')||'user@cryptex.mw')
+      });
+      localStorage.setItem(REPORTS_KEY, JSON.stringify(logs.slice(0,200)));
+      toast('Report submitted. Thank you.');
+      document.getElementById('dirReport').style.display='none';
+    };
+  }
+
+  // Ensure we render directory BEFORE opening the drawer (capture true)
+  function bindOpeners(){
+    const renderThenOpen = (e)=>{
+      // Render content then let chunk 1's opener open the drawer
+      renderDirectory();
+    };
+    document.getElementById('btnMerchantsList')?.addEventListener('click', renderThenOpen, true);
+    document.getElementById('openDirBtn')?.addEventListener('click', renderThenOpen, true);
+  }
+
+  // Close buttons for modals
+  document.getElementById('dirProfileClose')?.addEventListener('click', ()=>{ document.getElementById('dirProfile').style.display='none'; });
+  document.getElementById('dirReportClose')?.addEventListener('click', ()=>{ document.getElementById('dirReport').style.display='none'; });
+
+  // Live updates
+  window.addEventListener('storage', (e)=>{
+    if(['platform.merchants','platform.rates','platform.settings'].includes(e.key)){
+      if(document.getElementById('dirDrawer')?.style.display==='block') renderDirectory();
+    }
+  });
+  if(bus) bus.onmessage = (ev)=>{
+    const m = ev?.data || {};
+    if(m.type==='merchants.sync' || m.type==='merchants.update' || m.type==='rates.update'){
+      if(document.getElementById('dirDrawer')?.style.display==='block') renderDirectory();
+    }
+  };
+
+  window.addEventListener('DOMContentLoaded', ()=>{
+    if(isMerchant){
+      bindOpeners();
+      // Pre-render once so first open is instant
+      renderDirectory();
+    }
+  });
+
+})();
+</script>
+<!-- END CHUNK 4/8 -->
+ <!-- CHUNK 5/8: Trade modal enhancements — Receipts, Viewer, Mark Paid, Dispute, Rating/Feedback -->
+<style>
+  /* Receipts/Evidence */
+  .dz{
+    border:2px dashed #444; border-radius:12px; padding:.8rem; text-align:center; color:#cfcfcf;
+    background:#151515; transition:.15s border-color ease, .15s background ease; margin-top:.25rem;
+  }
+  .dz.drag{ border-color: var(--gold-2,#E0C16A); background:#131313; }
+  .dz input[type="file"]{ display:none; }
+  .dz .btn.small{ margin-top:.45rem; }
+
+  .rec-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:.6rem; margin-top:.6rem; }
+  .rec{ background:#1b1b1b; border:1px solid #333; border-radius:10px; overflow:hidden; display:flex; flex-direction:column; }
+  .rec-thumb{ height:110px; display:flex; align-items:center; justify-content:center; background:#111; color:#888; font-size:3rem; }
+  .rec-img{ width:100%; height:100%; object-fit:cover; }
+  .rec-meta{ padding:.45rem .5rem; display:flex; flex-direction:column; gap:.25rem; }
+  .rec-name{ font-size:.85rem; color:#e9e9e9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rec-size{ font-size:.78rem; color:#9E9E9E; }
+  .rec-actions{ display:flex; gap:.35rem; padding:.45rem .5rem .6rem; }
+  .rec-actions .btn{ padding:.35rem .5rem; font-size:.85rem; }
+
+  /* Viewer Lightbox */
+  .viewer{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.9); z-index:2100; }
+  .viewer-inner{ position:absolute; inset:4% 2%; display:flex; align-items:center; justify-content:center; }
+  .viewer img{ max-width:100%; max-height:100%; border-radius:10px; box-shadow:0 0 40px rgba(0,0,0,.45); }
+  .viewer-head{ position:absolute; top:10px; right:10px; display:flex; gap:.5rem; }
+  .viewer-head .btn{ background:#1e1e1e; border:1px solid #444; color:#fff; }
+
+  /* Rating & Feedback */
+  .stars{ display:inline-flex; gap:.25rem; }
+  .star{ font-size:1.4rem; color:#777; cursor:pointer; transition:.15s transform; }
+  .star.on{ color:#E0C16A; }
+  .star:hover{ transform: scale(1.08); }
+  .feedback-row{ display:grid; grid-template-columns:1fr auto; gap:.5rem; align-items:center; }
+  .feedback-text{ min-height:80px; resize:vertical; }
+  .note-muted{ color:#9E9E9E; font-size:.85rem; }
+
+  /* Extra action styles */
+  .btn.paid{ border-color:#FF9800; color:#FFB74D; }
+  .btn.danger{ border-color:#F44336; color:#ff9a9a; }
+</style>
+
+<!-- Viewer Lightbox (once) -->
+<template id="viewerTpl">
+  <div id="viewer" class="viewer" role="dialog" aria-modal="true">
+    <div class="viewer-head">
+      <button id="viewerDownload" class="btn small" type="button">Download</button>
+      <button id="viewerClose" class="btn small" type="button">Close</button>
+    </div>
+    <div class="viewer-inner">
+      <img id="viewerImg" alt="Receipt preview">
+    </div>
+  </div>
+</template>
+
+<script>
+(function(){
+  'use strict';
+  const $ = (s,r=document)=> r.querySelector(s);
+  const $$= (s,r=document)=> Array.from(r.querySelectorAll(s));
+  const parse = (s,d)=>{ try{return JSON.parse(s)}catch(e){return d} };
+  const toast = (window.Core && Core.toast) ? Core.toast : (m)=>{ const t=document.getElementById('toast')||document.createElement('div'); t.id='toast'; t.className='toast'; t.textContent=m; document.body.appendChild(t); t.classList.add('show'); clearTimeout(window._t); window._t=setTimeout(()=>t.classList.remove('show'),2000); };
+
+  const user = (localStorage.getItem('user')||'').toLowerCase() || 'guest';
+  const TRADES_KEY = 'platform.p2p.trades';
+  const bus = ('BroadcastChannel' in window) ? new BroadcastChannel('cryptex') : null;
+
+  function now(){ return new Date().toISOString(); }
+  function fmtBytes(b){ return b>=1024*1024 ? (b/(1024*1024)).toFixed(1)+' MB' : b>=1024 ? (b/1024).toFixed(0)+' KB' : b + ' B'; }
+  function timeAgo(d) {
+    const s = Math.floor((Date.now() - new Date(d).getTime())/1000);
+    if(s<60) return 'just now';
+    const m = Math.floor(s/60); if(m<60) return m+'m ago';
+    const h = Math.floor(m/60); if(h<24) return h+'h ago';
+    const dy = Math.floor(h/24); return dy+'d ago';
+  }
+
+  function getTrades(){ return parse(localStorage.getItem(TRADES_KEY), []).sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt)); }
+  function saveTrades(arr, broadcast=true){
+    localStorage.setItem(TRADES_KEY, JSON.stringify(arr));
+    if(broadcast && bus) bus.postMessage({ type:'p2p.trades.sync', payload: arr });
+    try{ localStorage.setItem('platform._tick', String(Date.now())); }catch(e){}
+  }
+
+  // Mount viewer once
+  window.addEventListener('DOMContentLoaded', ()=>{
+    if(!document.getElementById('viewer')){
+      const tpl = document.getElementById('viewerTpl'); tpl && document.body.appendChild(tpl.content.cloneNode(true));
+    }
+  });
+
+  // Wrap existing openTradeModal from chunk 3 to enhance
+  const prevOpen = window.openTradeModal;
+  window.openTradeModal = function(id){
+    if(prevOpen){ prevOpen(id); setTimeout(()=> enhanceTradeModal(id), 25); }
+    else enhanceTradeModal(id);
+  };
+
+  function enhanceTradeModal(id){
+    const trades = getTrades();
+    const t = trades.find(x=>x.id===id); if(!t) return;
+    const modal = document.getElementById('tradeModal'); if(!modal) return;
+
+    // Receipts area
+    ensureReceiptsArea(t);
+
+    // Rating & Feedback
+    ensureRatingArea(t);
+
+    // Mark Paid / Dispute actions
+    injectPaidDispute(t);
+  }
+
+  /* ===== Receipts & Evidence ===== */
+  const MAX_FILES = 8, MAX_SIZE = 2*1024*1024; // 2MB each
+  const ACCEPT = ['image/png','image/jpeg','image/webp','application/pdf'];
+
+  function ensureReceiptsArea(t){
+    const body = document.querySelector('#tradeModal .body3'); if(!body) return;
+    let host = document.getElementById('receiptsArea');
+    if(!host){
+      host = document.createElement('div'); host.id = 'receiptsArea';
+      host.innerHTML = `
+        <div class="label" style="margin-top:.2rem;">🧾 Receipts & Evidence</div>
+        <div id="dz" class="dz" aria-label="Upload receipts">
+          <div>Drag & drop receipts here (PNG/JPG/WebP/PDF, max 2MB each) or</div>
+          <label class="btn small" for="fileInput">Choose files</label>
+          <input id="fileInput" type="file" accept="${ACCEPT.join(',')}" multiple>
+        </div>
+        <div id="recGrid" class="rec-grid"></div>
+        <div class="note-muted" style="margin-top:.35rem;">Receipts are visible to you and admin. Do not upload sensitive data.</div>
+      `;
+      body.appendChild(host);
+
+      const dz = host.querySelector('#dz'), fileInput = host.querySelector('#fileInput');
+      ;['dragenter','dragover'].forEach(ev=> dz.addEventListener(ev, (e)=>{ e.preventDefault(); e.stopPropagation(); dz.classList.add('drag'); }));
+      ;['dragleave','drop'].forEach(ev=> dz.addEventListener(ev, (e)=>{ e.preventDefault(); e.stopPropagation(); dz.classList.remove('drag'); }));
+      dz.addEventListener('drop', (e)=> handleFiles(t, e.dataTransfer?.files));
+      fileInput.addEventListener('change', (e)=> handleFiles(t, e.target.files));
+    }
+    renderReceiptsGrid(t);
+  }
+
+  async function handleFiles(trade, fileList){
+    if(!fileList || !fileList.length) return;
+    let arr = Array.from(fileList);
+    if((trade.receipts?.length||0) + arr.length > MAX_FILES){
+      toast(`Max ${MAX_FILES} files. Some were skipped.`);
+      arr = arr.slice(0, MAX_FILES - (trade.receipts?.length||0));
+    }
+    const trades = getTrades();
+    const ix = trades.findIndex(x=>x.id===trade.id); if(ix<0) return;
+
+    trades[ix].receipts = trades[ix].receipts || [];
+
+    for(const f of arr){
+      if(!ACCEPT.includes(f.type)){ toast(`Unsupported: ${f.name}`); continue; }
+      if(f.size > MAX_SIZE){ toast(`Too large: ${f.name} (${fmtBytes(f.size)})`); continue; }
+      const dataUrl = await fileToDataURL(f);
+      trades[ix].receipts.push({
+        id: 'R-' + (Date.now().toString(36)+Math.random().toString(36).slice(2,6)).toUpperCase(),
+        name: f.name, size: f.size, type: f.type, url: dataUrl, addedAt: now()
+      });
+    }
+    saveTrades(trades);
+    renderReceiptsGrid(trades[ix]);
+    toast('Receipts updated');
+    bus && bus.postMessage({ type:'p2p.trade.receipts', payload:{ id: trade.id } });
+  }
+
+  function fileToDataURL(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); }); }
+
+  function renderReceiptsGrid(t){
+    const grid = document.getElementById('recGrid'); if(!grid) return;
+    const list = t.receipts || [];
+    if(!list.length){ grid.innerHTML = `<div class="note-muted">No receipts uploaded yet.</div>`; return; }
+    grid.innerHTML = '';
+    list.forEach(r=>{
+      const item = document.createElement('div'); item.className='rec';
+      const isImg = r.type.startsWith('image/');
+      item.innerHTML = `
+        <div class="rec-thumb">${ isImg ? `<img class="rec-img" src="${r.url}" alt="${r.name}">` : '📄' }</div>
+        <div class="rec-meta">
+          <div class="rec-name" title="${r.name}">${r.name}</div>
+          <div class="rec-size">${fmtBytes(r.size)} • ${timeAgo(r.addedAt)}</div>
+        </div>
+        <div class="rec-actions">
+          <button class="btn small" data-act="view" data-id="${r.id}" type="button">View</button>
+          <button class="btn small" data-act="copy" data-id="${r.id}" type="button">Copy</button>
+          <button class="btn small danger" data-act="del" data-id="${r.id}" type="button">Remove</button>
+        </div>
+      `;
+      grid.appendChild(item);
+    });
+
+    grid.onclick = (e)=>{
+      const b = e.target.closest('button[data-act]'); if(!b) return;
+      const act = b.getAttribute('data-act'); const id = b.getAttribute('data-id');
+      const trades = getTrades(); const ix = trades.findIndex(x=>x.id===t.id); if(ix<0) return;
+      const recs = trades[ix].receipts || []; const r = recs.find(x=>x.id===id); if(!r) return;
+
+      if(act==='view'){ r.type==='application/pdf' ? openFile(r.url, r.name) : openViewer(r.url, r.name); }
+      if(act==='copy'){ navigator.clipboard?.writeText(r.url).then(()=> toast('Link copied')); }
+      if(act==='del'){ trades[ix].receipts = recs.filter(x=>x.id!==id); saveTrades(trades); renderReceiptsGrid(trades[ix]); toast('Removed'); }
+    };
+  }
+
+  function openFile(url, name){
+    const a=document.createElement('a'); a.href=url; a.target='_blank'; a.download=name||'receipt'; a.click();
+  }
+  function openViewer(url, name){
+    const v = document.getElementById('viewer'), img = document.getElementById('viewerImg'), closeBtn=document.getElementById('viewerClose'), dl=document.getElementById('viewerDownload');
+    if(!v || !img) return;
+    img.src = url; img.alt = name || 'Receipt';
+    dl.onclick = ()=>{ const a=document.createElement('a'); a.href=url; a.download=name||'receipt'; a.click(); };
+    v.style.display='block';
+    closeBtn.onclick = ()=> v.style.display='none';
+    v.addEventListener('click', (e)=>{ if(e.target===v) v.style.display='none'; }, { once:true });
+    const onEsc = (e)=>{ if(e.key==='Escape'){ v.style.display='none'; window.removeEventListener('keydown', onEsc); } };
+    window.addEventListener('keydown', onEsc);
+  }
+
+  /* ===== Rating & Feedback (Completed only) ===== */
+  function ensureRatingArea(t){
+    const body = document.querySelector('#tradeModal .body3'); if(!body) return;
+    let host = document.getElementById('ratingArea');
+    if(!host){
+      host = document.createElement('div'); host.id='ratingArea';
+      host.innerHTML = `
+        <div class="label" style="margin-top:.2rem;">⭐ Feedback</div>
+        <div class="feedback-row">
+          <div>
+            <div id="starWrap" class="stars" role="radiogroup" aria-label="Rate user">
+              ${Array.from({length:5}).map((_,i)=> `<span class="star" data-val="${i+1}" role="radio" aria-checked="false">★</span>`).join('')}
+            </div>
+            <div class="note-muted">Rate the counterparty and leave a short note. Only visible to admin.</div>
+          </div>
+          <button id="saveFeedback" class="btn small" type="button">Save</button>
+        </div>
+        <textarea id="feedbackText" class="in feedback-text" placeholder="Optional private feedback..."></textarea>
+      `;
+      body.appendChild(host);
+    }
+
+    const stars = $$('#starWrap .star', host);
+    const note = document.getElementById('feedbackText');
+    const btn = document.getElementById('saveFeedback');
+
+    const rating = +t.ratingByMerchant || 0;
+    updateStars(stars, rating);
+    note.value = t.feedbackByMerchant || '';
+
+    const enable = t.status==='completed';
+    stars.forEach(s=> s.style.pointerEvents = enable ? 'auto' : 'none');
+    note.disabled = !enable; btn.disabled = !enable;
+
+    if(enable){
+      stars.forEach(s=>{
+        s.onclick = ()=> {
+          const val = +s.getAttribute('data-val');
+          updateStars(stars, val);
+          s.parentElement.setAttribute('data-selected', String(val));
+        };
+      });
+      btn.onclick = ()=>{
+        const val = +($('#starWrap').getAttribute('data-selected') || rating || 0);
+        const trades = getTrades(); const ix = trades.findIndex(x=>x.id===t.id); if(ix<0) return;
+        trades[ix].ratingByMerchant = val;
+        trades[ix].feedbackByMerchant = note.value || '';
+        saveTrades(trades);
+        toast('Feedback saved');
+        bus && bus.postMessage({ type:'p2p.trade.feedback', payload:{ id:t.id, rating:val } });
+      };
+    }else{
+      btn.onclick = null;
+    }
+  }
+  function updateStars(nodes, val){
+    nodes.forEach((n,i)=>{ n.classList.toggle('on', i<val); n.setAttribute('aria-checked', i<val ? 'true' : 'false'); });
+  }
+
+  /* ===== Mark Paid + Dispute (Active only) ===== */
+  function injectPaidDispute(t){
+    const acts = document.getElementById('tmActions'); if(!acts) return;
+
+    if(t.status==='active' && !t.paidAt && !document.getElementById('tmPaid')){
+      const b = document.createElement('button');
+      b.id='tmPaid'; b.className='btn small paid'; b.type='button'; b.textContent='Mark Paid';
+      acts.prepend(b);
+    }
+    if(t.status==='active' && !document.getElementById('tmDispute')){
+      const d = document.createElement('button');
+      d.id='tmDispute'; d.className='btn small danger'; d.type='button'; d.textContent='Open Dispute';
+      acts.appendChild(d);
+    }
+
+    if(!acts.dataset.enhanced5){
+      acts.dataset.enhanced5 = '1';
+      acts.addEventListener('click', (e)=>{
+        const btn = e.target.closest('button'); if(!btn) return;
+        if(btn.id==='tmPaid'){
+          const all = getTrades(); const ix = all.findIndex(x=>x.id===t.id); if(ix<0) return;
+          all[ix].paidAt = now(); saveTrades(all);
+          toast('Marked as paid');
+          // Update timeline text area
+          const tl = document.getElementById('tmTimeline');
+          if(tl){ tl.textContent = (tl.textContent ? tl.textContent+'\n' : '') + `Paid: ${new Date(all[ix].paidAt).toLocaleString()}`; }
+          btn.remove();
+          bus && bus.postMessage({ type:'p2p.trade.markpaid', payload:{ id: t.id } });
+        }
+        if(btn.id==='tmDispute'){
+          const reason = prompt('Describe the issue (visible to admin):') || '';
+          if(reason!==null){
+            const all = getTrades(); const ix = all.findIndex(x=>x.id===t.id); if(ix<0) return;
+            all[ix].dispute = { reason, openedAt: now(), openedBy: user };
+            saveTrades(all);
+            toast('Dispute opened');
+            const tl = document.getElementById('tmTimeline');
+            if(tl){ tl.textContent = (tl.textContent ? tl.textContent+'\n' : '') + `Dispute opened: ${new Date(all[ix].dispute.openedAt).toLocaleString()}`; }
+            bus && bus.postMessage({ type:'p2p.trade.dispute', payload:{ id: t.id } });
+          }
+        }
+      });
+    }
+  }
+
+})();
+</script>
+<!-- END CHUNK 5/8 -->
+ <!-- CHUNK 6/8: Live badges, notifications, activity enhancements, rate guard/round -->
+<style>
+  .count-chip{
+    background:#1e1e1e; border:1px solid rgba(212,175,55,.28); color:#E0C16A;
+    border-radius:999px; padding:.25rem .55rem; font-weight:800; font-size:.8rem;
+  }
+  .activity-tools{
+    display:flex; gap:.5rem; align-items:center; flex-wrap:wrap;
+  }
+  .in-mini{
+    background:#1E1E1E; border:1px solid #444; color:#fff; padding:.45rem .55rem; border-radius:8px; font-size:.9rem;
+  }
+</style>
+
+<script>
+(function(){
+  'use strict';
+  const $ = (s,r=document)=> r.querySelector(s);
+  const $$= (s,r=document)=> Array.from(r.querySelectorAll(s));
+  const parse = (s,d)=>{ try{return JSON.parse(s)}catch(e){return d} };
+  const toast = (window.Core && Core.toast) ? Core.toast : (m)=>{ const t=document.getElementById('toast')||document.createElement('div'); t.id='toast'; t.className='toast'; t.textContent=m; document.body.appendChild(t); t.classList.add('show'); clearTimeout(window._t); window._t=setTimeout(()=>t.classList.remove('show'),2000); };
+
+  const bus = ('BroadcastChannel' in window) ? new BroadcastChannel('cryptex') : null;
+
+  const user = (localStorage.getItem('user')||'').toLowerCase() || 'guest';
+  const role = (localStorage.getItem('role')||'user').toLowerCase();
+  const isMerchant = role==='merchant' || role==='admin';
+  const TRADES_KEY = 'platform.p2p.trades';
+  const PREF_KEY   = `merchant.pref.${user}`;
+  const AUDIT_KEY  = `merchant.audit.${user}`;
+  const RATES_KEY  = `merchant.rates.${user}`;
+
+  /* ===== Header badges (Req/Act) ===== */
+  function computeCounts(){
+    const trades = parse(localStorage.getItem(TRADES_KEY), []);
+    const req = trades.filter(t=> t.status==='request').length;
+    const act = trades.filter(t=> t.status==='active' && (t.merchant===user || !t.merchant)).length;
+    return { req, act };
+  }
+  function ensureHeaderBadges(){
+    const actions = document.querySelector('.actions');
+    if(!actions) return;
+    if(!document.getElementById('reqChip')){
+      const req = document.createElement('span'); req.id='reqChip'; req.className='count-chip'; req.title='Pending requests'; req.textContent='Req: 0';
+      actions.insertBefore(req, actions.firstChild);
+    }
+    if(!document.getElementById('actChip')){
+      const act = document.createElement('span'); act.id='actChip'; act.className='count-chip'; act.title='Active trades'; act.textContent='Act: 0';
+      actions.insertBefore(act, actions.firstChild.nextSibling);
+    }
+  }
+  function updateCountChips(){
+    ensureHeaderBadges();
+    const { req, act } = computeCounts();
+    const rc = document.getElementById('reqChip'); if(rc) rc.textContent = `Req: ${req}`;
+    const ac = document.getElementById('actChip'); if(ac) ac.textContent = `Act: ${act}`;
+  }
+
+  /* ===== Notifications (desktop + chime) ===== */
+  let ACtx = null;
+  function playChime(){
+    const p = getPref();
+    if(!p.notifySound) return;
+    try{
+      ACtx = ACtx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = ACtx.createOscillator(); const g = ACtx.createGain();
+      o.type='sine'; o.frequency.value = 880; // A5
+      g.gain.value = 0.001; o.connect(g).connect(ACtx.destination);
+      o.start();
+      const t = ACtx.currentTime;
+      g.gain.exponentialRampToValueAtTime(0.02, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+      o.stop(t + 0.3);
+    }catch(e){}
+  }
+  function notifyDesktop(title, body){
+    const p = getPref();
+    if(!p.notifyDesktop || !('Notification' in window)) return;
+    if(Notification.permission!=='granted') return;
+    const n = new Notification(title, { body, icon: '/favicon.ico' });
+    setTimeout(()=> n.close(), 6000);
+  }
+  function getPref(){
+    return parse(localStorage.getItem(PREF_KEY), {
+      notifyDesktop:false, notifySound:true, autoOpen:false,
+      boundPct:30, roundStep:10
+    });
+  }
+
+  function lastReqCount(){ return +(sessionStorage.getItem('merchant.lastReq')||'0'); }
+  function setLastReqCount(n){ sessionStorage.setItem('merchant.lastReq', String(n)); }
+
+  function onTradesChanged(source='local'){
+    const { req } = computeCounts();
+    const prev = lastReqCount();
+    updateCountChips();
+    if(req > prev){
+      const diff = req - prev;
+      playChime();
+      notifyDesktop('New trade request'+(diff>1?'s':''), diff>1 ? `${diff} new requests` : '1 new request');
+      // Record activity if function exists (from chunk 1)
+      if(typeof recordActivity==='function'){
+        recordActivity('trade', 'New request'+(diff>1?'s':''), `+${diff} via ${source}`);
+      }else{
+        // Fallback
+        const list = parse(localStorage.getItem(AUDIT_KEY), []);
+        list.push({ id:'A-'+(Date.now().toString(36)+Math.random().toString(36).slice(2,6)).toUpperCase(), type:'trade', title:'New request'+(diff>1?'s':''), detail:`+${diff} via ${source}`, createdAt: new Date().toISOString() });
+        localStorage.setItem(AUDIT_KEY, JSON.stringify(list.slice(-500)));
+      }
+      // Auto-open first request if enabled
+      const p = getPref();
+      if(p.autoOpen && typeof window.openTradeModal==='function'){
+        const trades = parse(localStorage.getItem(TRADES_KEY), []);
+        const firstReq = trades.find(t=> t.status==='request');
+        if(firstReq) window.openTradeModal(firstReq.id);
+      }
+    }
+    setLastReqCount(req);
+  }
+
+  /* ===== Activity drawer enhancements: tools (search/type filter/export/clear) ===== */
+  function enhanceActivityDrawer(){
+    const head = document.querySelector('#activityDrawer .head');
+    const body = document.getElementById('actList');
+    if(!head || !body) return;
+    if(!document.getElementById('actTools')){
+      const tools = document.createElement('div'); tools.id='actTools'; tools.className='activity-tools';
+      tools.innerHTML = `
+        <input id="actSearch" class="in-mini" type="search" placeholder="Search..." />
+        <select id="actType" class="in-mini">
+          <option value="">All</option>
+          <option value="trade">Trade</option>
+          <option value="status">Status</option>
+          <option value="rates">Rates</option>
+          <option value="announce">Announcement</option>
+          <option value="receipt">Receipt</option>
+          <option value="feedback">Feedback</option>
+          <option value="system">System</option>
+        </select>
+        <button id="actExport" class="btn small ghost" type="button">Export CSV</button>
+        <button id="actClear" class="btn small ghost" type="button">Clear</button>
+      `;
+      head.appendChild(tools);
+
+      // Wire
+      document.getElementById('actSearch').addEventListener('input', renderActivityFiltered);
+      document.getElementById('actType').addEventListener('change', renderActivityFiltered);
+      document.getElementById('actExport').addEventListener('click', exportActivityCSV);
+      document.getElementById('actClear').addEventListener('click', ()=>{ localStorage.setItem(AUDIT_KEY, JSON.stringify([])); renderActivityFiltered(); toast('Activity cleared'); });
+    }
+  }
+  function getActivityList(){
+    return parse(localStorage.getItem(AUDIT_KEY), []).sort((a,b)=> new Date(b.createdAt)-new Date(a.createdAt));
+  }
+  function exportActivityCSV(){
+    const rows = getActivityList().map(a=> [a.createdAt, a.type, a.title, (a.detail||'').replace(/\n/g,' ')]);
+    const csv = ['Date,Type,Title,Detail', ...rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob = new Blob([csv],{type:'text/csv'}); const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=`merchant_activity_${Date.now()}.csv`; a.click();
+  }
+  function renderActivityFiltered(){
+    const list = getActivityList();
+    const q = (document.getElementById('actSearch')?.value||'').toLowerCase().trim();
+    const tp= (document.getElementById('actType')?.value||'');
+    const iconFor=(t)=> t==='trade'?'💱':t==='status'?'🟢':t==='rates'?'💹':t==='announce'?'📣':t==='receipt'?'🧾':t==='feedback'?'⭐':'⚙️';
+    const host = document.getElementById('actList'); if(!host) return;
+    let filtered = list.filter(a=>{
+      if(tp && a.type!==tp) return false;
+      if(q && ![a.title,a.detail,a.type].filter(Boolean).some(s=> String(s).toLowerCase().includes(q))) return false;
+      return true;
+    });
+    if(!filtered.length){ host.innerHTML = '<div class="muted">No activity.</div>'; return; }
+    host.innerHTML = filtered.map(a=>`
+      <div style="display:grid; grid-template-columns:auto 1fr auto; gap:.6rem; align-items:center; background:#141414; border:1px solid #333; border-radius:10px; padding:.5rem;">
+        <div style="width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#1e1e1e;">${iconFor(a.type)}</div>
+        <div><div style="font-weight:900">${a.title}</div><div style="font-size:.8rem; color:#c9b882;">${a.type.toUpperCase()}</div></div>
+        <div style="font-size:.8rem; color:#9E9E9E" title="${new Date(a.createdAt).toLocaleString()}">${new Date(a.createdAt).toLocaleString()}</div>
+      </div>
+    `).join('');
+  }
+
+  /* ===== Rate guard + rounding (enforce before save) ===== */
+  function enforceRateGuard(){
+    const btn = document.getElementById('saveRatesBtn');
+    if(!btn || btn.dataset.guard) return;
+    btn.dataset.guard='1';
+    btn.addEventListener('click', (e)=>{
+      const buyIn = document.getElementById('buyRateInput'), sellIn=document.getElementById('sellRateInput');
+      if(!buyIn || !sellIn) return;
+      const p = getPref();
+      const admin = parse(localStorage.getItem('platform.rates'), {});
+      const live = parseFloat(localStorage.getItem('fxRateMWK') || '1770') || 1770;
+      const baseBuy = +admin.buy || live, baseSell = +admin.sell || baseBuy;
+      const minBuy = Math.floor(baseBuy * (1 - (p.boundPct||30)/100));
+      const maxBuy = Math.ceil (baseBuy * (1 + (p.boundPct||30)/100));
+      const minSell= Math.floor(baseSell* (1 - (p.boundPct||30)/100));
+      const maxSell= Math.ceil (baseSell* (1 + (p.boundPct||30)/100));
+      const step = Math.max(1, p.roundStep||10);
+      function roundStep(v){ return Math.round(v/step)*step; }
+      let buy = Math.round(+buyIn.value||0);
+      let sell= Math.round(+sellIn.value||0);
+      buy = roundStep(Math.min(maxBuy, Math.max(minBuy, buy)));
+      sell= roundStep(Math.min(maxSell, Math.max(minSell, sell)));
+      buyIn.value = buy; sellIn.value = sell;
+      document.getElementById('buyRate').textContent = buy? buy.toLocaleString() : '—';
+      document.getElementById('sellRate').textContent = sell? sell.toLocaleString() : '—';
+      toast(`Applied guard ±${p.boundPct||30}% • rounding ${step} MK`);
+      // let the original save handler proceed
+    }, true);
+  }
+
+  /* ===== Wiring ===== */
+  window.addEventListener('DOMContentLoaded', ()=>{
+    if(!isMerchant) return;
+    ensureHeaderBadges();
+    updateCountChips();
+    // enhance activity tools inside drawer
+    enhanceActivityDrawer();
+    // rate guard enforcement
+    enforceRateGuard();
+    // initialize last request count
+    setLastReqCount(computeCounts().req);
+  });
+
+  // Live updates
+  window.addEventListener('storage', (e)=>{
+    if(e.key===TRADES_KEY){ onTradesChanged('storage'); }
+    if(e.key===RATES_KEY || e.key==='platform.rates'){ /* nothing extra here; save button handler will clamp */ }
+    if(e.key===AUDIT_KEY){ if(document.getElementById('activityDrawer')?.style.display==='block') renderActivityFiltered(); }
+  });
+  if(bus){
+    bus.addEventListener('message', (ev)=>{
+      const m = ev?.data || {};
+      if(m.type==='p2p.trade.new' || m.type==='p2p.trades.sync' || m.type==='p2p.trade.update'){ onTradesChanged('bus'); }
+      if(m.type==='p2p.trade.receipts' || m.type==='p2p.trade.feedback' || m.type==='p2p.trade.markpaid' || m.type==='p2p.trade.dispute'){
+        // update activity drawer if open
+        if(document.getElementById('activityDrawer')?.style.display==='block') renderActivityFiltered();
+      }
+      if(m.type==='rates.update'){ /* header chip update handled in earlier chunks */ }
+    });
+  }
+
+})();
+</script>
+<!-- END CHUNK 6/8 -->
+ <!-- CHUNK 7/8: Advanced Settings, Keyboard Shortcuts, Network Awareness -->
+<style>
+  .set-section{
+    margin-top:.8rem; padding:.75rem; background:#151515; border:1px solid #333; border-radius:10px;
+  }
+  .set-title{ color:#E0C16A; font-weight:900; margin:0 0 .5rem; }
+  .set-grid{ display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+  @media (max-width:720px){ .set-grid{ grid-template-columns:1fr; } }
+  .in2{
+    width:100%; padding:.55rem .6rem; background:#0f0f0f; color:#fff; border:1px solid #444; border-radius:10px; outline:none;
+  }
+  .set-row{ display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
+  .mini{ font-size:.85rem; color:#9E9E9E; }
+</style>
+
+<script>
+(function(){
+  'use strict';
+  const $ = (s,r=document)=> r.querySelector(s);
+  const $$= (s,r=document)=> Array.from(r.querySelectorAll(s));
+  const parse = (s,d)=>{ try{return JSON.parse(s)}catch(e){return d} };
+  const toast = (window.Core && Core.toast) ? Core.toast : (m)=>{ const t=document.getElementById('toast')||document.createElement('div'); t.id='toast'; t.className='toast'; t.textContent=m; document.body.appendChild(t); t.classList.add('show'); clearTimeout(window._t); window._t=setTimeout(()=>t.classList.remove('show'),2000); };
+
+  const user = (localStorage.getItem('user')||'').toLowerCase() || 'guest';
+  const role = (localStorage.getItem('role')||'user').toLowerCase();
+  const isMerchant = role==='merchant' || role==='admin';
+
+  const PREF_KEY = `merchant.pref.${user}`;
+  const TRADES_KEY = 'platform.p2p.trades';
+
+  function getPref(){
+    return parse(localStorage.getItem(PREF_KEY), {
+      notifyDesktop:false, notifySound:true, autoOpen:false,
+      boundPct:30, roundStep:10
+    });
+  }
+  function savePref(p){ localStorage.setItem(PREF_KEY, JSON.stringify(p)); }
+
+  /* ===== Advanced Settings inside the Settings Drawer ===== */
+  function mountAdvancedSettings(){
+    const body = document.querySelector('#settingsDrawer .body');
+    if(!body || document.getElementById('setAdv')) return;
+    const wrap = document.createElement('div'); wrap.id='setAdv'; wrap.className='set-section';
+    wrap.innerHTML = `
+      <h4 class="set-title">Rate Guard & Rounding</h4>
+      <div class="set-grid">
+        <div>
+          <label class="mini">Max deviation vs platform (%)</label>
+          <input id="advBoundPct" class="in2" type="number" min="5" max="80" step="1" placeholder="30">
+        </div>
+        <div>
+          <label class="mini">Rounding step (MK)</label>
+          <input id="advRound" class="in2" type="number" min="1" step="1" placeholder="10">
+        </div>
+      </div>
+      <div class="set-row" style="margin-top:.6rem;">
+        <button id="advTestChime" class="btn small" type="button">Test Chime</button>
+        <button id="advEnableDesk" class="btn small ghost" type="button">Enable Desktop Notifications</button>
+        <span class="mini">Settings apply to the "Save My Rates" guard and new request notifications.</span>
+      </div>
+    `;
+    body.appendChild(wrap);
+
+    // Initialize values
+    const p = getPref();
+    $('#advBoundPct').value = p.boundPct || 30;
+    $('#advRound').value = p.roundStep || 10;
+
+    // Save on change
+    $('#advBoundPct').addEventListener('input', e=>{
+      const v = Math.min(80, Math.max(5, Math.round(+e.target.value||30)));
+      e.target.value = v;
+      savePref({ ...getPref(), boundPct: v });
+    });
+    $('#advRound').addEventListener('input', e=>{
+      const v = Math.max(1, Math.round(+e.target.value||10));
+      e.target.value = v;
+      savePref({ ...getPref(), roundStep: v });
+    });
+
+    // Test chime (small oscillator ping)
+    $('#advTestChime').addEventListener('click', ()=>{
+      try{
+        const ACtx = new (window.AudioContext || window.webkitAudioContext)();
+        const o = ACtx.createOscillator(); const g = ACtx.createGain();
+        o.type='sine'; o.frequency.value = 880; g.gain.value = 0.001; o.connect(g).connect(ACtx.destination);
+        o.start(); const t = ACtx.currentTime;
+        g.gain.exponentialRampToValueAtTime(0.02, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+        o.stop(t + 0.3);
+      }catch(e){}
+    });
+
+    // Enable desktop notifications
+    $('#advEnableDesk').addEventListener('click', ()=>{
+      if(!('Notification' in window)){ toast('Notifications not supported'); return; }
+      if(Notification.permission==='granted'){
+        savePref({ ...getPref(), notifyDesktop: true });
+        toast('Desktop notifications enabled');
+      }else{
+        Notification.requestPermission().then(res=>{
+          if(res==='granted'){
+            savePref({ ...getPref(), notifyDesktop: true });
+            toast('Desktop notifications enabled');
+          }else{
+            toast('Desktop notifications blocked');
+          }
+        });
+      }
+    });
+  }
+
+  // Ensure advanced settings are mounted whenever the Settings drawer opens
+  function wireSettingsOpen(){
+    const btn = document.getElementById('btnSettings');
+    if(!btn || btn.dataset.adv) return;
+    btn.dataset.adv='1';
+    btn.addEventListener('click', ()=> setTimeout(mountAdvancedSettings, 30), true);
+  }
+
+  /* ===== Keyboard Shortcuts =====
+     / focus search
+     g r → Requests; g a → Active; g h → History
+     Alt+M → Directory; Alt+A → Announcements; Alt+S → Settings; Alt+L → Activity
+     Alt+O → Toggle Online/Offline
+  */
+  function wireShortcuts(){
+    let awaitingG = false;
+    window.addEventListener('keydown', (e)=>{
+      // Ignore if typing in inputs/textareas
+      const tag = (e.target && e.target.tagName || '').toLowerCase();
+      const isTyping = tag==='input' || tag==='textarea' || e.target.isContentEditable;
+      if(!e.metaKey && !e.ctrlKey && !e.altKey && e.key==='/' && !isTyping){
+        e.preventDefault();
+        document.getElementById('tSearch')?.focus();
+        return;
+      }
+      if(e.key.toLowerCase()==='g' && !e.metaKey && !e.ctrlKey && !e.altKey){
+        awaitingG = true;
+        const handler = (ev)=>{
+          const k = ev.key.toLowerCase();
+          if(k==='r'){ document.getElementById('tabReq')?.click(); }
+          if(k==='a'){ document.getElementById('tabAct')?.click(); }
+          if(k==='h'){ document.getElementById('tabHist')?.click(); }
+          window.removeEventListener('keydown', handler, true);
+          awaitingG = false;
+        };
+        window.addEventListener('keydown', handler, true);
+        return;
+      }
+      // Alt combinations
+      if(e.altKey){
+        const open = (id)=> document.getElementById(id)?.click();
+        if(e.key.toLowerCase()==='m'){ e.preventDefault(); open('btnMerchantsList'); open('openDirBtn'); }
+        if(e.key.toLowerCase()==='a'){ e.preventDefault(); open('btnAnnouncements'); }
+        if(e.key.toLowerCase()==='s'){ e.preventDefault(); open('btnSettings'); }
+        if(e.key.toLowerCase()==='l'){ e.preventDefault(); open('btnActivity'); }
+        if(e.key.toLowerCase()==='o'){ e.preventDefault(); document.getElementById('statusToggle')?.dispatchEvent(new MouseEvent('click')); }
+      }
+    });
+  }
+
+  /* ===== Network Awareness (online/offline) for sync badge ===== */
+  function setSyncBadge(state){
+    const badge = document.getElementById('syncBadge'); if(!badge) return;
+    const set = (cls, text)=>{ badge.classList.remove('ok','warn','err'); badge.classList.add(cls); badge.innerHTML = `<span class="sync-dot"></span> ${text}`; };
+    if(state==='online-admin'){ set('ok','Admin rates'); }
+    else if(state==='online'){ set('ok','Live rate'); }
+    else if(state==='warn'){ set('warn','Syncing'); }
+    else { set('err','Offline'); }
+  }
+  function refreshSyncState(){
+    // If platform.rates exists, assume admin; else check navigator.onLine
+    const admin = parse(localStorage.getItem('platform.rates'), {});
+    if(+admin.buy>0 || +admin.sell>0){ setSyncBadge('online-admin'); }
+    else if(navigator.onLine){ setSyncBadge('online'); }
+    else { setSyncBadge('offline'); }
+  }
+
+  window.addEventListener('online',  ()=> refreshSyncState());
+  window.addEventListener('offline', ()=> setSyncBadge('offline'));
+
+  /* ===== Init ===== */
+  window.addEventListener('DOMContentLoaded', ()=>{
+    if(!isMerchant) return;
+    wireSettingsOpen();
+    wireShortcuts();
+    refreshSyncState();
+  });
+
+  // Keep counts fresh when trades change (chunk 6 already handles; this is just a belt-and-suspenders)
+  window.addEventListener('storage', (e)=>{
+    if(e.key===TRADES_KEY){ /* no-op here; chunk 6 updates badges and notifications */ }
+    if(e.key==='platform.rates'){ refreshSyncState(); }
+  });
+
+})();
+</script>
+<!-- END CHUNK 7/8 -->
+ <!-- CHUNK 8/8: Drawer Focus Trap + Scroll Lock + Defensive Wiring + Final Role/Nav polish -->
+<style>
+  .no-scroll{ overflow: hidden !important; }
+  /* Make drawer panels more keyboard-friendly */
+  .drawer .panel:focus{ outline:none; box-shadow: 0 0 0 2px rgba(212,175,55,.35); }
+</style>
+
+<script>
+(function(){
+  'use strict';
+  const $ = (s,r=document)=> r.querySelector(s);
+  const $$= (s,r=document)=> Array.from(r.querySelectorAll(s));
+  const parse = (s,d)=>{ try{return JSON.parse(s)}catch(e){return d} };
+
+  const role = (localStorage.getItem('role')||'user').toLowerCase();
+  const isMerchant = role==='merchant' || role==='admin';
+
+  /* ===== Role-aware nav hardening ===== */
+  function hardenBottomNav(){
+    const nav = document.querySelector('.nav-bar'); if(!nav) return;
+    const items = Array.from(nav.querySelectorAll('a'));
+    const merchantLink = items.find(a=>{
+      const href = (a.getAttribute('href')||'').toLowerCase();
+      const text = (a.textContent||'').toLowerCase();
+      return href.includes('merchant') || text.includes('merchant') || text.includes('🏪');
+    });
+    if(merchantLink){
+      if(isMerchant){
+        merchantLink.href = 'merchant_dashboard.html';
+        merchantLink.style.display = '';
+        merchantLink.classList.add('active');
+      }else{
+        // keep as merchants.html for regular users if present
+        if((merchantLink.getAttribute('href')||'').includes('merchant_dashboard.html')){
+          merchantLink.href = 'merchants.html';
+        }
+      }
+    }
+  }
+
+  /* ===== Focus Trap + Scroll Lock for Drawers ===== */
+  const FOCUSABLE = [
+    'a[href]','area[href]','input:not([disabled])','select:not([disabled])',
+    'textarea:not([disabled])','button:not([disabled])','iframe','object','embed',
+    '[contenteditable]','[tabindex]:not([tabindex="-1"])'
+  ].join(',');
+
+  const traps = new Map(); // id -> { first, last, opener, onKey }
+
+  function openTrap(drawerId, openerBtn){
+    const d = $(drawerId); if(!d) return;
+    const panel = d.querySelector('.panel') || d;
+    const fEls = $$(FOCUSABLE, panel);
+    if(!fEls.length) return;
+
+    // Save previously focused element
+    const prev = document.activeElement;
+    // Scroll lock
+    document.body.classList.add('no-scroll');
+
+    // Focus first focusable inside drawer
+    setTimeout(()=> fEls[0].focus(), 10);
+
+    function onKey(e){
+      if(e.key !== 'Tab') return;
+      const first = fEls[0];
+      const last  = fEls[fEls.length-1];
+      if(e.shiftKey){
+        if(document.activeElement === first){ e.preventDefault(); last.focus(); }
+      }else{
+        if(document.activeElement === last){ e.preventDefault(); first.focus(); }
+      }
+    }
+    d.addEventListener('keydown', onKey);
+    traps.set(drawerId, { first:fEls[0], last:fEls[fEls.length-1], opener: openerBtn || prev, onKey });
+  }
+
+  function closeTrap(drawerId){
+    const d = $(drawerId); if(!d) return;
+    const t = traps.get(drawerId); if(!t) return;
+    d.removeEventListener('keydown', t.onKey);
+    traps.delete(drawerId);
+
+    // Release scroll lock if no other drawer is open
+    const anyOpen = ['#annDrawer','#settingsDrawer','#activityDrawer','#dirDrawer'].some(id=>{
+      const el = $(id); return el && el.style.display==='block';
+    });
+    if(!anyOpen) document.body.classList.remove('no-scroll');
+
+    // Restore focus to opener
+    if(t.opener && typeof t.opener.focus==='function'){
+      setTimeout(()=> t.opener.focus(), 10);
+    }
+  }
+
+  function wireFocusTraps(){
+    // Announcements
+    const annBtn = document.getElementById('btnAnnouncements');
+    const annClose = document.getElementById('annClose');
+    if(annBtn && !annBtn.dataset.trap){
+      annBtn.dataset.trap='1';
+      annBtn.addEventListener('click', ()=> setTimeout(()=> openTrap('#annDrawer', annBtn), 15));
+    }
+    if(annClose && !annClose.dataset.trap){
+      annClose.dataset.trap='1';
+      annClose.addEventListener('click', ()=> closeTrap('#annDrawer'));
+    }
+    const annDrw = document.getElementById('annDrawer');
+    if(annDrw && !annDrw.dataset.trap){
+      annDrw.dataset.trap='1';
+      annDrw.addEventListener('click', (e)=>{ if(e.target===annDrw){ closeTrap('#annDrawer'); } });
+    }
+
+    // Settings
+    const setBtn = document.getElementById('btnSettings');
+    const setClose = document.getElementById('setClose');
+    const setDrw = document.getElementById('settingsDrawer');
+    if(setBtn && !setBtn.dataset.trap){
+      setBtn.dataset.trap='1';
+      setBtn.addEventListener('click', ()=> setTimeout(()=> openTrap('#settingsDrawer', setBtn), 15));
+    }
+    if(setClose && !setClose.dataset.trap){
+      setClose.dataset.trap='1';
+      setClose.addEventListener('click', ()=> closeTrap('#settingsDrawer'));
+    }
+    if(setDrw && !setDrw.dataset.trap){
+      setDrw.dataset.trap='1';
+      setDrw.addEventListener('click', (e)=>{ if(e.target===setDrw){ closeTrap('#settingsDrawer'); } });
+    }
+
+    // Activity
+    const actBtn = document.getElementById('btnActivity');
+    const actClose = document.getElementById('actClose');
+    const actDrw = document.getElementById('activityDrawer');
+    if(actBtn && !actBtn.dataset.trap){
+      actBtn.dataset.trap='1';
+      actBtn.addEventListener('click', ()=> setTimeout(()=> openTrap('#activityDrawer', actBtn), 15));
+    }
+    if(actClose && !actClose.dataset.trap){
+      actClose.dataset.trap='1';
+      actClose.addEventListener('click', ()=> closeTrap('#activityDrawer'));
+    }
+    if(actDrw && !actDrw.dataset.trap){
+      actDrw.dataset.trap='1';
+      actDrw.addEventListener('click', (e)=>{ if(e.target===actDrw){ closeTrap('#activityDrawer'); } });
+    }
+
+    // Directory
+    const dirBtn = document.getElementById('btnMerchantsList');
+    const dirBtn2= document.getElementById('openDirBtn');
+    const dirClose= document.getElementById('dirClose');
+    const dirDrw = document.getElementById('dirDrawer');
+    const bindDirOpen = (btn)=> btn && !btn.dataset.trap && (btn.dataset.trap='1', btn.addEventListener('click', ()=> setTimeout(()=> openTrap('#dirDrawer', btn), 20)));
+    bindDirOpen(dirBtn); bindDirOpen(dirBtn2);
+    if(dirClose && !dirClose.dataset.trap){
+      dirClose.dataset.trap='1';
+      dirClose.addEventListener('click', ()=> closeTrap('#dirDrawer'));
+    }
+    if(dirDrw && !dirDrw.dataset.trap){
+      dirDrw.dataset.trap='1';
+      dirDrw.addEventListener('click', (e)=>{ if(e.target===dirDrw){ closeTrap('#dirDrawer'); } });
+    }
+
+    // ESC closes and releases trap
+    window.addEventListener('keydown', (e)=>{
+      if(e.key==='Escape'){
+        ['#annDrawer','#settingsDrawer','#activityDrawer','#dirDrawer'].forEach(id=>{
+          const d=$(id); if(d && d.style.display==='block'){ d.style.display='none'; closeTrap(id); }
+        });
+      }
+    });
+  }
+
+  /* ===== Defensive wiring for top icons (idempotent) ===== */
+  function ensureTopIconsWork(){
+    const open = (id)=>{ const el=$(id); if(el){ el.style.display='block'; } };
+    const close = (id)=>{ const el=$(id); if(el){ el.style.display='none'; } };
+
+    const annBtn = document.getElementById('btnAnnouncements');
+    if(annBtn && !annBtn.dataset.wired){
+      annBtn.dataset.wired='1';
+      annBtn.addEventListener('click', ()=>{
+        // render announcements if fn exists (from chunk 1)
+        if(typeof renderAnnouncements==='function') renderAnnouncements();
+        open('#annDrawer');
+      });
+    }
+    const setBtn = document.getElementById('btnSettings');
+    if(setBtn && !setBtn.dataset.wired){
+      setBtn.dataset.wired='1';
+      setBtn.addEventListener('click', ()=>{
+        if(typeof renderSettingsDrawer==='function') renderSettingsDrawer();
+        open('#settingsDrawer');
+      });
+    }
+    const actBtn = document.getElementById('btnActivity');
+    if(actBtn && !actBtn.dataset.wired){
+      actBtn.dataset.wired='1';
+      actBtn.addEventListener('click', ()=>{
+        // prefer filtered render if exists (chunk 6)
+        if(typeof renderActivityFiltered==='function') renderActivityFiltered();
+        else if(typeof renderActivity==='function') renderActivity();
+        open('#activityDrawer');
+      });
+    }
+    const dirBtn = document.getElementById('btnMerchantsList');
+    const dirBtn2= document.getElementById('openDirBtn');
+    const onOpenDir = ()=>{
+      // Pre-render directory if fn exists (chunk 4)
+      if(typeof renderDirectory==='function') renderDirectory();
+      open('#dirDrawer');
+    };
+    if(dirBtn && !dirBtn.dataset.wired){ dirBtn.dataset.wired='1'; dirBtn.addEventListener('click', onOpenDir); }
+    if(dirBtn2 && !dirBtn2.dataset.wired){ dirBtn2.dataset.wired='1'; dirBtn2.addEventListener('click', onOpenDir); }
+
+    // Close buttons ensure closing
+    document.getElementById('annClose')?.addEventListener('click', ()=> close('#annDrawer'));
+    document.getElementById('setClose')?.addEventListener('click', ()=> close('#settingsDrawer'));
+    document.getElementById('actClose')?.addEventListener('click', ()=> close('#activityDrawer'));
+    document.getElementById('dirClose')?.addEventListener('click', ()=> close('#dirDrawer'));
+  }
+
+  /* ===== Observe DOM to (re)bind if nodes are replaced by later renders ===== */
+  function observeForRewire(){
+    const root = document.body;
+    const mo = new MutationObserver(()=>{
+      ensureTopIconsWork();
+      wireFocusTraps();
+      hardenBottomNav();
+    });
+    mo.observe(root, { childList:true, subtree:true });
+  }
+
+  /* ===== Init ===== */
+  window.addEventListener('DOMContentLoaded', ()=>{
+    hardenBottomNav();
+    ensureTopIconsWork();
+    wireFocusTraps();
+    observeForRewire();
+  });
+
+})();
+</script>
+<!-- FIX: Prevent bottom nav from overlapping content -->
+<style>
+  :root{ --navh: 80px; }
+  /* Always reserve space for the fixed bottom nav (plus safe-area on iOS) */
+  body{
+    padding-bottom: calc(var(--navh) + 24px + env(safe-area-inset-bottom));
+    min-height: 100dvh; /* modern dynamic viewport */
+    height: -webkit-fill-available; /* iOS fallback */
+  }
+  main.container{
+    padding-bottom: calc(var(--navh) + 24px);
+  }
+  /* Keep nav above content but below drawers/modals */
+  .nav-bar{ z-index: 100; }
+  /* Keep toast above nav; uses same --navh variable */
+  #toast{ bottom: calc(var(--navh) + 12px); }
+</style>
+
+<script>
+(function(){
+  'use strict';
+  const $ = s => document.querySelector(s);
+
+  // Read the nav height and push it to CSS var --navh
+  function setNavSafeSpace(){
+    const nav = $('.nav-bar');
+    // Use getBoundingClientRect to account for borders/padding + safe-area padding
+    const h = nav ? Math.ceil(nav.getBoundingClientRect().height) : 80;
+    document.documentElement.style.setProperty('--navh', h + 'px');
+  }
+
+  // Debounced updater to avoid layout thrash
+  let rafId = null;
+  function scheduleUpdate(){
+    if(rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(setNavSafeSpace);
+  }
+
+  // Run on load and viewport changes
+  window.addEventListener('DOMContentLoaded', scheduleUpdate);
+  window.addEventListener('load', scheduleUpdate);
+  window.addEventListener('resize', scheduleUpdate);
+  window.addEventListener('orientationchange', scheduleUpdate);
+
+  // Watch the nav in case it’s replaced or styles change
+  const mo = new MutationObserver(scheduleUpdate);
+  mo.observe(document.documentElement, { childList:true, subtree:true });
+
+  // If available, also react to nav resizing (fonts or dynamic labels)
+  const nav = document.querySelector('.nav-bar');
+  if('ResizeObserver' in window && nav){
+    const ro = new ResizeObserver(scheduleUpdate);
+    ro.observe(nav);
+  }
+
+  // In case your app changes the nav content async, re-evaluate a moment later
+  setTimeout(scheduleUpdate, 300);
+})();
+</script>
+</body>
+</html>

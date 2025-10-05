@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Merchants - Cryptex Malawi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root{
+      --bg-0:#0f0f10; --bg-1:#121212; --surface:#1e1e1e; --surface-2:#2c2c2c;
+      --gold:#D4AF37; --gold-2:#E0C16A; --muted:#9E9E9E; --text:#f5f5f5;
+      --danger:#F44336; --success:#4CAF50; --warn:#FF9800;
+      --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.45); --ring:0 0 0 2px rgba(212,175,55,.35);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      min-height:100vh; padding-bottom:100px; color:var(--text);
+      background:
+        radial-gradient(60vw 60vw at 10% -10%, rgba(212,175,55,.08), transparent 60%),
+        radial-gradient(70vw 70vw at 110% -20%, rgba(224,193,106,.06), transparent 60%),
+        linear-gradient(135deg, var(--bg-0), var(--bg-1));
+      font-family:'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* App bar with 3D brand */
+    .app-bar{
+      background:rgba(30,30,30,.8); border-bottom:1px solid rgba(212,175,55,.18);
+      backdrop-filter: blur(8px); padding:.85rem 1rem; box-shadow:0 8px 24px rgba(0,0,0,.25);
+      position: sticky; top:0; z-index:10;
+    }
+    .brand{ max-width:1000px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+    .brand-left{ display:flex; align-items:center; gap:.6rem; }
+    .logo-wrap{ perspective: 900px; }
+    .logo{
+      font-weight:900; letter-spacing:.18rem; font-size: clamp(1.4rem,4.5vw,2rem); line-height:1;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2) 70%);
+      background-clip: text;                 /* standard */
+      -webkit-background-clip: text;         /* Safari/iOS */
+      color: transparent;                    /* standard */
+      -webkit-text-fill-color: transparent;  /* Safari/iOS */
+      text-transform: uppercase;
+      transform: rotateX(14deg) rotateY(-10deg); transform-style: preserve-3d;
+      text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 12px 24px rgba(212,175,55,.25);
+      position:relative; transition: transform .4s ease, text-shadow .4s ease;
+    }
+    .logo::after{
+      content:''; position:absolute; inset:-6px -12px;
+      background: linear-gradient(120deg, transparent 25%, rgba(255,255,255,.12) 40%, transparent 60%);
+      transform: translateZ(50px) skewX(-12deg); mix-blend-mode: screen; border-radius:24px;
+      animation: shine 4.5s linear infinite;
+    }
+    .logo:hover{ transform: rotateX(0deg) rotateY(0deg) translateY(-2px) scale(1.02); text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 20px 40px rgba(212,175,55,.35); }
+    @keyframes shine{ 0%{ transform: translateX(-120%) translateZ(50px) skewX(-12deg);} 100%{ transform: translateX(120%) translateZ(50px) skewX(-12deg);} }
+    .subtitle{ color:#e7d59b; font-weight:800; letter-spacing:.06em; }
+
+    /* Announcement (from admin settings) */
+    .ann{ max-width:1000px; margin: .5rem auto 0; padding:.6rem .9rem; border-radius:10px; border:1px solid #2f2f2f; }
+    .ann.info{ background:#182022; border-color:#2b464d; color:#9fd3e6; }
+    .ann.warn{ background:#231f14; border-color:#5a4a1a; color:#e8d69a; }
+    .ann.error{ background:#2b1616; border-color:#5a1d1d; color:#ffb0b0; }
+    .ann.success{ background:#162318; border-color:#1a5a22; color:#a4f3b2; }
+
+    .container{ padding:1rem; max-width:1000px; margin: 0 auto; }
+
+    .help-row{ display:flex; gap:.5rem; align-items:center; justify-content:space-between; margin:.75rem 0; color:var(--muted); font-size:.95rem; flex-wrap:wrap; }
+    .select, .input, .checkbox-label{
+      background:#1E1E1E; border:1px solid #444; color:#fff; padding:.75rem .85rem; border-radius:10px; font-size:.95rem;
+      transition: border-color .2s, box-shadow .2s, transform .15s ease;
+    }
+    .select{ color:#E0C16A; }
+    .checkbox-label{ display:inline-flex; align-items:center; gap:.5rem; }
+    .checkbox-label input{ accent-color:var(--gold); width:1rem; height:1rem; }
+
+    .filters{ display:grid; grid-template-columns:1fr; gap:.6rem; margin-bottom:1rem; }
+    @media (min-width: 720px){ .filters{ grid-template-columns: 1.2fr .8fr .8fr .8fr .8fr; } }
+
+    .chip{ padding:.25rem .55rem; border:1px solid #444; border-radius:999px; font-size:.78rem; color:#E0C16A; background:#1E1E1E; cursor: pointer; }
+    .chip.active{ border-color:var(--gold); box-shadow: inset 0 0 0 1px rgba(212,175,55,.4); }
+
+    /* Toast */
+    .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:24px; background:#1b1b1b; border:1px solid rgba(212,175,55,.35); color:var(--gold-2); padding:.7rem 1rem; border-radius:10px; box-shadow: var(--shadow); display:none; z-index:1200; min-width:220px; text-align:center; }
+    .toast.show{ display:block; animation: toast-in .2s ease }
+    @keyframes toast-in{ from{ opacity:0; transform: translate(-50%, 12px);} to{ opacity:1; transform: translate(-50%, 0);} }
+
+    /* Glow buttons globally */
+    .btn:hover, .favorite:hover, .chip:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 12px 26px rgba(212,175,55,.30), 0 0 0 2px rgba(212,175,55,.25) inset;
+      border-color: var(--gold);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-bar">
+    <!-- Back Button (universal) -->
+  <a id="backBtn" class="back-thumb" href="dashboard.html" title="Go back">
+    <span class="back-ico" style="width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#D4AF37,#E0C16A); color:#121212; font-weight:900;">←</span>
+    <span>Back</span>
+  </a>
+    <div class="brand">
+      <div class="brand-left">
+        <div class="logo-wrap"><div class="logo">CRYPT-X</div></div>
+        <div class="subtitle">Verified Merchants</div>
+      </div>
+      <div class="chip" id="escrowBadge">🔒 Escrow Protected</div>
+    </div>
+    <div id="announcementHost"></div>
+  </div>
+
+  <div class="container">
+    <div class="help-row">
+      <div id="statsSummary">Loading merchants…</div>
+      <div class="row" style="display:flex; gap:.5rem; align-items:center;">
+        <span class="muted">Sort:</span>
+        <select id="sortSelect" class="select">
+          <option value="rating">Rating</option>
+          <option value="completion">Completion rate</option>
+          <option value="release">Fastest release</option>
+          <option value="trades">Most trades</option>
+          <option value="buyRate">Best buy rate</option>
+          <option value="sellRate">Best sell rate</option>
+          <option value="favorites">My favorites</option>
+        </select>
+        <button id="clearFiltersBtn" class="chip">Clear filters</button>
+      </div>
+    </div>
+        <div class="filters">
+      <input id="searchInput" class="input" type="search" placeholder="🔍 Search name, phone, location…" />
+      <select id="methodSelect" class="select">
+        <option value="all">All methods</option>
+        <option value="airtel">Airtel Money</option>
+        <option value="mpamba">TNM Mpamba</option>
+      </select>
+      <select id="minRatingSelect" class="select">
+        <option value="0">Min rating: Any</option>
+        <option value="4.5">Min rating: 4.5</option>
+        <option value="4.7">Min rating: 4.7</option>
+        <option value="4.9">Min rating: 4.9</option>
+      </select>
+      <label class="checkbox-label">
+        <input id="onlineOnlyChk" type="checkbox" />
+        Online only
+      </label>
+      <label class="checkbox-label">
+        <input id="favOnlyChk" type="checkbox" />
+        Favorites only
+      </label>
+    </div>
+
+    <div id="merchant-list"></div>
+    <div class="footer-space" style="height:70px;"></div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="profileTitle" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="profileTitle">Merchant profile</div>
+        <span class="close" onclick="closeProfileModal()">×</span>
+      </div>
+      <div id="profileBody"></div>
+    </div>
+  </div>
+
+  <!-- Report Modal -->
+  <div id="reportModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="reportTitle" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="reportTitle">Report Merchant</div>
+        <span class="close" onclick="closeReportModal()">×</span>
+      </div>
+      <div class="card">
+        <div class="label">Reason</div>
+        <select id="reportReason" class="select" style="width:100%;margin-bottom:.6rem;">
+          <option value="fraud">Suspected fraud</option>
+          <option value="delay">Excessive delay</option>
+          <option value="abuse">Abusive behavior</option>
+          <option value="other">Other</option>
+        </select>
+        <div class="label">Details (optional)</div>
+        <textarea id="reportDetails" class="input" rows="4" style="width:100%;"></textarea>
+        <div style="margin-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+          <button class="chip active" onclick="attachScreenshot()">Attach screenshot (optional)</button>
+          <input id="reportShot" type="file" accept="image/*" style="display:none;">
+        </div>
+        <div style="margin-top:.8rem;display:flex;gap:.5rem;">
+          <button class="btn primary small" onclick="submitReport()">Submit</button>
+          <button class="btn small" onclick="closeReportModal()">Cancel</button>
+        </div>
+      </div>
+      <div class="warn" style="margin-top:.6rem;">
+        Reports are private. Our team reviews them to keep the marketplace safe.
+      </div>
+    </div>
+  </div>
+
+  <!-- Trade Modal (Start Trade) -->
+  <div id="tradeModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="tradeTitle" style="display:none;">
+    <div class="modal-content" style="max-width:840px;">
+      <div class="modal-header">
+        <div class="modal-title" id="tradeTitle">Start Trade</div>
+        <span class="close" onclick="closeTradeModal()">×</span>
+      </div>
+      <div class="modal-body">
+        <div class="step-indicator">
+          <div class="step active" id="tStep1"><div class="step-circle">1</div><div class="step-label">Payment</div></div>
+          <div class="step" id="tStep2"><div class="step-circle">2</div><div class="step-label">Verification</div></div>
+          <div class="step" id="tStep3"><div class="step-circle">3</div><div class="step-label">Confirmation</div></div>
+        </div>
+
+        <!-- Step 1 -->
+        <div id="tradeStep1" class="trade-step">
+          <div class="card">
+            <div class="label">Merchant</div>
+            <div class="value" id="tMerchantName">—</div>
+            <div class="muted">Rate: <strong id="tRate">—</strong> • Phone: <strong id="tPhone">—</strong> <button class="chip" onclick="copyPhone(document.getElementById('tPhone').textContent)">Copy</button></div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="label">Amount in USDT</div>
+              <input id="tUsdt" class="input" type="number" inputmode="decimal" placeholder="0.00" min="10" step="0.01" />
+              <div class="muted" id="tMwk">≈ MK 0.00</div>
+            </div>
+            <div class="card">
+              <div class="label">Payment Method</div>
+              <div class="payment-method">
+                <button class="chip active" id="tPayAirtel" onclick="tradeSelectMethod('airtel')">📱 Airtel Money</button>
+                <button class="chip" id="tPayMpamba" onclick="tradeSelectMethod('mpamba')">📲 TNM Mpamba</button>
+              </div>
+              <div class="muted">Send exact amount to <strong id="tSendTo">—</strong></div>
+            </div>
+          </div>
+
+          <div class="warn" style="margin:.6rem 0;">
+            Safety tip: Use only your registered phone number. Keep your reference and screenshot ready.
+          </div>
+
+          <div class="btn-row" style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <button class="btn" onclick="closeTradeModal()">Cancel</button>
+            <button class="btn primary" onclick="tradeNext()">I've Sent Payment →</button>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div id="tradeStep2" class="trade-step" style="display:none;">
+          <div class="grid-2">
+            <div class="card">
+              <div class="label">Transaction Reference/ID</div>
+              <input id="tRef" class="input" placeholder="e.g., PP240101234567" />
+            </div>
+            <div class="card">
+              <div class="label">Upload Screenshot</div>
+              <div id="tUpload" class="upload-area" onclick="document.getElementById('tFile').click()">
+                <div style="font-size:2rem; margin-bottom:.35rem;">📸</div>
+                <div style="color:#E0C16A; font-weight:800;">Click to upload screenshot</div>
+                <div class="muted" style="margin-top:.35rem;">PNG, JPG up to 5MB</div>
+              </div>
+              <input id="tFile" type="file" accept="image/*" style="display:none" />
+              <div id="tFilename" class="muted" style="margin-top:.35rem; display:none;"></div>
+            </div>
+          </div>
+
+          <div class="btn-row" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;">
+            <button class="btn" onclick="tradePrev()">← Back</button>
+            <button id="tVerifyBtn" class="btn primary" onclick="tradeVerify()" disabled>Verify Payment →</button>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div id="tradeStep3" class="trade-step" style="display:none;">
+          <div class="success-box">
+            <div style="font-size:3rem; margin-bottom:.4rem;">✅</div>
+            <h3 style="margin:0 0 .4rem;">Transaction Submitted!</h3>
+            <p style="margin:0;">We’re verifying your payment.</p>
+          </div>
+
+          <div class="card">
+            <div class="label">Transaction ID</div>
+            <div class="row" style="gap:.5rem; align-items:center;">
+              <div class="value" id="tTxnId">—</div>
+              <button class="chip" onclick="copyTxnId()">Copy</button>
+            </div>
+            <div class="muted" id="tConfirmLine" style="margin-top:.35rem;">⏳ Pending Verification</div>
+          </div>
+
+          <div class="btn-row" style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <button class="btn" onclick="closeTradeModal()">Close</button>
+            <button class="btn primary" onclick="window.location.href='wallet.html'">View Wallet</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">Saved</div>
+    <style>
+    /* Merchant cards and glowing buttons */
+    .merchant-card{
+      background:#2C2C2C; border:1px solid #3a3a3a; padding:1rem; border-radius:12px; margin-bottom:1rem;
+      transition: transform .2s, border-color .2s, box-shadow .2s;
+    }
+    .merchant-card:hover{ transform: translateY(-2px); border-color: var(--gold); box-shadow: 0 8px 24px rgba(212,175,55,.25); }
+    .m-header{ display:flex; justify-content:space-between; align-items:flex-start; gap:.5rem; margin-bottom:.6rem; }
+    .m-name{ display:flex; align-items:center; gap:.5rem; font-weight:900; font-size:1.05rem; color:var(--gold); }
+    .badge{ border:1px solid var(--gold); color:#121212; background: linear-gradient(135deg,var(--gold),var(--gold-2)); font-size:.72rem; padding:.1rem .5rem; border-radius:999px; font-weight:800; }
+    .kyc-badge{ border:1px solid var(--gold-2); color:var(--gold-2); background:transparent; font-size:.72rem; padding:.1rem .5rem; border-radius:999px; font-weight:800; }
+    .favorite{ background:#1E1E1E; border:1px solid #444; color:var(--gold-2); border-radius:10px; padding:.35rem .6rem; cursor:pointer; font-weight:800; transition: box-shadow .15s ease, transform .15s ease; }
+    .favorite:hover{ box-shadow: 0 8px 24px rgba(212,175,55,.25); transform: translateY(-1px); border-color: var(--gold-2); }
+    .favorite.active{ border-color:var(--gold); box-shadow: inset 0 0 0 1px rgba(212,175,55,.45), 0 10px 26px rgba(212,175,55,.25); }
+
+    .m-sub{ display:grid; grid-template-columns: repeat(2,1fr); gap:.5rem .75rem; margin-bottom:.6rem; color:#C9C9C9; font-size:.92rem; }
+    @media (min-width: 720px){ .m-sub{ grid-template-columns: repeat(4,1fr); } }
+    .bar{ width:100%; height:6px; background:#1E1E1E; border:1px solid #444; border-radius:999px; overflow:hidden; }
+    .bar-fill{ height:100%; background: linear-gradient(90deg, #4CAF50, #E0C16A); }
+
+    .chips{ display:flex; flex-wrap:wrap; gap:.4rem; margin:.6rem 0; }
+    .chip.method{ border-color: var(--gold); }
+    .online{ color: var(--success); } .offline{ color: var(--danger); }
+
+    .m-actions{ display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.6rem; }
+    .btn{
+      padding:.6rem .9rem; border-radius:10px; border:1px solid var(--gold); cursor:pointer; background:#2C2C2C; color:var(--gold);
+      font-weight:800; font-size:.9rem; transition: transform .15s ease, box-shadow .2s ease, filter .2s ease, border-color .2s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); box-shadow: 0 14px 30px rgba(212,175,55,.28); border-color: var(--gold-2); }
+    .btn:active{ transform: translateY(0); filter: saturate(.95); }
+    .btn.primary{ background: linear-gradient(135deg,var(--gold),var(--gold-2)); color:#121212; border:none; box-shadow: 0 8px 20px rgba(212,175,55,.28); }
+    .btn.small{ font-size:.8rem; font-weight:700; padding:.35rem .6rem; }
+    .muted{ color:var(--muted); font-size:.85rem; }
+    .row{ display:flex; gap:.5rem; align-items:center; }
+    .sep{ color:#666; margin:0 .35rem; }
+
+    /* Generic modal (profile/report already in DOM) */
+    .modal{ position:fixed; inset:0; background: rgba(0,0,0,.85); z-index:1000; }
+    .modal-content{
+      background:#1E1E1E; margin:5% auto; width:95%; max-width:840px; border:2px solid var(--gold); border-radius:12px;
+      box-shadow: 0 0 40px rgba(212,175,55,.4); max-height:90vh; overflow:auto; padding:1rem 1.25rem;
+    }
+    .modal-header{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; padding-bottom:.5rem; border-bottom:1px solid #444; position: sticky; top:0; background:#1E1E1E; }
+    .modal-title{ font-weight: 900; color: var(--gold); display: flex; align-items: center; gap: .5rem; }
+    .close{ cursor:pointer; font-size:1.4rem; border:1px solid var(--gold); padding:.2rem .5rem; border-radius:8px; color:var(--gold); background:#2C2C2C; }
+
+    /* Trade modal (3 steps) */
+    .trade-grid{ display:grid; grid-template-columns:1fr; gap:.75rem; }
+    @media(min-width:720px){ .trade-grid{ grid-template-columns:1fr 1fr; } }
+    .trade-card{ background:#2C2C2C; border:1px solid #444; border-radius:10px; padding:.85rem; }
+    .label{ color:#E0C16A; font-size:.85rem; margin-bottom:.25rem; }
+    .value{ color:#fff; font-weight:700; }
+    .field{ width:100%; padding:1rem; background:#1E1E1E; border:1px solid #444; border-radius:10px; color:#fff; font-size:1rem; }
+    .field:focus{ outline:none; border-color:var(--gold-2); box-shadow: var(--ring); background:#191919; }
+    .method-option{ flex:1; padding:1rem; background:#2C2C2C; border:2px solid #444; border-radius:10px; text-align:center; cursor:pointer; transition:.2s }
+    .method-option:hover{ border-color:var(--gold); }
+    .method-option.selected{ border-color:var(--gold); background:#3C3C3C }
+    .method-icon{ font-size:1.7rem; margin-bottom:.35rem }
+
+    .step-indicator{ display:flex; justify-content:space-between; margin-bottom:1rem; padding:0 .25rem; }
+    .step{ flex:1; text-align:center; position:relative; }
+    .step::after{ content:''; position:absolute; top:15px; left:50%; width:100%; height:2px; background:#444; z-index:-1; }
+    .step:last-child::after{ display:none; }
+    .step-circle{ width:30px; height:30px; border-radius:50%; background:#2C2C2C; border:2px solid #444; margin:0 auto .45rem; display:flex; align-items:center; justify-content:center; font-weight:900; color:#777 }
+    .step.active .step-circle{ background:linear-gradient(135deg,var(--gold),var(--gold-2)); border-color:var(--gold); color:#121212 }
+    .step.completed .step-circle{ background:var(--success); border-color:var(--success); color:#fff }
+    .step-label{ font-size:.8rem; color:#777 } .step.active .step-label{ color:var(--gold) }
+
+    .upload{ border:2px dashed var(--gold); border-radius:12px; padding:1rem; text-align:center; cursor:pointer; transition:.2s; margin-top:.35rem; }
+    .upload:hover{ background: rgba(212,175,55,.08) }
+    .upload.has-file{ border-style:solid; background: rgba(76,175,80,.1); border-color: var(--success) }
+  </style>
+
+  <script>
+    // ===== Data and utilities =====
+    const favKey = 'merchantFavorites';
+    let favorites = JSON.parse(localStorage.getItem(favKey) || '[]');
+    const FILTERS_KEY = 'merchants.filters';
+    const REPORTS_KEY = 'platform.reports';
+
+    function minsAgo(m){ return new Date(Date.now() - m*60*1000).toISOString(); }
+    function timeAgo(iso){ const s=Math.floor((Date.now()-new Date(iso))/1000); if(s<60)return'just now'; const m=Math.floor(s/60); if(m<60)return`${m}m ago`; const h=Math.floor(m/60); if(h<24)return`${h}h ago`; const d=Math.floor(h/24); return `${d}d ago`; }
+    function stars(n){ const full=Math.floor(n), half=n-full>=0.5; let out=''; for(let i=0;i<full;i++) out+='★'; if(half) out+='☆'; while(out.length<5) out+='✩'; return out; }
+    function fmtMWK(x){ return 'MK ' + Number(x).toLocaleString(); }
+    function fmtUSDT(x){ return Number(x).toLocaleString(undefined,{maximumFractionDigits:2}) + ' USDT'; }
+    function trustScore(m){ const base=(m.rating/5)*40 + (m.completion/100)*35 + (1 - Math.min(m.dispute/5,1))*15 + Math.min(m.years/5,1)*10; return Math.round(base); }
+    function methodLabel(m){ return m==='airtel'?'Airtel Money':m==='mpamba'?'TNM Mpamba':''; }
+
+    function toast(msg){ const t=document.getElementById('toast'); if(!t){ alert(msg); return; } t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2000); }
+
+    // Announcement from admin settings
+    function renderAnnouncement(){
+      const host=document.getElementById('announcementHost');
+      const settings=JSON.parse(localStorage.getItem('platform.settings')||'null');
+      if(!settings || !settings.announcement){ host.innerHTML=''; return; }
+      const {title,msg,style} = settings.announcement;
+      const cls = style==='warn'?'ann warn':style==='error'?'ann error':style==='success'?'ann success':'ann info';
+      host.innerHTML = `<div class="${cls}"><strong>${title||''}</strong>${msg?` — ${msg}`:''}</div>`;
+    }
+
+    // Rates from Admin (fallback)
+    function getRates(){ return JSON.parse(localStorage.getItem('platform.rates')||'null') || {buy:1750, sell:1745}; }
+    function getFees(){ return JSON.parse(localStorage.getItem('platform.fees')||'null') || { buy:2.0, sell:1.5 }; }
+
+    // Data source: prefer admin merchants, fallback demo; remove bank transfer
+    const demoMerchants = [
+      { id:1, name:"Gold Exchanger", phone:"0888123456", online:true,  lastSeen: minsAgo(2),  rating:4.9,  trades:842, completion:98, dispute:0.6, avgReleaseMin:7,  years:4, methods:["airtel","mpamba"], buyRate:1750, sellRate:1745, limits:{min:5000, max:200000}, location:"Lilongwe", languages:["EN","NY"], liquidityUSDT:3500, verified:true, kycLevel:2, badges:["Top Rated","Fast Payout"] },
+      { id:2, name:"QuickTrade MW", phone:"0999123456", online:false, lastSeen: minsAgo(35), rating:4.7,  trades:610, completion:95, dispute:1.2, avgReleaseMin:10, years:3, methods:["mpamba","airtel"], buyRate:1747, sellRate:1742, limits:{min:10000, max:150000}, location:"Blantyre", languages:["EN"], liquidityUSDT:1200, verified:true, kycLevel:2, badges:["Trusted","Great Support"] },
+      { id:3, name:"TrustedCrypt",  phone:"0888654321", online:true,  lastSeen: minsAgo(1),  rating:4.95, trades:1054,completion:99, dispute:0.3, avgReleaseMin:5,  years:5, methods:["airtel"], buyRate:1752, sellRate:1748, limits:{min:2000, max:500000}, location:"Mzuzu",    languages:["EN","NY"], liquidityUSDT:8200, verified:true, kycLevel:2, badges:["Top Rated","Low Disputes","High Liquidity"] },
+      { id:4, name:"Crypto4U",      phone:"0999765432", online:true,  lastSeen: minsAgo(8),  rating:4.6,  trades:402, completion:93, dispute:1.8, avgReleaseMin:12, years:2, methods:["mpamba"], buyRate:1745, sellRate:1740, limits:{min:3000, max:100000}, location:"Zomba",     languages:["EN"], liquidityUSDT:600,  verified:true, kycLevel:1, badges:["Great Support"] }
+    ];
+    function loadMerchants(){
+      const adminList = JSON.parse(localStorage.getItem('platform.merchants')||'[]');
+      let list = Array.isArray(adminList) && adminList.length ? adminList.map(m=>({
+        id: m.id || Math.floor(Math.random()*1e6),
+        name: m.name, phone: m.phone, online: !!m.online, lastSeen: m.online? minsAgo(1) : minsAgo(30),
+        rating: m.rating || 4.6, trades: m.trades || 0, completion: m.completion || 96, dispute: m.dispute || 0.5,
+        avgReleaseMin: m.avgReleaseMin || 10, years: m.years || 1,
+        methods: (m.methods || ['airtel']).filter(x=> x!=='bank'),
+        buyRate: m.buyRate || (getRates().buy||1750), sellRate: m.sellRate || (getRates().sell||1745),
+        limits: m.limits || {min:5000,max:200000}, location: m.location || 'Lilongwe',
+        languages: m.languages || ['EN'], liquidityUSDT: m.liquidityUSDT || 0, verified: m.verified!==false, kycLevel: m.kycLevel || 1,
+        badges: m.badges || []
+      })) : demoMerchants.slice();
+      return list.filter(m=>m.verified!==false);
+    }
+
+    // Render list
+    const merchantList = document.getElementById('merchant-list');
+    function renderMerchants(data){
+      merchantList.innerHTML = '';
+      if(!data.length){ merchantList.innerHTML = `<div class="muted">No merchants match your filters.</div>`; return; }
+
+      const onlineCount = data.filter(m=>m.online).length;
+      const avgRating = (data.reduce((a,b)=>a+b.rating,0)/data.length).toFixed(2);
+      document.getElementById('statsSummary').textContent = `${data.length} merchants • ${onlineCount} online • Avg rating ${avgRating}`;
+
+      data.forEach(m=>{
+        const card = document.createElement('div'); card.className='merchant-card';
+        const favActive = favorites.includes(m.id) ? 'active' : '';
+        const methods = (m.methods||[]).filter(x=>x!=='bank');
+        card.innerHTML = `
+          <div class="m-header">
+            <div>
+              <div class="m-name">
+                ${m.name}
+                ${m.verified ? `<span class="badge">Verified</span>` : ''}
+                <span class="kyc-badge">KYC L${m.kycLevel||1}</span>
+              </div>
+              <div class="muted">
+                <span class="${m.online?'online':'offline'}">${m.online?'🟢 Online':'🔴 Offline'}</span>
+                <span class="sep">•</span> Last seen ${timeAgo(m.lastSeen)}
+                <span class="sep">•</span> ${m.location||'—'}
+              </div>
+            </div>
+            <button class="favorite ${favActive}" onclick="toggleFavorite(event, ${m.id})">${favActive?'★':'☆'} Save</button>
+          </div>
+
+          <div class="m-sub">
+            <div><strong>${stars(m.rating)}</strong> <span class="muted">(${m.rating.toFixed(2)})</span></div>
+            <div><strong>${m.trades.toLocaleString()}</strong> trades</div>
+            <div><strong>${m.completion}%</strong> completion</div>
+            <div><strong>${m.dispute}%</strong> dispute</div>
+            <div><strong>${m.avgReleaseMin} min</strong> avg release</div>
+            <div><strong>${m.years} yr</strong> active</div>
+            <div><strong>${fmtUSDT(m.liquidityUSDT)}</strong> liquidity</div>
+            <div class="row"><span class="label" style="margin:0;color:#E0C16A;">Trust</span>
+              <div class="bar" style="flex:1;"><div class="bar-fill" style="width:${trustScore(m)}%"></div></div>
+              <span class="muted">${trustScore(m)}/100</span>
+            </div>
+          </div>
+
+          <div class="chips">
+            ${(m.badges||[]).map(b=>`<span class="chip">${b}</span>`).join('')}
+            ${methods.map(me=> methodLabel(me) ? `<span class="chip method">${methodLabel(me)}</span>` : '').join('')}
+            <span class="chip">Limits: ${fmtMWK(m.limits.min)} - ${fmtMWK(m.limits.max)}</span>
+          </div>
+
+          <div class="row" style="justify-content: space-between; margin:.4rem 0;">
+            <div class="row" style="gap:.6rem;">
+              <span class="muted">Rates:</span>
+              <span>Buy <strong>${fmtMWK(m.buyRate)}</strong></span>
+              <span class="sep">•</span>
+              <span>Sell <strong>${fmtMWK(m.sellRate)}</strong></span>
+            </div>
+            <div class="muted">Lang: ${Array.isArray(m.languages)?m.languages.join(', '):'EN'}</div>
+          </div>
+
+          <div class="m-actions">
+            <button class="btn primary" onclick="startTrade(${m.id})">Start Trade</button>
+            <button class="btn" onclick="openProfile(${m.id})">View Profile</button>
+            <button class="btn small" onclick="copyPhone('${m.phone}')">Copy Phone</button>
+            <button class="btn small" onclick="openReport(${m.id})">Report</button>
+          </div>`;
+        merchantList.appendChild(card);
+      });
+    }
+
+    // Actions
+    function startTrade(id){ openTrade(id); } // defined in Chunk 4
+    function openProfile(id){
+      const m = currentData.find(x=>x.id===id); if(!m) return;
+      const el = document.getElementById('profileBody');
+      el.innerHTML = `
+        <div class="trade-grid">
+          <div class="trade-card">
+            <div class="label">Merchant</div>
+            <div class="value" style="display:flex;align-items:center;gap:.5rem;">
+              ${m.name} ${m.verified?'<span class="badge">Verified</span>':''} <span class="kyc-badge">KYC L${m.kycLevel||1}</span>
+            </div>
+            <div class="muted">Phone: ${m.phone} <span class="sep">•</span> ${m.location||'—'}</div>
+            <div class="muted">Methods: ${(m.methods||[]).filter(x=>x!=='bank').map(methodLabel).join(', ')||'—'}</div>
+            <div class="muted">Languages: ${Array.isArray(m.languages)?m.languages.join(', '):'EN'}</div>
+          </div>
+          <div class="trade-card">
+            <div class="label">Performance</div>
+            <div>Rating: <strong>${m.rating.toFixed(2)}</strong> (${stars(m.rating)})</div>
+            <div>Trades: <strong>${m.trades.toLocaleString()}</strong> • Completion: <strong>${m.completion}%</strong> • Dispute: <strong>${m.dispute}%</strong></div>
+            <div>Avg release: <strong>${m.avgReleaseMin} min</strong> • Years active: <strong>${m.years}</strong></div>
+            <div class="row" style="gap:.5rem;align-items:center;margin-top:.35rem;">
+              <span class="label" style="margin:0;color:#E0C16A;">Trust</span>
+              <div class="bar" style="flex:1;"><div class="bar-fill" style="width:${trustScore(m)}%"></div></div>
+              <span class="muted">${trustScore(m)}/100</span>
+            </div>
+          </div>
+        </div>
+        <div class="warn" style="margin-top:.75rem;">
+          Safety tip: Communicate only inside Cryptex. Never release crypto before confirmed payment. Admin-managed escrow protects your trades.
+        </div>
+        <div style="display:flex; gap:.5rem; margin-top:.75rem; flex-wrap:wrap;">
+          <button class="btn primary" onclick="startTrade(${m.id})">Start Trade</button>
+          <button class="btn" onclick="copyPhone('${m.phone}')">Copy Phone</button>
+          <button class="btn" onclick="openReport(${m.id})">Report Merchant</button>
+          <button class="btn small" onclick="closeProfileModal()">Close</button>
+        </div>`;
+      document.getElementById('profileTitle').textContent = `Merchant Profile • ${m.name}`;
+      document.getElementById('profileModal').style.display = 'block';
+    }
+    function closeProfileModal(){ document.getElementById('profileModal').style.display='none'; }
+
+    // Report handling
+    let reportTargetId = null;
+    function openReport(id){ reportTargetId=id; document.getElementById('reportModal').style.display='block'; }
+    function closeReportModal(){ document.getElementById('reportModal').style.display='none'; }
+    function attachScreenshot(){ document.getElementById('reportShot').click(); }
+    function submitReport(){
+      const merchant = currentData.find(m=>m.id===reportTargetId);
+      const reason = document.getElementById('reportReason').value;
+      const details = (document.getElementById('reportDetails').value||'').trim();
+      const file = document.getElementById('reportShot').files[0];
+      const logs = JSON.parse(localStorage.getItem(REPORTS_KEY)||'[]');
+      logs.unshift({
+        id:'RP-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),
+        merchantId: merchant?.id, merchantName: merchant?.name, reason, details,
+        hasFile: !!file, ts: new Date().toISOString(), user: (localStorage.getItem('user')||'user@cryptex.mw')
+      });
+      localStorage.setItem(REPORTS_KEY, JSON.stringify(logs.slice(0,200)));
+      toast('Report submitted. Thank you.');
+      closeReportModal();
+    }
+
+    function copyPhone(phone){ navigator.clipboard.writeText(phone); toast('Phone copied'); }
+    function toggleFavorite(e,id){
+      e.stopPropagation();
+      const idx=favorites.indexOf(id);
+      if(idx===-1) favorites.push(id); else favorites.splice(idx,1);
+      localStorage.setItem(favKey, JSON.stringify(favorites));
+      e.currentTarget.classList.toggle('active');
+      e.currentTarget.textContent = e.currentTarget.classList.contains('active') ? '★ Save' : '☆ Save';
+    }
+  </script>
+        <script>
+    // Minimal, reliable Chunk 4 — redirects to buy.html with prefill
+
+    let currentData = [];
+    const els = {
+      q: document.getElementById('searchInput'),
+      method: document.getElementById('methodSelect'),
+      minRating: document.getElementById('minRatingSelect'),
+      onlineOnly: document.getElementById('onlineOnlyChk'),
+      favOnly: document.getElementById('favOnlyChk'),
+      sort: document.getElementById('sortSelect'),
+      clear: document.getElementById('clearFiltersBtn')
+    };
+
+    function toast(msg){ const t=document.getElementById('toast'); if(!t){ alert(msg); return; } t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2000); }
+
+    function saveFilters(){
+      localStorage.setItem('merchants.filters', JSON.stringify({
+        q: els.q.value,
+        method: els.method.value,
+        minRating: els.minRating.value,
+        onlineOnly: els.onlineOnly.checked,
+        favOnly: els.favOnly.checked,
+        sort: els.sort.value
+      }));
+    }
+    function loadFilters(){
+      const s = JSON.parse(localStorage.getItem('merchants.filters')||'null');
+      if(!s) return;
+      els.q.value = s.q||'';
+      els.method.value = s.method||'all';
+      els.minRating.value = s.minRating||'0';
+      els.onlineOnly.checked = !!s.onlineOnly;
+      els.favOnly.checked = !!s.favOnly;
+      els.sort.value = s.sort||'rating';
+    }
+
+    function removeBankFilterOption(){
+      const s = document.getElementById('methodSelect');
+      if (!s) return;
+      [...s.options].forEach(opt => { if (opt.value === 'bank') s.removeChild(opt); });
+    }
+
+    function applyFilters(){
+      const q = els.q.value.trim().toLowerCase();
+      const method = els.method.value;
+      const minRating = parseFloat(els.minRating.value||'0');
+      const onlineOnly = els.onlineOnly.checked;
+      const favOnly = els.favOnly.checked;
+      const sort = els.sort.value;
+
+      // Load merchants from Chunk 3
+      let data = (typeof loadMerchants === 'function') ? loadMerchants() : [];
+
+      // Strip bank method globally
+      data = data.map(m => ({ ...m, methods: (m.methods||[]).filter(me => me !== 'bank') }));
+
+      currentData = data.slice();
+
+      if(q){ data = data.filter(m=> [m.name, m.phone, m.location].some(v=>String(v).toLowerCase().includes(q))); }
+      if(method !== 'all'){ data = data.filter(m=> (m.methods||[]).includes(method)); }
+      data = data.filter(m=> (m.rating||0) >= minRating);
+      if(onlineOnly) data = data.filter(m=> m.online);
+
+      const favs = JSON.parse(localStorage.getItem('merchantFavorites')||'[]');
+      if(favOnly) data = data.filter(m=> favs.includes(m.id));
+
+      data.sort((a,b)=>{
+        switch(sort){
+          case 'rating': return b.rating - a.rating;
+          case 'completion': return b.completion - a.completion;
+          case 'release': return a.avgReleaseMin - b.avgReleaseMin;
+          case 'trades': return b.trades - a.trades;
+          case 'buyRate': return b.buyRate - a.buyRate;
+          case 'sellRate': return b.sellRate - a.sellRate;
+          case 'favorites': return (favs.includes(b.id)?1:0) - (favs.includes(a.id)?1:0) || (b.rating - a.rating);
+          default: return b.rating - a.rating;
+        }
+      });
+
+      if (typeof renderMerchants === 'function') renderMerchants(data);
+      saveFilters();
+    }
+
+    // Debounce search
+    let qTimer=null;
+    els.q.addEventListener('input', ()=>{ clearTimeout(qTimer); qTimer=setTimeout(applyFilters,200); });
+    [els.method, els.minRating, els.onlineOnly, els.favOnly, els.sort].forEach(el=> el.addEventListener('change', applyFilters));
+    els.clear.addEventListener('click', ()=>{
+      els.q.value=''; els.method.value='all'; els.minRating.value='0'; els.onlineOnly.checked=false; els.favOnly.checked=false; els.sort.value='rating';
+      applyFilters();
+    });
+
+    // Live updates from Admin (merchants/rates/settings)
+    window.addEventListener('storage', (e)=>{
+      if(['platform.merchants','platform.rates','platform.settings'].includes(e.key)){
+        if (typeof renderAnnouncement==='function') renderAnnouncement();
+        applyFilters();
+      }
+    });
+
+    // Start Trade -> redirect to Buy with prefill
+    window.startTrade = function(id){
+      try{
+        let m = (currentData||[]).find(x=>x.id===id);
+        if(!m && typeof loadMerchants==='function'){ m = loadMerchants().find(x=>x.id===id); }
+        if(!m){ toast('Merchant not found'); return; }
+
+        const rates = JSON.parse(localStorage.getItem('platform.rates')||'null') || {buy:1750};
+        const rate = m.buyRate || rates.buy || 1750;
+
+        // Persist for buy.html to auto-highlight and prefill
+        localStorage.setItem('trade.pref', JSON.stringify({
+          merchant: m.name,
+          rate: rate,
+          phone: m.phone || '',
+          method: 'airtel' // default
+        }));
+
+        // Pass via query as well
+        const url = `buy.html?merchant=${encodeURIComponent(m.name)}&rate=${rate}&phone=${encodeURIComponent(m.phone||'')}`;
+        window.location.href = url;
+      }catch(e){
+        console.error('startTrade error', e);
+        toast('Could not start trade');
+      }
+    };
+
+    // Init
+    window.addEventListener('DOMContentLoaded', ()=>{
+      if (typeof renderAnnouncement==='function') renderAnnouncement(); // from Chunk 3
+      removeBankFilterOption();
+      loadFilters();
+      applyFilters();
+    });
+  </script>
+  <script>
+  (function(){
+    // Make the back button smart
+    const backBtn = document.getElementById('backBtn');
+    if (backBtn) {
+      backBtn.addEventListener('click', function(e) {
+        // If there's a history to go back to, use it
+        if (window.history.length > 1) {
+          e.preventDefault(); // Prevent the link from navigating to dashboard.html
+          window.history.back();
+        }
+        // Otherwise, it will just navigate to its href (dashboard.html)
+      });
+    }
+
+    // Update header avatar from localStorage
+    const avatar = document.getElementById('headerAvatar');
+    if (avatar) {
+      const name = localStorage.getItem('userName') || '';
+      const email = localStorage.getItem('user') || 'U';
+      avatar.textContent = (name || email).trim().slice(0, 1).toUpperCase();
+    }
+  })();
+</script>
+</body>
+</html>

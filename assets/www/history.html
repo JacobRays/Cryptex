@@ -1,0 +1,689 @@
+cat > history.html << 'EOF'
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Transaction History - Cryptex Malawi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #121212;
+      color: #D4AF37;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    .app-bar {
+      background: #1E1E1E;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 2px 10px rgba(212, 175, 55, 0.1);
+    }
+    .back-btn {
+      font-size: 1.5rem;
+      cursor: pointer;
+      text-decoration: none;
+      color: #D4AF37;
+    }
+    .page-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      flex: 1;
+    }
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      background: #2C2C2C;
+      border: 1px solid #D4AF37;
+      color: #D4AF37;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .container {
+      padding: 1rem;
+      max-width: 800px;
+      margin: auto;
+    }
+    .stats-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: #2C2C2C;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid #333;
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #D4AF37;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: #9E9E9E;
+      margin-top: 0.25rem;
+    }
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    .filter-tab {
+      padding: 0.5rem 1rem;
+      background: #2C2C2C;
+      border: 1px solid #444;
+      border-radius: 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+    .filter-tab:hover {
+      border-color: #D4AF37;
+    }
+    .filter-tab.active {
+      background: linear-gradient(135deg, #D4AF37, #E0C16A);
+      color: #121212;
+      border-color: #D4AF37;
+    }
+    .transaction {
+      background: #2C2C2C;
+      border: 1px solid #333;
+      margin-bottom: 1rem;
+      border-radius: 10px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .transaction:hover {
+      border-color: #D4AF37;
+      transform: translateX(5px);
+    }
+    .tran-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 0.5rem;
+    }
+    .tran-left {
+      flex: 1;
+    }
+    .tran-type {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #D4AF37;
+    }
+    .tran-date {
+      font-size: 0.8rem;
+      color: #999;
+      margin-top: 0.3rem;
+    }
+    .tran-reference {
+      font-size: 0.75rem;
+      color: #666;
+      font-family: monospace;
+      margin-top: 0.2rem;
+    }
+    .tran-status {
+      font-size: 0.8rem;
+      border-radius: 12px;
+      padding: 0.3rem 0.6rem;
+      display: inline-block;
+      font-weight: bold;
+    }
+    .status-completed, .status-approved {
+      background-color: #4CAF50;
+      color: #fff;
+    }
+    .status-pending {
+      background-color: #FF9800;
+      color: #fff;
+    }
+    .status-failed, .status-rejected {
+      background-color: #F44336;
+      color: #fff;
+    }
+    .status-processing {
+      background-color: #2196F3;
+      color: #fff;
+    }
+    .tran-amount {
+      text-align: right;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    .amount-in {
+      color: #4CAF50;
+    }
+    .amount-out {
+      color: #F44336;
+    }
+    .tran-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid #444;
+      font-size: 0.85rem;
+      color: #9E9E9E;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #9E9E9E;
+    }
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #1E1E1E;
+      display: flex;
+      justify-content: space-around;
+      padding: 0.75rem;
+      border-top: 1px solid #D4AF37;
+    }
+    .nav-item {
+      text-align: center;
+      color: #9E9E9E;
+      text-decoration: none;
+    }
+    .nav-item.active {
+      color: #D4AF37;
+    }
+    .nav-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+    .nav-label {
+      font-size: 0.75rem;
+    }
+    .rejection-reason {
+      background: rgba(244, 67, 54, 0.1);
+      border-left: 3px solid #F44336;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: #F44336;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-bar">
+    <a href="dashboard.html" class="back-btn">←</a>
+    <div class="page-title">📄 Transaction History</div>
+    <button class="filter-btn" onclick="exportTransactions()">📥 Export</button>
+  </div>
+
+  <div class="container">
+    <!-- Statistics Cards -->
+    <div class="stats-cards">
+      <div class="stat-card">
+        <div class="stat-value" id="totalTransactions">0</div>
+        <div class="stat-label">Total Transactions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="completedCount" style="color: #4CAF50;">0</div>
+        <div class="stat-label">Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="pendingCount" style="color: #FF9800;">0</div>
+        <div class="stat-label">Pending</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="rejectedCount" style="color: #F44336;">0</div>
+        <div class="stat-label">Rejected</div>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <div class="filter-tab active" onclick="filterTransactions('all')">All</div>
+      <div class="filter-tab" onclick="filterTransactions('buy')">Buy USDT</div>
+      <div class="filter-tab" onclick="filterTransactions('sell')">Sell USDT</div>
+      <div class="filter-tab" onclick="filterTransactions('deposit')">Deposits</div>
+      <div class="filter-tab" onclick="filterTransactions('withdraw')">Withdrawals</div>
+      <div class="filter-tab" onclick="filterTransactions('pending')">Pending</div>
+      <div class="filter-tab" onclick="filterTransactions('completed')">Completed</div>
+      <div class="filter-tab" onclick="filterTransactions('rejected')">Rejected</div>
+    </div>
+
+    <!-- Transactions List -->
+    <div id="historyList">
+      <!-- Transactions will load here -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <div class="empty-icon">📭</div>
+      <h3 style="color: #D4AF37; margin-bottom: 0.5rem;">No Transactions Found</h3>
+      <p>Your transaction history will appear here</p>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="nav-bar">
+    <a href="dashboard.html" class="nav-item">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label">Home</div>
+    </a>
+    <a href="wallet.html" class="nav-item">
+      <div class="nav-icon">💼</div>
+      <div class="nav-label">Wallet</div>
+    </a>
+    <a href="history.html" class="nav-item active">
+      <div class="nav-icon">📄</div>
+      <div class="nav-label">History</div>
+    </a>
+    <a href="settings.html" class="nav-item">
+      <div class="nav-icon">⚙️</div>
+      <div class="nav-label">Settings</div>
+    </a>
+  </nav>
+
+  <script>
+    let allTransactions = [];
+    let currentFilter = 'all';
+
+    // Load transactions from localStorage
+    function loadTransactions() {
+      // Get transactions from localStorage (created by buy/sell operations)
+      const storedTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+      
+      // Add some demo transactions if none exist
+      if (storedTransactions.length === 0) {
+        allTransactions = [
+          {
+            id: 'TXN-1234567890-ABC',
+            type: 'buy',
+            amount: 100,
+            totalMWK: 177000,
+            date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+            status: 'completed',
+            merchant: 'Gold Exchange Pro',
+            paymentMethod: 'airtel',
+            reference: 'PP240101234567',
+            direction: 'in'
+          },
+          {
+            id: 'TXN-1234567891-DEF',
+            type: 'sell',
+            amount: 75,
+            totalMWK: 130875,
+            date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+            status: 'completed',
+            merchant: 'Quick Trade MW',
+            paymentMethod: 'mpamba',
+            reference: 'TM987654321',
+            direction: 'out'
+          },
+          {
+            id: 'TXN-1234567892-GHI',
+            type: 'deposit',
+            amount: 155000,
+            date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'pending',
+            paymentMethod: 'airtel',
+            reference: 'AM555666777',
+            direction: 'in'
+          },
+          {
+            id: 'TXN-1234567893-JKL',
+            type: 'withdraw',
+            amount: 50000,
+            date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'completed',
+            paymentMethod: 'mpamba',
+            reference: 'WD123456789',
+            direction: 'out'
+          },
+          {
+            id: 'TXN-1234567894-MNO',
+            type: 'buy',
+            amount: 50,
+            totalMWK: 88500,
+            date: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'rejected',
+            merchant: 'Instant Crypto',
+            paymentMethod: 'airtel',
+            reference: 'PP240100999888',
+            rejectionReason: 'Screenshot unclear - transaction details not visible',
+            direction: 'in'
+          }
+        ];
+        // Save demo transactions
+        localStorage.setItem('transactions', JSON.stringify(allTransactions));
+      } else {
+        allTransactions = storedTransactions;
+      }
+      
+      // Sort by date (newest first)
+      allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      updateStatistics();
+      renderTransactions();
+    }
+
+    function updateStatistics() {
+      const total = allTransactions.length;
+      const completed = allTransactions.filter(t => t.status === 'completed' || t.status === 'approved').length;
+      const pending = allTransactions.filter(t => t.status === 'pending' || t.status === 'processing').length;
+      const rejected = allTransactions.filter(t => t.status === 'rejected' || t.status === 'failed').length;
+      
+      document.getElementById('totalTransactions').textContent = total;
+      document.getElementById('completedCount').textContent = completed;
+      document.getElementById('pendingCount').textContent = pending;
+      document.getElementById('rejectedCount').textContent = rejected;
+    }
+
+    function renderTransactions() {
+      const container = document.getElementById('historyList');
+      const emptyState = document.getElementById('emptyState');
+      container.innerHTML = '';
+      
+      // Filter transactions
+      let filteredTransactions = allTransactions;
+      if (currentFilter !== 'all') {
+        if (['completed', 'pending', 'rejected'].includes(currentFilter)) {
+          filteredTransactions = allTransactions.filter(t => t.status === currentFilter);
+        } else {
+          filteredTransactions = allTransactions.filter(t => t.type === currentFilter);
+        }
+      }
+      
+      if (filteredTransactions.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      }
+      
+      emptyState.style.display = 'none';
+      
+      filteredTransactions.forEach(tx => {
+        const txDiv = document.createElement('div');
+        txDiv.className = 'transaction';
+        txDiv.onclick = () => showTransactionDetails(tx);
+        
+        const statusClass = getStatusClass(tx.status);
+        const amountClass = tx.direction === 'in' ? 'amount-in' : 'amount-out';
+        const amountPrefix = tx.direction === 'in' ? '+' : '-';
+        
+        // Format amount based on type
+        let amountDisplay = '';
+        if (tx.type === 'buy' || tx.type === 'sell') {
+          amountDisplay = `${amountPrefix}${tx.amount} USDT`;
+        } else {
+          amountDisplay = `${amountPrefix}MK ${(tx.amount || tx.totalMWK || 0).toLocaleString()}`;
+        }
+        
+        // Format date
+        const date = new Date(tx.date);
+        const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        txDiv.innerHTML = `
+          <div class="tran-header">
+            <div class="tran-left">
+              <div class="tran-type">${getTransactionTypeLabel(tx.type)}</div>
+              <div class="tran-date">${dateStr}</div>
+              ${tx.reference ? `<div class="tran-reference">Ref: ${tx.reference}</div>` : ''}
+            </div>
+            <div>
+              <div class="tran-amount ${amountClass}">${amountDisplay}</div>
+              <div style="text-align: right; margin-top: 0.25rem;">
+                <span class="tran-status ${statusClass}">${tx.status.toUpperCase()}</span>
+              </div>
+            </div>
+          </div>
+          ${tx.merchant ? `
+            <div class="tran-details">
+              <div>Merchant: ${tx.merchant}</div>
+              <div>Method: ${getPaymentMethodLabel(tx.paymentMethod)}</div>
+            </div>
+          ` : ''}
+          ${tx.rejectionReason ? `
+            <div class="rejection-reason">
+              <strong>Rejection Reason:</strong> ${tx.rejectionReason}
+            </div>
+          ` : ''}
+        `;
+        
+        container.appendChild(txDiv);
+      });
+    }
+
+    function getStatusClass(status) {
+      const statusMap = {
+        'completed': 'status-completed',
+        'approved': 'status-approved',
+        'pending': 'status-pending',
+        'processing': 'status-processing',
+        'rejected': 'status-rejected',
+        'failed': 'status-failed'
+      };
+      return statusMap[status] || 'status-pending';
+    }
+
+    function getTransactionTypeLabel(type) {
+      const labels = {
+        'buy': '💰 Buy USDT',
+        'sell': '💸 Sell USDT',
+        'deposit': '📥 Deposit MWK',
+        'withdraw': '📤 Withdraw',
+        'recharge': '⚡ Recharge'
+      };
+      return labels[type] || type;
+    }
+
+    function getPaymentMethodLabel(method) {
+      const labels = {
+        'airtel': 'Airtel Money',
+        'mpamba': 'TNM Mpamba',
+        'bank': 'Bank Transfer'
+      };
+      return labels[method] || method;
+    }
+
+    function filterTransactions(filter) {
+      currentFilter = filter;
+      
+      // Update active tab
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      renderTransactions();
+    }
+
+    function showTransactionDetails(tx) {
+      // Create a detailed modal for transaction
+      const modal = document.createElement('div');
+      modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      `;
+      
+      const statusClass = getStatusClass(tx.status);
+      const date = new Date(tx.date);
+      
+      modal.innerHTML = `
+        <div style="
+          background: #1E1E1E;
+          border: 2px solid #D4AF37;
+          border-radius: 12px;
+          padding: 2rem;
+          width: 90%;
+          max-width: 500px;
+          max-height: 80vh;
+          overflow-y: auto;
+        ">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="color: #D4AF37;">Transaction Details</h2>
+            <span onclick="this.closest('div').parentElement.parentElement.remove()" style="color: #D4AF37; font-size: 1.5rem; cursor: pointer;">×</span>
+          </div>
+          
+          <div style="background: #2C2C2C; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <div style="text-align: center; margin-bottom: 1rem;">
+              <div style="font-size: 2rem;">${tx.type === 'buy' ? '💰' : tx.type === 'sell' ? '💸' : tx.type === 'deposit' ? '📥' : '📤'}</div>
+              <div style="color: #D4AF37; font-size: 1.2rem; font-weight: bold; margin-top: 0.5rem;">
+                ${getTransactionTypeLabel(tx.type)}
+              </div>
+            </div>
+            <div style="text-align: center;">
+              <span class="tran-status ${statusClass}" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                ${tx.status.toUpperCase()}
+              </span>
+            </div>
+          </div>
+          
+          <div style="background: #2C2C2C; padding: 1rem; border-radius: 8px;">
+            <div style="display: grid; gap: 0.75rem;">
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #9E9E9E;">Transaction ID:</span>
+                <span style="color: #D4AF37; font-family: monospace; font-size: 0.9rem;">${tx.id}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #9E9E9E;">Date:</span>
+                <span style="color: #E0C16A;">${date.toLocaleDateString()}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #9E9E9E;">Time:</span>
+                <span style="color: #E0C16A;">${date.toLocaleTimeString()}</span>
+              </div>
+              ${tx.amount ? `
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #9E9E9E;">Amount:</span>
+                  <span style="color: #4CAF50; font-weight: bold;">
+                    ${tx.type === 'buy' || tx.type === 'sell' ? tx.amount + ' USDT' : 'MK ' + tx.amount.toLocaleString()}
+                  </span>
+                </div>
+              ` : ''}
+              ${tx.totalMWK ? `
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #9E9E9E;">Total MWK:</span>
+                  <span style="color: #E0C16A;">MK ${tx.totalMWK.toLocaleString()}</span>
+                </div>
+              ` : ''}
+              ${tx.merchant ? `
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #9E9E9E;">Merchant:</span>
+                  <span style="color: #E0C16A;">${tx.merchant}</span>
+                </div>
+              ` : ''}
+              ${tx.paymentMethod ? `
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #9E9E9E;">Payment Method:</span>
+                  <span style="color: #E0C16A;">${getPaymentMethodLabel(tx.paymentMethod)}</span>
+                </div>
+              ` : ''}
+              ${tx.reference ? `
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="color: #9E9E9E;">Reference:</span>
+                  <span style="color: #E0C16A; font-family: monospace;">${tx.reference}</span>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+          
+          ${tx.rejectionReason ? `
+            <div style="background: rgba(244, 67, 54, 0.1); border: 1px solid #F44336; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+              <div style="color: #F44336; font-weight: bold; margin-bottom: 0.5rem;">Rejection Reason:</div>
+              <div style="color: #E0C16A;">${tx.rejectionReason}</div>
+            </div>
+          ` : ''}
+          
+          ${tx.status === 'pending' ? `
+            <div style="background: rgba(255, 152, 0, 0.1); border: 1px solid #FF9800; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+              <div style="color: #FF9800; text-align: center;">
+                ⏳ This transaction is being processed. Estimated time: 5-10 minutes.
+              </div>
+            </div>
+          ` : ''}
+          
+          <button onclick="this.closest('div').parentElement.remove()" style="
+            width: 100%;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            background: linear-gradient(135deg, #D4AF37, #E0C16A);
+            color: #121212;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+          ">Close</button>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+    }
+
+    function exportTransactions() {
+      // Create CSV content
+      let csv = 'Date,Type,Amount,Status,Reference,Payment Method\n';
+      allTransactions.forEach(tx => {
+        const date = new Date(tx.date).toLocaleString();
+        const amount = tx.type === 'buy' || tx.type === 'sell' ? `${tx.amount} USDT` : `MK ${tx.amount || tx.totalMWK || 0}`;
+        csv += `"${date}","${getTransactionTypeLabel(tx.type)}","${amount}","${tx.status}","${tx.reference || ''}","${getPaymentMethodLabel(tx.paymentMethod) || ''}"\n`;
+      });
+      
+      // Download CSV
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `cryptex_transactions_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      
+      // Show notification
+      showNotification('Transactions exported successfully!');
+    }
+
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+      `;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+
+    // Load transactions on page load
+    loadTransactions();
+  </script>
+</body>
+</html>
+EOF

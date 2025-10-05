@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sell USDT - Cryptex Malawi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <style>
+    :root{
+      --bg-0:#0f0f10; --bg-1:#121212; --surface:#1e1e1e; --surface-2:#2c2c2c;
+      --gold:#D4AF37; --gold-2:#E0C16A; --muted:#9E9E9E; --text:#f5f5f5;
+      --danger:#F44336; --success:#4CAF50; --warn:#FF9800;
+      --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.45); --ring:0 0 0 2px rgba(212,175,55,.35);
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      min-height:100vh; background:
+        radial-gradient(60vw 60vw at 10% -10%, rgba(212,175,55,.08), transparent 60%),
+        radial-gradient(70vw 70vw at 110% -20%, rgba(224,193,106,.06), transparent 60%),
+        linear-gradient(135deg, var(--bg-0), var(--bg-1));
+      color:var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* App bar + 3D logo */
+    .app-bar{
+      background:rgba(30,30,30,.8); border-bottom:1px solid rgba(212,175,55,.18);
+      backdrop-filter: blur(8px); padding:.85rem 1rem; box-shadow:0 8px 24px rgba(0,0,0,.25); display:flex; align-items:center; gap:.75rem;
+      position: sticky; top:0; z-index:10;
+    }
+    .back-btn{ text-decoration:none; color:var(--gold-2); font-size:1.5rem; }
+    .brand{ margin:0 auto; display:flex; align-items:center; justify-content:center; gap:.5rem; }
+    .logo-wrap{ perspective: 900px; }
+    .logo{
+      font-weight:900; letter-spacing:.18rem; font-size: clamp(1.4rem,4.5vw,2rem); line-height:1;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2) 70%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase;
+      transform: rotateX(14deg) rotateY(-10deg); transform-style: preserve-3d;
+      text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 12px 24px rgba(212,175,55,.25);
+      position:relative; transition: transform .4s ease, text-shadow .4s ease;
+    }
+    .logo::after{
+      content:''; position:absolute; inset:-6px -12px;
+      background: linear-gradient(120deg, transparent 25%, rgba(255,255,255,.12) 40%, transparent 60%);
+      transform: translateZ(50px) skewX(-12deg); mix-blend-mode: screen; border-radius:24px;
+      animation: shine 4.5s linear infinite;
+    }
+    .logo:hover{ transform: rotateX(0deg) rotateY(0deg) translateY(-2px) scale(1.02); text-shadow: 0 1px 0 #b38f2b, 0 2px 0 #9c7a1d, 0 20px 40px rgba(212,175,55,.35); }
+    @keyframes shine{ 0%{ transform: translateX(-120%) translateZ(50px) skewX(-12deg);} 100%{ transform: translateX(120%) translateZ(50px) skewX(-12deg);} }
+
+    .container{ padding:1rem; max-width:520px; margin:0 auto; }
+
+    .balance-info{ background:#2C2C2C; border:1px solid rgba(212,175,55,.35); padding:1rem; border-radius:12px; margin:1rem 0; text-align:center; box-shadow: var(--shadow); }
+    .balance-label{ font-size:.9rem; color:#E0C16A; font-weight:700 }
+    .balance-value{ font-size:1.8rem; font-weight:900; color:var(--gold-2) }
+
+    .rate-card{ background: linear-gradient(135deg, #2C2C2C, #1E1E1E); border:1px solid var(--gold); padding:1rem; border-radius:12px; margin-bottom:1rem; text-align:center }
+    .rate-value{ font-size:1.1rem; color:#E0C16A; font-weight:800 }
+
+    .input-group{ background:#2C2C2C; padding:1.2rem; border-radius:12px; margin-bottom:1rem; border:1px solid #333; }
+    .input-label{ color:#E0C16A; margin-bottom:.5rem; font-size:.9rem; font-weight:700 }
+    .input-field{
+      width:100%; padding:1rem; background:#1E1E1E; border:1px solid #444; border-radius:10px; color:#fff; font-size:1.1rem;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .input-field:focus{ outline:none; border-color:var(--gold-2); box-shadow: var(--ring); background:#191919 }
+    .conversion-text{ color:var(--muted); font-size:.9rem; margin-top:.5rem }
+
+    .payment-method{ background:#2C2C2C; padding:1.2rem; border-radius:12px; margin-bottom:1rem; border:1px solid #333; }
+    .method-option{ display:flex; align-items:center; padding:1rem; background:#1E1E1E; border:1px solid #444; border-radius:10px; margin-bottom:.5rem; cursor:pointer; transition:.2s }
+    .method-option:hover{ border-color:var(--gold-2) }
+    .method-option.selected{ border-color:var(--gold-2); background:#333333 }
+    .method-icon{ font-size:1.5rem; margin-right:.9rem }
+    .method-name{ flex:1; font-weight:900 }
+
+    .fee-info{ background:#2C2C2C; padding:1rem; border-radius:10px; border:1px solid #333; margin-top:.6rem; font-size:.95rem }
+    .fee-row{ display:flex; justify-content:space-between; margin:.25rem 0 }
+    .total-row{ border-top:1px solid #444; padding-top:.5rem; font-weight:900; color:var(--gold-2) }
+
+    .sell-btn{
+      width:100%; padding:1rem; background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      color:#121212; border:none; border-radius:12px; font-size:1.05rem; font-weight:900; cursor:pointer; margin-top:1rem;
+      text-transform: uppercase; letter-spacing:.06em; box-shadow: 0 8px 20px rgba(212,175,55,.25); transition: transform .15s ease;
+    }
+    .sell-btn:hover{ transform: translateY(-2px) }
+    .sell-btn:disabled{ opacity:.5; cursor:not-allowed }
+
+    .warning-box{ background: rgba(244,67,54,.1); border:1px solid var(--danger); padding:1rem; border-radius:10px; margin-top:.6rem; font-size:.9rem; color:var(--danger) }
+
+    /* Toast */
+    .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:24px; background:#1b1b1b; border:1px solid rgba(212,175,55,.35); color:var(--gold-2); padding:.7rem 1rem; border-radius:10px; box-shadow: var(--shadow); display:none; z-index:1200; min-width:220px; text-align:center; }
+    .toast.show{ display:block; animation: toast-in .2s ease }
+    @keyframes toast-in{ from{ opacity:0; transform: translate(-50%, 12px);} to{ opacity:1; transform: translate(-50%, 0);} }
+  </style>
+</head>
+<body>
+  <div class="app-bar">
+    <a class="back-btn" href="wallet.html" aria-label="Back">←</a>
+    <div class="brand">
+      <div class="logo-wrap"><div class="logo">CRYPT-X</div></div>
+      <div style="color:#e7d59b; font-weight:800; letter-spacing:.06em;">Sell USDT</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="balance-info">
+      <div class="balance-label">Available USDT Balance</div>
+      <div id="availableUsdtDisplay" class="balance-value">0.00 USDT</div>
+    </div>
+
+    <div class="rate-card">
+      <div id="sellRateValue" class="rate-value">Current Rate: 1 USDT = MK 1,745</div>
+    </div>
+
+    <div class="input-group">
+      <div class="input-label">Amount to Sell (USDT)</div>
+      <input type="number" id="sellAmount" class="input-field" placeholder="0.00" inputmode="decimal" min="0" step="0.01" />
+      <div id="mwkReceive" class="conversion-text">You will receive: MK 0.00</div>
+    </div>
+
+    <div class="payment-method">
+      <div class="input-label" style="margin-bottom:.6rem;">Select Payment Method</div>
+      <div class="method-option selected" onclick="selectMethod(this,'airtel')"><div class="method-icon">📱</div><div class="method-name">Airtel Money</div></div>
+      <div class="method-option" onclick="selectMethod(this,'mpamba')"><div class="method-icon">📲</div><div class="method-name">TNM Mpamba</div></div>
+      <div class="method-option" onclick="selectMethod(this,'bank')"><div class="method-icon">🏦</div><div class="method-name">Bank Transfer</div></div>
+    </div>
+        <div class="input-group">
+      <div class="input-label">Receiving Phone/Account Number</div>
+      <input type="text" id="receivingNumber" class="input-field" placeholder="Enter number" />
+    </div>
+
+    <div class="fee-info">
+      <div class="fee-row"><span>Amount (USDT):</span><span id="amountUsdt">0.00 USDT</span></div>
+      <div class="fee-row"><span>Exchange Amount:</span><span id="exchangeAmount">MK 0.00</span></div>
+      <div class="fee-row"><span>Service Fee (2%):</span><span id="serviceFee">MK 0.00</span></div>
+      <div class="fee-row total-row"><span>You Will Receive:</span><span id="totalReceive">MK 0.00</span></div>
+    </div>
+
+    <button id="sellBtn" class="sell-btn" type="button">Confirm Sell Order</button>
+
+    <div class="warning-box">
+      ⚠️ Important: Once confirmed, this transaction cannot be reversed. Please ensure all details are correct.
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">Saved</div>
+    <script>
+    // ===== Config =====
+    const SERVICE_FEE_PCT = 0.02;
+    const MIN_USDT = 5;              // allow smaller sales than buys
+    const DEMO_AUTO_APPROVE = true;  // set false for manual verification demo
+    const SELL_SPREAD = 5;           // MK spread below FX for sell
+
+    // ===== State =====
+    let selectedMethod = 'airtel';
+    let selectedRate = 1745; // will be set from fxRateMWK - spread
+    let availableUSDT = 0;
+
+    // ===== Utils =====
+    const fmtMWK = v => 'MK ' + Number(v||0).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2});
+    function toast(msg){ const t=document.getElementById('toast'); if(!t){ alert(msg); return; } t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2000); }
+    function getFxRateMWK(){ let r = parseFloat(localStorage.getItem('fxRateMWK')||'1750'); if(isNaN(r)||r<=0) r=1750; return r; }
+
+    // ===== Transactions & Wallet helpers =====
+    function getTxns(){ let tx = JSON.parse(localStorage.getItem('transactions')||'[]'); if(!Array.isArray(tx)) tx=[]; return tx.sort((a,b)=> new Date(b.date||b.timestamp)-new Date(a.date||a.timestamp)); }
+    function saveTxns(tx){ localStorage.setItem('transactions', JSON.stringify(tx)); }
+    function generateTxnId(){ return 'TXN-' + Date.now() + '-' + Math.random().toString(36).substr(2,9).toUpperCase(); }
+
+    function persistWallet(w){ localStorage.setItem('wallet', JSON.stringify({ usdt: +w.usdt || 0, mwk: +w.mwk || 0 })); }
+    function getWallet(){
+      const w = JSON.parse(localStorage.getItem('wallet')||'null');
+      if (w && typeof w.usdt==='number' && typeof w.mwk==='number') return w;
+      const r = recomputeWalletFromHistory();
+      persistWallet(r);
+      return r;
+    }
+    function recomputeWalletFromHistory(){
+      const tx = getTxns();
+      let w = { usdt:0, mwk:0 };
+      const fx = getFxRateMWK();
+      tx.forEach(t=>{
+        if((t.status||'').toLowerCase()!=='completed') return;
+        const typ=(t.type||'').toLowerCase();
+        if(typ==='deposit')       w.mwk += +t.amount || +t.totalMWK || 0;
+        else if(typ==='withdraw') w.mwk -= +t.amount || +t.totalMWK || 0;
+        else if(typ==='buy'){   // bought USDT using MWK
+          const usdt=+t.amount||0; const mwk=+t.totalMWK||Math.round(usdt*fx);
+          w.usdt += usdt; w.mwk -= mwk;
+        }else if(typ==='sell'){ // sold USDT for MWK (credit net MWK)
+          const usdt=+t.amount||0; const mwk=+t.totalMWK||Math.round(usdt*fx);
+          w.usdt -= usdt; w.mwk += mwk;
+        }
+      });
+      w.usdt = Math.max(0, +w.usdt.toFixed(6));
+      w.mwk  = Math.max(0, Math.round(w.mwk));
+      return w;
+    }
+
+    // ===== UI Updates =====
+    function initRate(){
+      selectedRate = Math.max(1, Math.round(getFxRateMWK() - SELL_SPREAD));
+      document.getElementById('sellRateValue').textContent = `Current Rate: 1 USDT = MK ${selectedRate.toLocaleString()}`;
+    }
+    function updateBalanceUI(){
+      const w = getWallet();
+      availableUSDT = +w.usdt || 0;
+      document.getElementById('availableUsdtDisplay').textContent = `${availableUSDT.toFixed(2)} USDT`;
+      const input = document.getElementById('sellAmount');
+      if (input){
+        input.max = String(availableUSDT);
+        // clamp value if necessary
+        if (+input.value > availableUSDT) { input.value = availableUSDT.toFixed(2); }
+      }
+    }
+    function recalc(){
+      const usdt = Math.max(0, parseFloat(document.getElementById('sellAmount').value||'0'));
+      const gross = usdt * selectedRate;           // MWK before fees
+      const fee = gross * SERVICE_FEE_PCT;
+      const net = gross - fee;                      // MWK to receive
+      document.getElementById('mwkReceive').textContent = `You will receive: ${fmtMWK(net)}`;
+      document.getElementById('amountUsdt').textContent = `${usdt.toFixed(2)} USDT`;
+      document.getElementById('exchangeAmount').textContent = fmtMWK(gross);
+      document.getElementById('serviceFee').textContent = fmtMWK(fee);
+      document.getElementById('totalReceive').textContent = fmtMWK(net);
+      return { usdt, gross, fee, net };
+    }
+
+    // ===== Input & method handling =====
+    function selectMethod(el, method){
+      document.querySelectorAll('.method-option').forEach(o=>o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedMethod = method;
+      const input = document.getElementById('receivingNumber');
+      input.placeholder = method==='airtel' ? 'Enter Airtel Money number' :
+                          method==='mpamba' ? 'Enter TNM Mpamba number' :
+                          'Enter bank account number';
+    }
+    function validateRecipient(method, value){
+      const digits = String(value||'').replace(/\D/g,'');
+      if(method==='bank') return digits.length>=8 && digits.length<=20;
+      // mobile money basic check (Malawi length); we keep it permissive but numeric
+      return digits.length>=9 && digits.length<=13;
+    }
+
+    // ===== Sell flow =====
+    function confirmSell(){
+      const btn = document.getElementById('sellBtn');
+      const { usdt, net } = recalc();
+      const number = document.getElementById('receivingNumber').value.trim();
+
+      if (!usdt || usdt <= 0) return toast('Enter a valid amount');
+      if (usdt < MIN_USDT) return toast(`Minimum sale is ${MIN_USDT} USDT`);
+      if (usdt > availableUSDT) return toast('Amount exceeds available USDT');
+      if (!validateRecipient(selectedMethod, number)) return toast('Enter a valid receiving number/account');
+
+      btn.disabled = true; btn.textContent = 'Placing order...';
+
+      // Create pending transaction (wallet changes only when completed)
+      const txnId = generateTxnId();
+      const tx = {
+        id: txnId,
+        type: 'sell',
+        amount: +usdt,
+        totalMWK: +net,              // credit NET MWK after fee
+        method: selectedMethod,
+        receiver: number,
+        status: 'pending',
+        direction: 'out',
+        date: new Date().toISOString()
+      };
+      const all = getTxns(); all.unshift(tx); saveTxns(all);
+
+      toast('Sell order placed — pending verification');
+
+      // Demo auto-approval to show instant wallet updates
+      if (DEMO_AUTO_APPROVE) {
+        setTimeout(()=>{
+          const txs = getTxns();
+          const i = txs.findIndex(t=>t.id===txnId);
+          if(i>-1){
+            txs[i].status = 'completed';
+            saveTxns(txs);
+            // persist wallet snapshot for consistency across pages
+            persistWallet(recomputeWalletFromHistory());
+            updateBalanceUI(); // reflect new balance locally
+            toast('Sale completed — MWK sent');
+          }
+          btn.disabled = false; btn.textContent = 'Confirm Sell Order';
+        }, 3000);
+      } else {
+        setTimeout(()=>{ btn.disabled = false; btn.textContent = 'Confirm Sell Order'; }, 1200);
+      }
+    }
+
+    // ===== Bindings =====
+    window.addEventListener('DOMContentLoaded', ()=>{
+      // Optional auth check (if app.js present)
+      if (typeof checkAuth === 'function') { try{ checkAuth(); }catch(_){} }
+
+      initRate();
+      updateBalanceUI();
+      recalc();
+
+      const amountEl = document.getElementById('sellAmount');
+      amountEl.addEventListener('input', ()=>{
+        let v = amountEl.value.replace(/[^0-9.]/g,'');
+        const num = Math.min(Math.max(parseFloat(v||'0'), 0), availableUSDT || 0);
+        if (v !== '' && !isNaN(num)) amountEl.value = v;
+        recalc();
+      });
+
+      document.getElementById('sellBtn').addEventListener('click', confirmSell);
+    });
+
+    // Keep rate/balances in sync if other tabs update
+    window.addEventListener('storage', (e)=>{
+      if(e.key==='transactions' || e.key==='wallet'){ updateBalanceUI(); recalc(); }
+      if(e.key==='fxRateMWK'){ initRate(); recalc(); }
+    });
+  </script>
+
+  <!-- Optional global helpers -->
+  <script src="app.js"></script>
+</body>
+</html>
