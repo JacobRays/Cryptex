@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-// For web iframe:
+// These imports are now only used in the web-specific part,
+// but we keep them here for simplicity and handle them with checks.
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:ui' as ui;
 // ignore: avoid_web_libraries_in_flutter
@@ -59,7 +60,8 @@ class WebShell extends StatefulWidget {
 }
 
 class _WebShellState extends State<WebShell> {
-  late final WebViewController _controller;
+  // Make the controller nullable, as it's not used on web
+  WebViewController? _controller;
   double _progress = 0;
   final String startPage = 'dashboard.html';
 
@@ -67,6 +69,7 @@ class _WebShellState extends State<WebShell> {
   void initState() {
     super.initState();
     if (!kIsWeb) {
+      // This code will ONLY run on mobile (Android/iOS)
       _controller = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setBackgroundColor(const Color(0x00000000))
@@ -76,7 +79,7 @@ class _WebShellState extends State<WebShell> {
         ))
         ..loadFlutterAsset('assets/www/$startPage');
     } else {
-      // Serve HTML from /app/ inside Flutter web build
+      // This code will ONLY run on web
       // ignore: undefined_prefixed_name
       ui.platformViewRegistry.registerViewFactory('cryptex-iframe', (int viewId) {
         final iframe = html.IFrameElement()
@@ -89,36 +92,32 @@ class _WebShellState extends State<WebShell> {
     }
   }
 
-  NavigationDecision _navDecision(NavigationRequest req) {
-    final url = req.url;
-    final uri = Uri.tryParse(url);
+  Future<NavigationDecision> _navDecision(NavigationRequest req) async {
+    final uri = Uri.tryParse(req.url);
     if (uri == null) return NavigationDecision.navigate;
 
-    final scheme = (uri.scheme).toLowerCase();
-    // External handlers
-    if (scheme == 'mailto' || scheme == 'tel' || scheme == 'whatsapp') {
-      launchUrl(uri, mode: LaunchMode.externalApplication);
+    final scheme = uri.scheme.toLowerCase();
+    if (['mailto', 'tel', 'whatsapp'].contains(scheme) || uri.host.contains('wa.me')) {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
       return NavigationDecision.prevent;
     }
-    if (uri.host.contains('wa.me') || url.contains('whatsapp://')) {
-      launchUrl(uri, mode: LaunchMode.externalApplication);
-      return NavigationDecision.prevent;
-    }
-    // Allow assets
-    if (url.startsWith('file://') || url.startsWith('flutter-asset://')) {
+    if (req.url.startsWith('file://') || req.url.startsWith('flutter-asset://')) {
       return NavigationDecision.navigate;
     }
-    // Block external hosts in WebView; open system browser
     if (uri.host.isNotEmpty) {
-      launchUrl(uri, mode: LaunchMode.externalApplication);
+       if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
       return NavigationDecision.prevent;
     }
     return NavigationDecision.navigate;
   }
 
   Future<bool> _onWillPop() async {
-    if (!kIsWeb && await _controller.canGoBack()) {
-      _controller.goBack();
+    if (!kIsWeb && _controller != null && await _controller!.canGoBack()) {
+      _controller!.goBack();
       return false;
     }
     return true;
@@ -130,10 +129,10 @@ class _WebShellState extends State<WebShell> {
       title: const Text('CRYPT-X'),
       centerTitle: true,
       actions: [
-        if (!kIsWeb)
+        if (!kIsWeb && _controller != null)
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => _controller.reload(),
+            onPressed: () => _controller!.reload(),
             tooltip: 'Reload',
           ),
       ],
@@ -149,14 +148,21 @@ class _WebShellState extends State<WebShell> {
       ),
     );
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        final canGoBack = await _onWillPop();
+        if(canGoBack && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
       child: Scaffold(
         appBar: appBar,
         body: SafeArea(
           child: kIsWeb
               ? const HtmlElementView(viewType: 'cryptex-iframe')
-              : WebViewWidget(controller: _controller),
+              : (_controller != null ? WebViewWidget(controller: _controller!) : const Center(child: Text("WebView not supported on this platform"))),
         ),
       ),
     );
