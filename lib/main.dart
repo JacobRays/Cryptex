@@ -2,14 +2,12 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+// The platform-specific import is still needed for this new approach
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 
-// This is required for Android versions of webview_flutter
 void main() {
+  // We no longer need the platform check in main()
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isAndroid) {
-    WebView.platform = AndroidWebView();
-  }
   runApp(const CryptexApp());
 }
 
@@ -22,7 +20,6 @@ class CryptexApp extends StatelessWidget {
       title: 'CRYPT-X',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // Using your PhoenixTheme colors
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF121212),
         appBarTheme: const AppBarTheme(
@@ -49,13 +46,26 @@ class WebShell extends StatefulWidget {
 class _WebShellState extends State<WebShell> {
   late final WebViewController _controller;
   double _progress = 0;
-  // This is the starting page of your HTML app from the assets/www folder
   final String startPage = 'dashboard.html';
 
   @override
   void initState() {
     super.initState();
-    _controller = WebViewController()
+
+    // ========= THE NEW, CORRECT INITIALIZATION =========
+    late final PlatformWebViewControllerCreationParams params;
+    if (WebViewPlatform.instance is AndroidWebViewPlatform) {
+      params = AndroidWebViewControllerCreationParams(
+        // Optional: you can add specific Android features here if needed in the future
+      );
+    } else {
+      params = const PlatformWebViewControllerCreationParams();
+    }
+
+    final WebViewController controller = WebViewController.fromPlatformCreationParams(params);
+    // =======================================================
+
+    controller
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(NavigationDelegate(
@@ -63,32 +73,37 @@ class _WebShellState extends State<WebShell> {
         onNavigationRequest: _handleNavigation,
       ))
       ..loadFlutterAsset('assets/www/$startPage');
+      
+    // Add debugging features for Android WebView
+    if (controller.platform is AndroidWebViewController) {
+      AndroidWebViewController.enableDebugging(true);
+      (controller.platform as AndroidWebViewController)
+          .setMediaPlaybackRequiresUserGesture(false);
+    }
+
+    _controller = controller;
   }
 
-  // This function decides what to do when a link is clicked
   Future<NavigationDecision> _handleNavigation(NavigationRequest request) async {
     final uri = Uri.parse(request.url);
     final scheme = uri.scheme.toLowerCase();
 
-    // If the link is for WhatsApp, email, or a phone call, open it outside the app
     if (['mailto', 'tel', 'whatsapp'].contains(scheme) || uri.host.contains('wa.me')) {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
-      return NavigationDecision.prevent; // Stop the WebView from navigating
+      return NavigationDecision.prevent;
     }
 
-    // Allow all other navigation inside the app (to your other HTML pages)
     return NavigationDecision.navigate;
   }
 
-  // Handle the Android back button
   Future<bool> _onWillPop() async {
     if (await _controller.canGoBack()) {
       _controller.goBack();
-      return false; // Don't close the app
+      return false;
     }
-    return true; // Close the app if there's no history
+    return true;
   }
 
   @override
@@ -96,11 +111,7 @@ class _WebShellState extends State<WebShell> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        // We can remove the AppBar to make it feel more like a native app
-        // If you want it back, just uncomment the appBar line.
-        // appBar: AppBar(title: const Text('CRYPT-X')),
         body: SafeArea(
-          // Add a Stack to show the loading bar on top of the WebView
           child: Stack(
             children: [
               WebViewWidget(controller: _controller),
